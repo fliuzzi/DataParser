@@ -1,9 +1,5 @@
 package com.where.data.parsers.citysearch;
 
-
-
-
-
 import gnu.trove.TIntIntHashMap;
 
 import java.io.BufferedReader;
@@ -42,7 +38,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-
 
 public class CitySearchParser {
 	private static boolean generateDictionary;
@@ -97,6 +92,7 @@ public class CitySearchParser {
 		}
 	}
 	
+	//Maps the cs2whereids.txt files to a TIntIntHashMap.  K CS_id -> V where_id
 	private static TIntIntHashMap generateIdMap(String path) throws IOException
 	{
 		TIntIntHashMap map = new TIntIntHashMap();
@@ -132,7 +128,7 @@ public class CitySearchParser {
 		ZipEntry zipEntry = null;
 		try {
 			CSListingIndexer indexer = !generateDictionary ? 
-					CSListingIndexer.newInstance(indexPath, CSListingDocumentFactory.getAnalyzerWrapper()) : null;
+					CSListingIndexer.newInstance(indexPath) : null;
 			indexer.setcs2whereMapping(csId2whereId);
 			if(isAdvertiserFeed && !generateDictionary) {
 				new File(indexPath + "/cat_6_all_alt").mkdirs();

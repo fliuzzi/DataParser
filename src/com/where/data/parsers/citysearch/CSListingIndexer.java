@@ -35,7 +35,7 @@ public class CSListingIndexer {
 		}
 	}
 	
-	public static CSListingIndexer newInstance(String indexPath, org.apache.lucene.analysis.Analyzer an) {
+	public static CSListingIndexer newInstance(String indexPath, Analyzer an) {
 		try {
 			CSListingIndexer indexer = new CSListingIndexer();
 			indexer.indexPath = indexPath;
