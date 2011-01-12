@@ -2,6 +2,8 @@ package com.where.data.parsers.citysearch;
 
 
 
+
+
 import gnu.trove.TIntIntHashMap;
 
 import java.io.BufferedReader;
@@ -41,9 +43,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import com.where.commons.feed.citysearch.nlp.SentimentAnalysis;
-import com.where.commons.feed.citysearch.search.CSListingIndexer;
-import com.where.commons.feed.citysearch.Category;
 
 public class CitySearchParser {
 	private static boolean generateDictionary;

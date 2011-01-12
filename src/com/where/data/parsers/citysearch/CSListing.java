@@ -11,7 +11,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.where.commons.feed.citysearch.Category;
+//import com.where.commons.feed.citysearch.Category;
 import com.where.commons.feed.citysearch.search.query.twitter.Tweet;
 
 public class CSListing implements Serializable {

@@ -26,16 +26,11 @@ import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.lucene.util.Version;
 
-import com.where.commons.feed.citysearch.CSListing;
-import com.where.commons.feed.citysearch.Offer;
-//import com.where.commons.feed.citysearch.Tip;
-import com.where.commons.feed.citysearch.Category;
 import com.where.commons.feed.citysearch.search.BaseAnalyzer;
 import com.where.commons.feed.citysearch.search.NoStemAnalyzer;
 import com.where.commons.feed.citysearch.search.budget.ExcludedCategories;
 import com.where.commons.util.LocationUtil;
 import com.where.commons.util.StringUtil;
-import com.where.commons.util.search.LocalezeUtil;
 import com.where.util.cache.ICache;
 
 public class CSListingDocumentFactory {

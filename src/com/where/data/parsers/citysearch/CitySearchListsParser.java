@@ -26,12 +26,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import com.where.commons.feed.citysearch.CSListing;
-import com.where.commons.feed.citysearch.ParseUtils;
-import com.where.commons.feed.citysearch.Placelist;
 import com.where.commons.feed.citysearch.search.CSListingIndexer;
-import com.where.commons.feed.citysearch.Category;
 import com.where.commons.util.LocationUtil;
+
 
 public class CitySearchListsParser {
 	public static final String NAME = "name";
