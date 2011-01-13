@@ -3,7 +3,6 @@ package com.where.data.parsers.citysearch;
 import gnu.trove.TIntIntHashMap;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
@@ -13,11 +12,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javax.xml.parsers.DocumentBuilder;
@@ -25,71 +21,41 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.lucene.analysis.KeywordAnalyzer;
-import org.apache.lucene.analysis.WhitespaceAnalyzer;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.NumericField;
 import org.apache.lucene.index.CorruptIndexException;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriter.MaxFieldLength;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.NIOFSDirectory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 public class CitySearchParser {
-	private static boolean generateDictionary;
 	
 	private static Set<Category> allCategories = new HashSet<Category>();
-	
-	private static Map<String, String> ypMap = new HashMap<String, String>();
-	private static Map<String, String> spMap = new HashMap<String, String>();
-	
+		
 	private static final String SP_REF_ID = "6";
 	private static CSListingIndexer spAltCategoryIndexer;
 	private static int refcount;
 	
-	private static PrintWriter wordWriter;
+	
 	private static PrintWriter locwordWriter;
+	
 	
 	protected CitySearchParser() {}
 	
 	private static final Log logger = LogFactory.getLog(CitySearchParser.class);
+	
+	public static void parseListings(String path, String indexPath) throws IOException {
 		
-	public static void parseListings(String path, String indexPath, String dictFolder) throws IOException {
-		locwordWriter = new PrintWriter(new FileWriter(new File(indexPath + ".locwords")));		
+		locwordWriter = new PrintWriter(new FileWriter(new File(indexPath + ".locwords")));
+		
 		//TODO: as per Masumi, fix this
 		String idMappingPath = path;
 		int idx = idMappingPath.lastIndexOf("/");
 		idMappingPath = idMappingPath.substring(0, idx);
 		idMappingPath += "/csid2whereid.txt";
-
-		if(!generateDictionary) {
-			String ypMapFile = new File(path).getParent() + "/ypmap.csv";
-			System.out.println("YP Mapping from " + ypMapFile);
-			populateDirectoryMap(ypMap, ypMapFile);
-			System.out.println("Mapped " + ypMap.size() + " YP places");
-			String spMapFile = new File(path).getParent() + "/spmap.csv";
-			System.out.println("SP Mapping from " + spMapFile);
-			populateDirectoryMap(spMap, spMapFile);
-			System.out.println("Mapped " + spMap.size() + " SP places");			
-		}
-		else {
-			try {
-				wordWriter = new PrintWriter(new FileWriter(new File(indexPath + ".words")));
-			}
-			catch(Exception ignored) {}
-		}
 		
-		if(path.endsWith(".zip")) parseListingsZip(path, indexPath, dictFolder, idMappingPath);
+		if(path.endsWith(".zip")) parseListingsZip(path, indexPath, idMappingPath);
 		else {throw(new UnsupportedEncodingException(path));}
-		
-		if(wordWriter != null) {
-			wordWriter.close();
-			locwordWriter.close();
-		}
+		locwordWriter.close();
 	}
 	
 	//Maps the cs2whereids.txt files to a TIntIntHashMap using \t delim.  K CS_id -> V where_id
@@ -112,19 +78,15 @@ public class CitySearchParser {
 		return map;
 	}
 	
-	private static void parseListingsZip(String zipPath, String indexPath, String dictFolder, String idMappingPath) throws CorruptIndexException, IOException {
-		if(dictFolder != null) {
-			//nlp
-			SentimentAnalysis.setTagger(dictFolder);
-		}
-		
+	private static void parseListingsZip(String zipPath, String indexPath, String idMappingPath) throws CorruptIndexException, IOException {
+
+		//check if the input is an advertiser feed
 		boolean isAdvertiserFeed = zipPath.indexOf("advertiser") > -1;		
 
-		if(!generateDictionary) {
-			new File(indexPath).mkdirs();
-		}
+		//create indexPath (output)
+		new File(indexPath).mkdirs();	
 		
-		//map the CitySearch IDs to Where IsDs
+		//map the CitySearch IDs to Where IDs
 		TIntIntHashMap csId2whereId = generateIdMap(idMappingPath);
 		
 		int count = 0;
@@ -132,18 +94,16 @@ public class CitySearchParser {
 		try {
 			//if the parser is not generating a dictionary, indexer is a CSListingIndexer with arg indexPath.
 			//     else null
-			CSListingIndexer indexer = !generateDictionary ? 
-					CSListingIndexer.newInstance(indexPath) : null;
+			CSListingIndexer indexer = CSListingIndexer.newInstance(indexPath);
 					
 			//loads the csId2WhereId map into the indexer instance
 			indexer.setcs2whereMapping(csId2whereId);
 			
-			if(isAdvertiserFeed && !generateDictionary) {
+			
+			if(isAdvertiserFeed) {
 				new File(indexPath + "/cat_6_all_alt").mkdirs();
 				spAltCategoryIndexer = CSListingIndexer.newInstance(indexPath + "/cat_6_all_alt");
 			}
-			
-			
 			
 			// --- begin to parse through the zipped XMLs
 			ZipInputStream zis = new ZipInputStream(new FileInputStream(zipPath));
@@ -173,8 +133,11 @@ public class CitySearchParser {
 					int locationEnd = line.indexOf("</location>");
 					if(locationEnd > -1) {
 						locationCounter++;
-						//if buffer gets big (>2000), index 
+						
+						//if buffer gets big (>2000), index and clear buffer.
 						if(locationCounter > 2000) {
+							System.out.println("LocationCounter reached 2000!    .....Indexing....");//frank debug
+							
 							buffer.append(line.substring(0, locationEnd+11));
 							buffer.append("</locations>");
 							count+=outerParse("<locations>" + buffer.toString(), indexer);
@@ -184,6 +147,7 @@ public class CitySearchParser {
 							if(line.length() > locationEnd+11) {
 								buffer.append(line.substring(locationEnd+11));
 							}
+							
 							locationCounter = 0;
 						}
 						else buffer.append(line);
@@ -205,135 +169,10 @@ public class CitySearchParser {
 			if(spAltCategoryIndexer != null) spAltCategoryIndexer.close();
 			// Finished parsing and indexing zip. zip and index streams closed.
 			
-			//int refcount: category index num
-			System.out.println("refcount " + refcount);
-			
 			logger.info("Done. Extracted and Indexed " + count + " CS Listings");
-			logger.info("Writing categories");
-			{
-				
-				//reads categories from indexPath+.locwords file and stores into a map.
-				//  if the key already exists in the map, increment the value by 1 (count)
-				//  K String line -> V 1
-				BufferedReader br = new BufferedReader(new FileReader(new File(indexPath + ".locwords")));
-				HashMap<String, Integer> seen = new HashMap<String, Integer>();
-				String line = "";
-
-				while((line = br.readLine()) != null)
-				{
-					line = line.trim();
-					if(seen.containsKey(line))
-					{
-						int cnt = seen.get(line).intValue();
-						seen.put(line, ++cnt);
-					}
-					else
-					{
-						seen.put(line, 1);						
-					}
-				}
-		        Directory directory = new NIOFSDirectory(new File(indexPath+"/" + CSListingDocumentFactory.LOCIDX_SUFFIX));
-
-		        IndexWriter iw= new IndexWriter(directory, new KeywordAnalyzer(), true, MaxFieldLength.UNLIMITED);
-		        for(Entry<String, Integer> entry: seen.entrySet())
-		        {
-			        org.apache.lucene.document.Document d = new org.apache.lucene.document.Document();
-					d.add(new Field(CSListingDocumentFactory.LOCATION, entry.getKey(), Field.Store.YES, Field.Index.NOT_ANALYZED));
-					NumericField nf = new NumericField(CSListingDocumentFactory.COUNT,Field.Store.YES, true);					nf.setIntValue(entry.getValue().intValue());
-					d.add(nf);
-					iw.addDocument(d);
-		        }
-		        iw.commit();
-		        iw.close();
-				directory.close();				
-
-			}
-			
-			
-			if(!isAdvertiserFeed && !generateDictionary) {
-				HashSet<String> seen = new HashSet<String>();
-		        Directory directory = new NIOFSDirectory(new File(indexPath+"/" + CSListingDocumentFactory.CATIDX_SUFFIX));
-		        IndexWriter iw= new IndexWriter(directory, new WhitespaceAnalyzer(), true, MaxFieldLength.UNLIMITED);
-				BufferedWriter writer = new BufferedWriter(new FileWriter("categories.csv"));
-				for(Category c:allCategories) {
-					writer.write(c.toString());					
-					writer.newLine();
-					String toTest = c.getName().trim().toLowerCase();
-					if(seen.contains(toTest)){continue;}
-					seen.add(toTest);
-					org.apache.lucene.document.Document d = new org.apache.lucene.document.Document();
-					d.add(new Field(CSListingDocumentFactory.CATNAME, c.getName(), Field.Store.YES, Field.Index.NOT_ANALYZED));
-					d.add(new Field(CSListingDocumentFactory.CATID, c.getId(), Field.Store.YES, Field.Index.NOT_ANALYZED));
-					iw.addDocument(d);
-				}
-				writer.close();
-				iw.optimize();
-				iw.commit();
-				iw.close();
-				directory.close();
-				indexCategories(allCategories, indexPath);
-			}
-		} 
-		catch(Exception ex) {
-			logger.error("Error parsing out cs enhanced listing data " + (zipEntry != null ? zipEntry.getName() : ""), ex);
-			
-			throw new IllegalStateException(ex);
-		}
-	}
-	
-	private static void populateDirectoryMap(Map<String, String> directoryMap, String mapFilePath) {
-		try {
-			if(!new File(mapFilePath).exists()) return;
-			
-			String line = null;
-			BufferedReader reader = new BufferedReader(new FileReader(mapFilePath));
-			//skip header
-			reader.readLine();
-			while((line = reader.readLine()) != null) {
-				String[] tokens = line.split(",");
-				if(tokens != null && tokens.length > 1) {
-					String csid = tokens[0];
-					String directoryid = tokens[1].trim();
-					directoryMap.put(csid, directoryid);
-				}
-			}
-			
-			reader.close();
 		}
 		catch(Exception ex) {
-			ex.printStackTrace();
-		}
-	}
-	
-	private static void indexCategories(Set<Category> allCategories, String indexPath) {
-		try {
-			Set<Category> cats = new HashSet<Category>();
-			Set<Category> parents = new HashSet<Category>();
-			
-			for(Category c:allCategories) {
-				cats.add(c);
-				if(c.getParent() != null) {
-					parents.add(c.getParent());
-				}
-			}
-			
-			File f = new File(indexPath);
-			String catIndexPath = f.getAbsolutePath() + "/cat_ba";
-			new File(catIndexPath).mkdirs();
-			CSListingIndexer catIndexer = CSListingIndexer.newInstance(catIndexPath);
-			
-			for(Category c:cats) {
-				catIndexer.index(CSListingDocumentFactory.createCategoryDocument(c));
-			}
-			
-			for(Category c:parents) {
-				catIndexer.index(CSListingDocumentFactory.createCategoryDocument(c));
-			}
-			
-			catIndexer.close();
-		}
-		catch(Exception ex) {
-			logger.error("Error parsing out cs enhanced listing data for categories", ex);
+			logger.error("Error parsing out CitySearch enhanced listing data " + (zipEntry != null ? zipEntry.getName() : ""), ex);
 			
 			throw new IllegalStateException(ex);
 		}
@@ -346,7 +185,7 @@ public class CitySearchParser {
 		
 		return parse(doc, indexer);
 	}
-		
+
 	private static int parse(Document doc, CSListingIndexer indexer) {
 		NodeList list = doc.getDocumentElement().getElementsByTagName("location");
 		if(list == null || list.getLength() == 0) return 0;
@@ -355,14 +194,10 @@ public class CitySearchParser {
 			Element location = (Element)list.item(i);
 			
 			CSListing poi = populateDetail(location);
-			CSListingDocumentFactory.toLocationWords(poi, locwordWriter);			
-			if(!generateDictionary) {
-				index(poi, indexer);
-				indexCategories(location, poi);
-			}
-			else {
-				CSListingDocumentFactory.toWords(poi, wordWriter);
-			}
+		
+			CSListingDocumentFactory.toLocationWords(poi, locwordWriter);
+			index(poi, indexer);
+			indexCategories(location, poi);
 		}
 		
 		return list.getLength();
@@ -378,167 +213,163 @@ public class CitySearchParser {
 		
 		populateBasic(poi, location);
 		
-		if(!generateDictionary) {
-			Element urls = ParseUtils.getChildByName(location, "urls");
-			if(urls != null) {
-				 poi.setMenuUrl(ParseUtils.getChildValueByName(urls, "menu_url"));
-				 poi.setWebUrl(ParseUtils.getChildValueByName(urls, "website_url"));
-				 poi.setStaticMapUrl(ParseUtils.getChildValueByName(urls, "map_url"));
-				 poi.setSendToUrl(ParseUtils.getChildValueByName(urls, "send_to_friend_url"));
-				 poi.setEmailUrl(ParseUtils.getChildValueByName(urls, "email_link"));
-				 if(poi.getReservationId() == null) {
-				 	String reservationUrl = ParseUtils.getChildValueByName(urls, "reservation_url");
-				 	poi.setReservationUrl(reservationUrl);
-				 }
-			}
-			
-			Element categories = ParseUtils.getChildByName(location, "categories");
-			if(categories != null) {
-				NodeList category = categories.getChildNodes();
-				if(category != null && category.getLength() > 0) {
-					for(int i = 0, n = category.getLength(); i < n; i++) {
-						Element cat = (Element)category.item(i);
-						String name = cat.getAttribute("name");
-						if(name != null && name.startsWith("$")) {
-							poi.setPriceLevel(name);
-							break;
-						}
-					}
-				}
-			}
-			
-			Element customerContent = ParseUtils.getChildByName(location, "customer_content");
-			if(customerContent != null) {
-				poi.setCustomerMessage(ParseUtils.getChildValueByName(customerContent, "customer_message"));
-				Element bullets = ParseUtils.getChildByName(customerContent, "bullets");
-				if(bullets != null) {
-					NodeList bullet = bullets.getChildNodes();
-					if(bullet != null && bullet.getLength() > 0) {
-						for(int i = 0, n = bullet.getLength(); i < n; i++) {
-							try {
-								Element b = (Element)bullet.item(i);
-								String text = b.getFirstChild().getNodeValue();
-								poi.addBullet(text);
-							}
-							catch(Exception ignored) {}
-						}
-					}
-				}
-			}
-			
-			try {
-				Element offers = ParseUtils.getChildByName(location, "offers");
-				Element offer = ParseUtils.getChildByName(offers, "offer");
-				if(offer != null) {
-					Offer o = new Offer();
-					o.setName(ParseUtils.getChildValueByName(offer, "offer_name"));
-					o.setText(ParseUtils.getChildValueByName(offer, "offer_text"));
-					o.setDescription(ParseUtils.getChildValueByName(offer, "offer_description"));
-					o.setUrl(ParseUtils.getChildValueByName(offer, "offer_url"));
-					o.setExpirationDate(ParseUtils.getChildValueByName(offer, "offer_expiration_date"));
-					
-					poi.setOffer(o);
-				}
-			}
-			catch(Exception ignored) {}
-			
-			Element attributes = ParseUtils.getChildByName(location, "attributes");
-			if(attributes != null) {
-				NodeList attribute = attributes.getChildNodes();
-				if(attribute != null && attribute.getLength() > 0) {
-					for(int i = 0, n = attribute.getLength(); i < n; i++) {
-						Element attr = (Element)attribute.item(i);
-						String name = attr.getAttribute("name");
-						String value = attr.getAttribute("value");
-						
-						poi.addAttribute(name + " - " + value);
-					}
-				}
-			}
-			
-			poi.setBusinessHours(ParseUtils.getChildValueByName(location, "business_hours"));
-			
-			poi.setParking(ParseUtils.getChildValueByName(location, "parking"));
-			
-			Element tips = ParseUtils.getChildByName(location, "tips");
-			if(tips != null) {
-				NodeList tip = tips.getChildNodes();
-				if(tip != null && tip.getLength() > 0) {
-					for(int i = 0, n = tip.getLength(); i < n; i++) {
-						Tip t = new Tip();
-						Element tipE = (Element)tip.item(i);
-						t.setTitle(ParseUtils.getChildValueByName(tipE, "tip_name"));
-						String tiptext = ParseUtils.getChildValueByName(tipE, "tip_text");
-						if(tiptext != null) t.setText(tiptext.trim());
-						poi.addTip(t);
-					}
-				}
-			}		
-			
-			Element images = ParseUtils.getChildByName(location, "images");
-			if(images != null) {
-				NodeList imagelist = images.getChildNodes();
-				if(imagelist != null && imagelist.getLength() > 0) {
-					for(int i = 0, n = imagelist.getLength(); i < n; i++) {
-						Element image = (Element)imagelist.item(i);
-						poi.addImage(ParseUtils.getChildValueByName(image, "image_url"));
-					}
-				}
-			}	
-			
-			Element editorials = ParseUtils.getChildByName(location, "editorials");
-			if(editorials != null) {
-				NodeList editoriallist = editorials.getChildNodes();
-				if(editoriallist != null && editoriallist.getLength() > 0) {
-					for(int i = 0, n = editoriallist.getLength(); i < n; i++) {
-						Review review = new Review();
-						Element editorial = (Element)editoriallist.item(i);
-						review.setTitle(ParseUtils.getChildValueByName(editorial, "editorial_title"));
-						review.setAuthor(ParseUtils.getChildValueByName(editorial, "editorial_author"));
-						review.setReview(ParseUtils.getChildValueByName(editorial, "editorial_review"));
-						review.setPros(ParseUtils.getChildValueByName(editorial, "pros"));
-						review.setCons(ParseUtils.getChildValueByName(editorial, "cons"));
-						review.setRating(ParseUtils.getChildValueByName(editorial, "review_rating"));
-						review.setDate(ParseUtils.getChildValueByName(editorial, "editorial_date").substring(0, 10));
-						
-						poi.addEditorial(review);
-					}
-				}
-			}			
-			
-			Element reviews = ParseUtils.getChildByName(location, "reviews");
-			if(reviews != null) {				
-				NodeList reviewlist = reviews.getElementsByTagName("review");
-				if(reviewlist != null && reviewlist.getLength() > 0) {
-					for(int i = 0, n = reviewlist.getLength(); i < n; i++) {
-						Review review = new Review();
-						Element r = (Element)reviewlist.item(i);
-						
-						review.setAttribution(ParseUtils.getAttributeValue(r, "attribution_text"), ParseUtils.getAttributeValue(r, "attribution_source"), ParseUtils.getAttributeValue(r, "attribution_logo"), ParseUtils.getChildValueByName(r, "review_url"));
-						
-						review.setTitle(ParseUtils.getChildValueByName(r, "review_title"));
-						review.setAuthor(ParseUtils.getChildValueByName(r, "review_author"));
-						review.setReview(ParseUtils.getChildValueByName(r, "review_text"));
-						review.setPros(ParseUtils.getChildValueByName(r, "pros"));
-						review.setCons(ParseUtils.getChildValueByName(r, "cons"));
-						review.setRating(ParseUtils.getChildValueByName(r, "review_rating"));
-						review.setDate(ParseUtils.getChildValueByName(r, "review_date").substring(0, 10));
-						
-						poi.addUserReview(review);
-					}
-				}
-			}
-			
-			SentimentAnalysis.extractTermFreqs(poi);
+		
+		Element urls = ParseUtils.getChildByName(location, "urls");
+		if(urls != null) {
+			 poi.setMenuUrl(ParseUtils.getChildValueByName(urls, "menu_url"));
+			 poi.setWebUrl(ParseUtils.getChildValueByName(urls, "website_url"));
+			 poi.setStaticMapUrl(ParseUtils.getChildValueByName(urls, "map_url"));
+			 poi.setSendToUrl(ParseUtils.getChildValueByName(urls, "send_to_friend_url"));
+			 poi.setEmailUrl(ParseUtils.getChildValueByName(urls, "email_link"));
+			 if(poi.getReservationId() == null) {
+			 	String reservationUrl = ParseUtils.getChildValueByName(urls, "reservation_url");
+			 	poi.setReservationUrl(reservationUrl);
+			 }
 		}
 		
+		Element categories = ParseUtils.getChildByName(location, "categories");
+		if(categories != null) {
+			NodeList category = categories.getChildNodes();
+			if(category != null && category.getLength() > 0) {
+				for(int i = 0, n = category.getLength(); i < n; i++) {
+					Element cat = (Element)category.item(i);
+					String name = cat.getAttribute("name");
+					if(name != null && name.startsWith("$")) {
+						poi.setPriceLevel(name);
+						break;
+					}
+				}
+			}
+		}
+		
+		Element customerContent = ParseUtils.getChildByName(location, "customer_content");
+		if(customerContent != null) {
+			poi.setCustomerMessage(ParseUtils.getChildValueByName(customerContent, "customer_message"));
+			Element bullets = ParseUtils.getChildByName(customerContent, "bullets");
+			if(bullets != null) {
+				NodeList bullet = bullets.getChildNodes();
+				if(bullet != null && bullet.getLength() > 0) {
+					for(int i = 0, n = bullet.getLength(); i < n; i++) {
+						try {
+							Element b = (Element)bullet.item(i);
+							String text = b.getFirstChild().getNodeValue();
+							poi.addBullet(text);
+						}
+						catch(Exception ignored) {}
+					}
+				}
+			}
+		}
+		
+		try {
+			Element offers = ParseUtils.getChildByName(location, "offers");
+			Element offer = ParseUtils.getChildByName(offers, "offer");
+			if(offer != null) {
+				Offer o = new Offer();
+				o.setName(ParseUtils.getChildValueByName(offer, "offer_name"));
+				o.setText(ParseUtils.getChildValueByName(offer, "offer_text"));
+				o.setDescription(ParseUtils.getChildValueByName(offer, "offer_description"));
+				o.setUrl(ParseUtils.getChildValueByName(offer, "offer_url"));
+				o.setExpirationDate(ParseUtils.getChildValueByName(offer, "offer_expiration_date"));
+				
+				poi.setOffer(o);
+			}
+		}
+		catch(Exception ignored) {}
+		
+		Element attributes = ParseUtils.getChildByName(location, "attributes");
+		if(attributes != null) {
+			NodeList attribute = attributes.getChildNodes();
+			if(attribute != null && attribute.getLength() > 0) {
+				for(int i = 0, n = attribute.getLength(); i < n; i++) {
+					Element attr = (Element)attribute.item(i);
+					String name = attr.getAttribute("name");
+					String value = attr.getAttribute("value");
+					
+					poi.addAttribute(name + " - " + value);
+				}
+			}
+		}
+		
+		poi.setBusinessHours(ParseUtils.getChildValueByName(location, "business_hours"));
+		
+		poi.setParking(ParseUtils.getChildValueByName(location, "parking"));
+		
+		Element tips = ParseUtils.getChildByName(location, "tips");
+		if(tips != null) {
+			NodeList tip = tips.getChildNodes();
+			if(tip != null && tip.getLength() > 0) {
+				for(int i = 0, n = tip.getLength(); i < n; i++) {
+					Tip t = new Tip();
+					Element tipE = (Element)tip.item(i);
+					t.setTitle(ParseUtils.getChildValueByName(tipE, "tip_name"));
+					String tiptext = ParseUtils.getChildValueByName(tipE, "tip_text");
+					if(tiptext != null) t.setText(tiptext.trim());
+					poi.addTip(t);
+				}
+			}
+		}		
+		
+		Element images = ParseUtils.getChildByName(location, "images");
+		if(images != null) {
+			NodeList imagelist = images.getChildNodes();
+			if(imagelist != null && imagelist.getLength() > 0) {
+				for(int i = 0, n = imagelist.getLength(); i < n; i++) {
+					Element image = (Element)imagelist.item(i);
+					poi.addImage(ParseUtils.getChildValueByName(image, "image_url"));
+				}
+			}
+		}	
+		
+		Element editorials = ParseUtils.getChildByName(location, "editorials");
+		if(editorials != null) {
+			NodeList editoriallist = editorials.getChildNodes();
+			if(editoriallist != null && editoriallist.getLength() > 0) {
+				for(int i = 0, n = editoriallist.getLength(); i < n; i++) {
+					Review review = new Review();
+					Element editorial = (Element)editoriallist.item(i);
+					review.setTitle(ParseUtils.getChildValueByName(editorial, "editorial_title"));
+					review.setAuthor(ParseUtils.getChildValueByName(editorial, "editorial_author"));
+					review.setReview(ParseUtils.getChildValueByName(editorial, "editorial_review"));
+					review.setPros(ParseUtils.getChildValueByName(editorial, "pros"));
+					review.setCons(ParseUtils.getChildValueByName(editorial, "cons"));
+					review.setRating(ParseUtils.getChildValueByName(editorial, "review_rating"));
+					review.setDate(ParseUtils.getChildValueByName(editorial, "editorial_date").substring(0, 10));
+					
+					poi.addEditorial(review);
+				}
+			}
+		}			
+		
+		Element reviews = ParseUtils.getChildByName(location, "reviews");
+		if(reviews != null) {				
+			NodeList reviewlist = reviews.getElementsByTagName("review");
+			if(reviewlist != null && reviewlist.getLength() > 0) {
+				for(int i = 0, n = reviewlist.getLength(); i < n; i++) {
+					Review review = new Review();
+					Element r = (Element)reviewlist.item(i);
+					
+					review.setAttribution(ParseUtils.getAttributeValue(r, "attribution_text"), ParseUtils.getAttributeValue(r, "attribution_source"), ParseUtils.getAttributeValue(r, "attribution_logo"), ParseUtils.getChildValueByName(r, "review_url"));
+					
+					review.setTitle(ParseUtils.getChildValueByName(r, "review_title"));
+					review.setAuthor(ParseUtils.getChildValueByName(r, "review_author"));
+					review.setReview(ParseUtils.getChildValueByName(r, "review_text"));
+					review.setPros(ParseUtils.getChildValueByName(r, "pros"));
+					review.setCons(ParseUtils.getChildValueByName(r, "cons"));
+					review.setRating(ParseUtils.getChildValueByName(r, "review_rating"));
+					review.setDate(ParseUtils.getChildValueByName(r, "review_date").substring(0, 10));
+					
+					poi.addUserReview(review);
+				}
+			}
+		}
+		
+	
 		return poi;
 	}
 	
 	private static void populateBasic(CSListing poi, Element location) {
 		poi.setListingId(ParseUtils.getChildValueByName(location, "id"));		
-		poi.setYpId(ypMap.get(poi.getListingId()));
-		poi.setSpId(spMap.get(poi.getListingId()));
 		
 		setWhereId(poi);
 		
@@ -711,9 +542,7 @@ public class CitySearchParser {
 	}	
 	
 	private static void setWhereId(CSListing poi) {
-		if(!generateDictionary) {
-			poi.setWhereId(poi.getListingId());
-		}
+		poi.setWhereId(poi.getListingId());
 	}
 	
 	
@@ -750,11 +579,7 @@ public class CitySearchParser {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		if(args.length == 4) {
-			CitySearchParser.generateDictionary = true;
-			CitySearchParser.parseListings(args[0], args[1], args[2]);
-		}
-		else if(args.length == 3) CitySearchParser.parseListings(args[0], args[1], args[2]);
-		else {throw(new Exception("need at least 3 args"));}
-	}	
+		if(args.length == 2) CitySearchParser.parseListings(args[0], args[1]);
+		else {throw(new Exception("need 2 args"));}
+	}
 }
