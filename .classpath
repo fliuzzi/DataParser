@@ -7,7 +7,6 @@
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-core-3.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-spatial-3.0.2.jar"/>
-	<classpathentry kind="lib" path="lib/trove.jar"/>
 	<classpathentry kind="lib" path="lib/where_utils.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-spellchecker-3.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/ostermillerutils_1_07_00.jar"/>
