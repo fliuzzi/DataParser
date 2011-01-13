@@ -23,7 +23,5 @@
 	<classpathentry kind="lib" path="lib/commons-httpclient-3.1.jar"/>
 	<classpathentry kind="lib" path="lib/trove-2.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/nlp.jar"/>
-	<classpathentry kind="lib" path="lib/maxent-3.0.0.jar"/>
-	<classpathentry kind="lib" path="lib/opennlp-tools-1.5.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
