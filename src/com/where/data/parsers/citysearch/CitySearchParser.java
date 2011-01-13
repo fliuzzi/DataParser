@@ -92,7 +92,7 @@ public class CitySearchParser {
 		}
 	}
 	
-	//Maps the cs2whereids.txt files to a TIntIntHashMap.  K CS_id -> V where_id
+	//Maps the cs2whereids.txt files to a TIntIntHashMap using \t delim.  K CS_id -> V where_id
 	private static TIntIntHashMap generateIdMap(String path) throws IOException
 	{
 		TIntIntHashMap map = new TIntIntHashMap();
@@ -114,6 +114,7 @@ public class CitySearchParser {
 	
 	private static void parseListingsZip(String zipPath, String indexPath, String dictFolder, String idMappingPath) throws CorruptIndexException, IOException {
 		if(dictFolder != null) {
+			//nlp
 			SentimentAnalysis.setTagger(dictFolder);
 		}
 		
@@ -123,18 +124,28 @@ public class CitySearchParser {
 			new File(indexPath).mkdirs();
 		}
 		
+		//map the CitySearch IDs to Where IsDs
 		TIntIntHashMap csId2whereId = generateIdMap(idMappingPath);
+		
 		int count = 0;
 		ZipEntry zipEntry = null;
 		try {
+			//if the parser is not generating a dictionary, indexer is a CSListingIndexer with arg indexPath.
+			//     else null
 			CSListingIndexer indexer = !generateDictionary ? 
 					CSListingIndexer.newInstance(indexPath) : null;
+					
+			//loads the csId2WhereId map into the indexer instance
 			indexer.setcs2whereMapping(csId2whereId);
+			
 			if(isAdvertiserFeed && !generateDictionary) {
 				new File(indexPath + "/cat_6_all_alt").mkdirs();
 				spAltCategoryIndexer = CSListingIndexer.newInstance(indexPath + "/cat_6_all_alt");
 			}
 			
+			
+			
+			// --- begin to parse through the zipped XMLs
 			ZipInputStream zis = new ZipInputStream(new FileInputStream(zipPath));
 			
 			while((zipEntry = zis.getNextEntry()) != null) {
@@ -153,6 +164,7 @@ public class CitySearchParser {
 						}
 					}
 					
+					//grabs everything in between locations tag and stores into line
 					int locationsIndex = line.indexOf("</locations>");
 					if(locationsIndex > -1) {
 						line = line.substring(0, locationsIndex);
@@ -161,6 +173,7 @@ public class CitySearchParser {
 					int locationEnd = line.indexOf("</location>");
 					if(locationEnd > -1) {
 						locationCounter++;
+						//if buffer gets big (>2000), index 
 						if(locationCounter > 2000) {
 							buffer.append(line.substring(0, locationEnd+11));
 							buffer.append("</locations>");
@@ -187,14 +200,21 @@ public class CitySearchParser {
 			}
 			zis.close();
 			
+			
 			if(indexer != null) indexer.close();
 			if(spAltCategoryIndexer != null) spAltCategoryIndexer.close();
+			// Finished parsing and indexing zip. zip and index streams closed.
 			
+			//int refcount: category index num
 			System.out.println("refcount " + refcount);
 			
 			logger.info("Done. Extracted and Indexed " + count + " CS Listings");
 			logger.info("Writing categories");
 			{
+				
+				//reads categories from indexPath+.locwords file and stores into a map.
+				//  if the key already exists in the map, increment the value by 1 (count)
+				//  K String line -> V 1
 				BufferedReader br = new BufferedReader(new FileReader(new File(indexPath + ".locwords")));
 				HashMap<String, Integer> seen = new HashMap<String, Integer>();
 				String line = "";
