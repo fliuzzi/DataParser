@@ -47,7 +47,7 @@ public class CitySearchParser {
 		
 		locwordWriter = new PrintWriter(new FileWriter(new File(indexPath + ".locwords")));
 		
-		//TODO: as per Masumi, fix this
+		//TODO: as per Masumi, fix this (csid2where)
 		String idMappingPath = path;
 		int idx = idMappingPath.lastIndexOf("/");
 		idMappingPath = idMappingPath.substring(0, idx);

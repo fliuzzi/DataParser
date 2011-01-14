@@ -42,12 +42,12 @@ public class LocalezeParser {
 	public static final String GEOHASH = "geohash";
 	private static Map<Long, Category> categories = new HashMap<Long, Category>();
 	private static Map<Long, Category> subcategories = new HashMap<Long, Category>();
-	private static Map<Long, Category> subsubcategories = new HashMap<Long, Category>();	
+	private static Map<Long, Category> subsubcategories = new HashMap<Long, Category>();
 	private static Map<Long, String> companyCategories = new HashMap<Long, String>();
-	
-	//TODO: need to change this once we have thesre stored
+
+	//TODO: need to change this once we have these stored
 	private static int startId_ = 100*1000000 +1; //Give the first 100M to cs
-	
+
 	private static void populateCategoryMap(String folder) throws Exception {
 		BufferedReader reader = new BufferedReader(new FileReader(folder + "/Categories.txt"));
 		String line = null;
@@ -60,8 +60,8 @@ public class LocalezeParser {
 			}
 		}
 		reader.close();
-	}	
-	
+	}
+
 	private static void populateSubcategoryMap(String folder) throws Exception {
 		BufferedReader reader = new BufferedReader(new FileReader(folder + "/CondensedHeadingDetail.txt"));
 		String line = null;
@@ -78,7 +78,7 @@ public class LocalezeParser {
 			}
 		}
 		reader.close();
-	}	
+	}
 	
 	private static void populateSubSubcategoryMap(String folder) throws Exception {
 		BufferedReader reader = new BufferedReader(new FileReader(folder + "/NormalizedHeadingDetail.txt"));
@@ -96,8 +96,8 @@ public class LocalezeParser {
 			}
 		}
 		reader.close();
-	}	
-		
+	}
+
 	private static void populateCompanyCategories(String folder, String indexFolder) throws Exception {
 		BufferedReader reader = new BufferedReader(new FileReader(folder + "/CompanyHeadings.txt"));
 		String line = null;
@@ -114,7 +114,7 @@ public class LocalezeParser {
 
 				Category category = subsubcategories.get(categoryid);
 				if(category == null) category = subcategories.get(categoryid);
-				if(category == null) category = categories.get(categoryid);				
+				if(category == null) category = categories.get(categoryid);
 				if(category == null) throw new IllegalStateException("No Category can be found for PID " + pid + "line: " + line);
 				
 				String cats = companyCategories.get(pid);
@@ -309,7 +309,7 @@ public class LocalezeParser {
                 writer.optimize();
             }
         }
-
+        
         //shutdown will wait for jobs to get cleaned up, so we don't need
         //to do anything special here        System.out.println("populating main index");       
 
@@ -318,19 +318,22 @@ public class LocalezeParser {
         writer.optimize();
         writer.close();
     }
-    
-	public static void main(String[] args) throws Exception 
+
+	public static void main(String[] args) throws Exception
 	{
-	    System.out.println("populating category maps");
-	    populateCategoryMap(args[0]); 
-		populateSubcategoryMap(args[0]);
-		populateSubSubcategoryMap(args[0]);		
-        System.out.println("finished populating category maps");
-        System.out.println("populating company categories");
-		populateCompanyCategories(args[1], args[2]);		
-	    System.out.println("finishedpopulating company categories");
-        System.out.println("populating main index");	    
-		populateMainIndex(args[1], args[2]);
-        System.out.println("finished populating main index");        
+	    if(args.length == 3){
+    	    System.out.println("populating category maps");
+    	    populateCategoryMap(args[0]); 
+    		populateSubcategoryMap(args[0]);
+    		populateSubSubcategoryMap(args[0]);
+            System.out.println("finished populating category maps");
+            System.out.println("populating company categories");
+    		populateCompanyCategories(args[1], args[2]);
+    	    System.out.println("finishedpopulating company categories");
+            System.out.println("populating main index");
+    		populateMainIndex(args[1], args[2]);
+            System.out.println("finished populating main index");
+	    }
+	    else {throw(new Exception("need 3 args"));}
 	}
 }
