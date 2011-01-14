@@ -48,6 +48,9 @@ public class LocalezeParser {
 	//TODO: need to change this once we have these stored
 	private static int startId_ = 100*1000000 +1; //Give the first 100M to cs
 
+	//Parses Localeze File: Categories.txt
+    // each line is stored into one Category object with an idNum and a String Category Name
+	//     and finally stored into a hashmap
 	private static void populateCategoryMap(String folder) throws Exception {
 		BufferedReader reader = new BufferedReader(new FileReader(folder + "/Categories.txt"));
 		String line = null;
@@ -62,6 +65,9 @@ public class LocalezeParser {
 		reader.close();
 	}
 
+	//Parses Localeze File: condensedHeadingDetail.txt
+	//Acts as populateCategoryMap + links Category to parent category (by stemkey)
+	//stores category into HashMap subcategories
 	private static void populateSubcategoryMap(String folder) throws Exception {
 		BufferedReader reader = new BufferedReader(new FileReader(folder + "/CondensedHeadingDetail.txt"));
 		String line = null;
@@ -80,6 +86,9 @@ public class LocalezeParser {
 		reader.close();
 	}
 	
+	//Parses Localeze File: NormalizedHeadingDetail.txt
+	//Acts just like populateSubCategoryMap
+	//stores category into HashMap subsubcategories
 	private static void populateSubSubcategoryMap(String folder) throws Exception {
 		BufferedReader reader = new BufferedReader(new FileReader(folder + "/NormalizedHeadingDetail.txt"));
 		String line = null;
@@ -98,6 +107,8 @@ public class LocalezeParser {
 		reader.close();
 	}
 
+	//Parses Localeze File: CompanyHeadings.txt
+	//Outputs to: HashMap companyCategories
 	private static void populateCompanyCategories(String folder, String indexFolder) throws Exception {
 		BufferedReader reader = new BufferedReader(new FileReader(folder + "/CompanyHeadings.txt"));
 		String line = null;
@@ -112,6 +123,7 @@ public class LocalezeParser {
 				Long pid = Long.valueOf(splitter[0].trim());
 				Long categoryid = Long.valueOf(splitter[1].trim());
 
+				
 				Category category = subsubcategories.get(categoryid);
 				if(category == null) category = subcategories.get(categoryid);
 				if(category == null) category = categories.get(categoryid);
@@ -319,6 +331,8 @@ public class LocalezeParser {
         writer.close();
     }
 
+    
+    
 	public static void main(String[] args) throws Exception
 	{
 	    if(args.length == 3){

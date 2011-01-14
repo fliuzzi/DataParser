@@ -74,6 +74,7 @@ public class Parser
     private FileOutputStream outputStream_;
     private FileChannel outputChannel_;
     private String newDataDir_;
+    public static int batchSize = 8;
     
     public Parser(String oldIndexPath, String newDataDir, String newIndexPath) throws CorruptIndexException, IOException
     {
@@ -134,7 +135,7 @@ public class Parser
                 if(num > maxId)
                 {
                     maxId = num;
-                }                
+                }
             }
             catch(Exception e)
             {
@@ -171,7 +172,7 @@ public class Parser
         public long userId_;
         public int rating_;
     }
-                              
+
     public static class Listing
     {
         long csId_;
@@ -612,13 +613,16 @@ public class Parser
         }         
     }
     
+    //stores args, sets maxuserid, passes everything to Parser.processInputFiles
     public static void main(String[] args) throws IOException, InterruptedException, ExecutionException {
-        if(args.length < 3) 
+        if(args.length < 3)
         {
             System.out.println("USAGE:");
-            System.out.println("old index file: path to old index to dedup against");
+            System.out.println("old index file: path to old index to de-dupe against");
             System.out.println("new data input directory: new directory to merge in");
             System.out.println("new data output file : directory to write output file");
+            System.out.println("optional: batch size (default=8)");
+            return;
         }
         String oldIndex = args[0];
         String newDataDir = args[1];
@@ -632,12 +636,11 @@ public class Parser
         p.processInputFiles(newDataDir);
         p.close();
     }
-    
-    public static int batchSize = 8;
 
     public void processInputFiles(String dirName) throws IOException, InterruptedException, ExecutionException
     {
-       File [] ratingsFiles = getFiles(dirName);
+       File [] ratingsFiles = getFiles(dirName);  //get all ratings files
+       
        int numBatches = ratingsFiles.length/batchSize;
        int i = 0;
        for(i = 0; i < numBatches; i++)
@@ -657,14 +660,14 @@ public class Parser
        outputStream_.close();
     }
     
-        
+    
     protected void processInputFileBatch(int startIndex, int batchSize, File [] ratingsFiles) throws IOException, InterruptedException, ExecutionException
     {
         assert(startIndex + batchSize < ratingsFiles.length);
         int i = startIndex;
         ArrayList<FutureTask<FileProcessor>> fpList = 
             new ArrayList<FutureTask<FileProcessor>>();
-        
+
         while(i < startIndex + batchSize)
         {
             File f = ratingsFiles[i];
@@ -677,9 +680,10 @@ public class Parser
         {
             ft.get();
         }
-        outputStream_.flush();        
+        outputStream_.flush();
     }
-    
+
+    // returns a File array of all files in path 'dirName' that end with .rating
     public static File [] getFiles(String dirName)
     {
         File dir = new File(dirName);
