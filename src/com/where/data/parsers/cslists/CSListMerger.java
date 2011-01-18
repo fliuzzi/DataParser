@@ -10,7 +10,8 @@ import java.io.PrintWriter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+//takes two files..take this make new class that will add as well as replace
+//create new CSListsAdder
 
 public class CSListMerger
 {
@@ -64,8 +65,10 @@ public class CSListMerger
             {
                 if(isEquivalent(jo, smallList.getJSONObject(j)))
                 {
+                    
                     valid = false;
                     JSONObject n = new JSONObject(smallList.getJSONObject(j).toString());
+                    
 //                    String uri = n.optJSONObject("source").optString("url");   // this was all done to deal with the fact that jim gave us stuff with the same uri
 //                    String name = n.optString("name");
 //                    if(name.indexOf("Helio") != -1) uri += "/1";
@@ -98,9 +101,7 @@ public class CSListMerger
 		writer.println(finallist.toString());
 		writer.close();
     }
-    /**
-     * @param args
-     */
+
     public static void main(String[] args)
     {
         if(args == null || args.length != 3) {
@@ -115,5 +116,4 @@ public class CSListMerger
         }
         System.out.println("Done");
     }
-
 }

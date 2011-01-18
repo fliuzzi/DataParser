@@ -30,7 +30,7 @@ import org.xml.sax.InputSource;
 public class CitySearchParser {
 	
 	private static Set<Category> allCategories = new HashSet<Category>();
-		
+	
 	private static final String SP_REF_ID = "6";
 	private static CSListingIndexer spAltCategoryIndexer;
 	private static int refcount;

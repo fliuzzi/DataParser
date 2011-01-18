@@ -1,3 +1,8 @@
+//CSListParser.java
+//***********
+// Will probably not be used again, since data has already been collected.
+//**********
+
 package com.where.data.parsers.cslists;
 
 import java.io.BufferedReader;

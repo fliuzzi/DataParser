@@ -414,7 +414,7 @@ public class Parser
         Listing curListing = null;
         STATE state = STATE.FRESH;
         String line = null;
-        int cnt = 0;        
+        int cnt = 0;
         BufferedReader inputReader = new BufferedReader(new StringReader(slurpFile(file)));
         while((line = inputReader.readLine()) != null)
         {

@@ -1,3 +1,6 @@
+//CSListIndexer.java
+//indexes the cslist json
+
 package com.where.data.parsers.cslists;
 
 import java.io.BufferedReader;
@@ -39,6 +42,8 @@ import com.where.places.lists.PlacelistPlace;
 import com.where.utils.CSListingUtil;
 import com.where.utils.Utils;
 
+
+
 public class CSListIndexer {
 	private static Profile profile = new Profile();
 	
@@ -71,6 +76,9 @@ public class CSListIndexer {
 		writer.optimize();
 		writer.close();
 		
+		
+		
+		// write the bad POIs to a txt...
 		PrintWriter out = new PrintWriter(new FileWriter(new File(new File(indexPath).getParent(), "badpois.txt")));
 		for(Map.Entry<String, List<String>> entry:badpois.entrySet()) {
 			out.println(entry.getKey());
@@ -238,6 +246,8 @@ public class CSListIndexer {
 	}
 	
 	private static void indexPlacelists(String csListFile, IndexWriter writer, String dymPath) throws Exception {
+	    
+	    //parse cslist.json file and store all non-null to StringBuffer buffer
 		BufferedReader reader = new BufferedReader(new FileReader(csListFile));
 		String line = null;
 		StringBuffer buffer = new StringBuffer();
@@ -245,6 +255,8 @@ public class CSListIndexer {
 			buffer.append(line);
 		}
 		reader.close();
+		
+		
 		
 		PrintWriter dymwriter = new PrintWriter(new FileWriter(dymPath));
 		
@@ -254,6 +266,8 @@ public class CSListIndexer {
 		System.out.println(lists.length() + " lists in JSON");
 		for(int i = 0, n = lists.length(); i < n; i++) {
 			Placelist pl = Placelist.fromJSON(lists.getJSONObject(i));
+			
+			
 			pl.setId(Utils.hash(pl.getSourceUrl()));
 			
 			writeDym(dymwriter, pl);
@@ -305,14 +319,14 @@ public class CSListIndexer {
             System.out.println("input ad index build");
             System.out.println("cs lists json file");
             System.out.println("output directory");
-            System.out.println("output dym directory");
+            System.out.println("output dym .txt file");
 		
 		}
 	    String indexPath = args[0];//"/h/csdata/11_04_idxbuild";
         String adIndexPath = args[1];//"/h/csdata/adv/adv";
         String csListFile = args[2];//"/h/csdata/cslists.json";
         String outputDir = args[3];//"/h/csdata/newcslists_idx";
-        String dym = args[4];//"/h/csdata/cslistsdym";
+        String dym = args[4];//"/h/csdata/cslistsdym.txt";
         
 		CSListIndexer.profile.setIndexPath(indexPath);
 		CSListIndexer.profile.setAdIndexPath(adIndexPath);
