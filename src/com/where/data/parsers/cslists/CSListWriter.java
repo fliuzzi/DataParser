@@ -1,5 +1,5 @@
 package com.where.data.parsers.cslists;
-
+//generates the josn
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
