@@ -43,6 +43,19 @@ import com.where.utils.CSListingUtil;
 import com.where.utils.Utils;
 
 
+/*
+ * CSListIndexer indexes JSON -> CSLists Index & Places Index
+ *                          CSLists Index
+ *                              Fields:
+ *                                      id - hashed from pl URL
+ *                                      lat and lat-range
+ *                                      long and long-range
+ *                                      PlaceList object
+ *                          Places Index
+ *                              Fields:
+ *                                      id - CS listing id
+ *                                      placelists - Arraylist of the placelist hashes
+ */
 
 public class CSListIndexer {
 	private static Profile profile = new Profile();
@@ -93,10 +106,17 @@ public class CSListIndexer {
 		System.out.println("Bad " + badpois.size());
 	}
 	
+	
+	//indexes the cslists/places Index
 	private static void indexPlaceLookups(String indexPath) throws Exception {
 		IndexWriter writer = newIndexWriter(indexPath + "/places");
 		for(Map.Entry<String, Set<Placelist>> entry:inversed.entrySet()) {
+		    
+		    
+		    //placeID = key of entry map
 			String placeid = entry.getKey();
+			
+			
 			Set<Placelist> lists = entry.getValue();
 			Document document = new Document();
 			document.add(new Field(PLACE_ID, placeid, Field.Store.YES, Field.Index.NOT_ANALYZED));
@@ -155,6 +175,8 @@ public class CSListIndexer {
 		return docs;
 	}
 	
+	
+	
 	private static void addInverseLookup(Placelist placelist) {
 		for(int i = 0, n = placelist.groupsSize(); i < n; i++) {
 			GroupOfPlaces group = placelist.group(i);
@@ -205,7 +227,7 @@ public class CSListIndexer {
 			byte[] bytes = bout.toByteArray();
 			document.add(new Field(PLACELIST, bytes, 0, bytes.length, Field.Store.YES));
 		}
-		catch(Exception ex) {			
+		catch(Exception ex) {
 			throw new IllegalArgumentException(ex);
 		}
 	}
@@ -228,7 +250,7 @@ public class CSListIndexer {
 				place.setPoi(poi);
 			}
 			
-			//remove all "bad" palces from this group
+			//remove all "bad" places from this group
 			if(!badgroupplaces.isEmpty()) {
 				g.removePlaces(badgroupplaces);
 			}
@@ -247,7 +269,7 @@ public class CSListIndexer {
 	
 	private static void indexPlacelists(String csListFile, IndexWriter writer, String dymPath) throws Exception {
 	    
-	    //parse cslist.json file and store all non-null to StringBuffer buffer
+	    //line-parse cslist.json file and store all non-null to StringBuffer buffer
 		BufferedReader reader = new BufferedReader(new FileReader(csListFile));
 		String line = null;
 		StringBuffer buffer = new StringBuffer();
@@ -267,10 +289,12 @@ public class CSListIndexer {
 		for(int i = 0, n = lists.length(); i < n; i++) {
 			Placelist pl = Placelist.fromJSON(lists.getJSONObject(i));
 			
-			
+			//set the hashed placelistID
 			pl.setId(Utils.hash(pl.getSourceUrl()));
 			
+			//writes the dym.txt file by passing the writer and a placeList
 			writeDym(dymwriter, pl);
+			
 			
 			List<Document> docs = newPlacelistDocuments(pl);
 			for(Document doc:docs) {	
@@ -285,6 +309,7 @@ public class CSListIndexer {
 	}
 	
 	//TODO keep this but add new function for typeahead restricted by location
+	//writeDym: writes the dym.txt file
 	private static void writeDym(PrintWriter writer, Placelist pl) throws Exception {
 		writer.println(pl.getName().trim().toLowerCase());
 		String[] split = pl.getName().split(" ");
@@ -307,26 +332,26 @@ public class CSListIndexer {
         Directory directory = new NIOFSDirectory(new File(indexPath));
         IndexWriter writer = new IndexWriter(directory, new Analyzer(), true, MaxFieldLength.UNLIMITED);
         writer.setMergeFactor(100000);
-        writer.setMaxMergeDocs(Integer.MAX_VALUE);        
+        writer.setMaxMergeDocs(Integer.MAX_VALUE);
         return writer;
-	} 
+	}
 	
 	public static void main(String[] args) throws Exception {
 		if(args.length < 5)
 		{
 		    System.out.println("Usage: CSListIndexer");
-            System.out.println("input index build");
-            System.out.println("input ad index build");
-            System.out.println("cs lists json file");
-            System.out.println("output directory");
-            System.out.println("output dym .txt file");
+            System.out.println("\t Input: existing cslists index dir");
+            System.out.println("\t Input: existing ad index dir");
+            System.out.println("\t Input: CSLists JSON file (to be indexed)");
+            System.out.println("\t Output: index dir");
+            System.out.println("\t Output: DYM .txt file");
 		
 		}
-	    String indexPath = args[0];//"/h/csdata/11_04_idxbuild";
-        String adIndexPath = args[1];//"/h/csdata/adv/adv";
-        String csListFile = args[2];//"/h/csdata/cslists.json";
-        String outputDir = args[3];//"/h/csdata/newcslists_idx";
-        String dym = args[4];//"/h/csdata/cslistsdym.txt";
+	    String indexPath = args[0];
+        String adIndexPath = args[1];
+        String csListFile = args[2];
+        String outputDir = args[3];
+        String dym = args[4];
         
 		CSListIndexer.profile.setIndexPath(indexPath);
 		CSListIndexer.profile.setAdIndexPath(adIndexPath);

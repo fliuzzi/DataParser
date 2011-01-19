@@ -10,8 +10,6 @@ import java.io.PrintWriter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-//takes two files..take this make new class that will add as well as replace
-//create new CSListsAdder
 
 public class CSListMerger
 {
