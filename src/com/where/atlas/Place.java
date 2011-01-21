@@ -4,8 +4,8 @@ public class Place {
 
 	public static enum Source { LOCALEZE, CS }
 
-	//TODO: [F]: add replacement objectID data struct
-	//private ObjectId id;
+	
+	private String whereId;
 	private String shortname;
 	private String name;
 	private String phone;
@@ -15,7 +15,15 @@ public class Place {
 	private double [] latlng;
 	private String geohash;
 
-	public String getGeohash() {
+	public String getWhereId() {
+                return whereId;
+        }
+
+        public void setWhereId(String whereId) {
+                this.whereId = whereId;
+        }
+
+        public String getGeohash() {
 		return geohash;
 	}
 
@@ -31,9 +39,6 @@ public class Place {
 		this.latlng = latlng;
 	}
 
-	//public ObjectId getId() {
-	//	return id;
-	//}
 
 	public String getShortname() {
 		return shortname;

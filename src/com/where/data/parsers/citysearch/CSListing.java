@@ -170,7 +170,7 @@ public class CSListing implements Serializable {
 		return category;
 	}
 
-	protected void setCategory(String category) {
+	public void setCategory(String category) {
 		this.category = category;
 	}
 
