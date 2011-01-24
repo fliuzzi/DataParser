@@ -2,7 +2,7 @@
 <project name="Dataparser" basedir="." default="build">
 
 	<property name="src.dir" value="${basedir}/src" />
-	<property name="dist.dir" value="${basedir}/dist" />
+	<property name="dist.dir" value="${basedir}/bin" />
 	<property name="class.dir" value="${dist.dir}/classes" />
 	<property name="lib.dir" value="${basedir}/lib" />
 
