@@ -299,7 +299,7 @@ public class LocalezeParser {
     //returns an untaken whereid and also increments the atomicInteger
     private synchronized static int untakenWhereID(AtomicInteger whereid){
         int id = whereid.incrementAndGet();
-        while(mappedExistingIDs.containsValue(whereid.longValue()))
+        while(mappedExistingIDs.containsValue((long)id))
             id = whereid.incrementAndGet();
         
         return id;
