@@ -300,8 +300,12 @@ public class LocalezeParser {
     private synchronized static int untakenWhereID(AtomicInteger whereid){
         int id = whereid.incrementAndGet();
         while(mappedExistingIDs.containsValue((long)id))
+        {
+            System.out.println("Trying ID: " + (long)id);
             id = whereid.incrementAndGet();
+        }
         
+        System.out.println("***Using ID: " + id);
         return id;
     }
     
