@@ -1,6 +1,5 @@
 package com.where.data.parsers.localeze;
 
-
 import gnu.trove.TLongLongHashMap;
 
 import java.io.BufferedInputStream;
@@ -391,7 +390,7 @@ public class LocalezeParser {
 	public static void main(String[] args) throws Exception
 	{
 	    if(args.length == 4){
-	        mappedExistingIDs = deSerializeCache(args[4]); //read in deserialized map2whereIDs
+	        mappedExistingIDs = deSerializeCache(args[3]); //read in deserialized map2whereIDs
 	        
     	    System.out.println("populating category maps");
     	    populateCategoryMap(args[0]); 
