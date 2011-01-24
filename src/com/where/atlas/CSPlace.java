@@ -627,7 +627,8 @@ private static final long serialVersionUID = -7943816525234309314L;
                             json.put("thumburl", thumbUrl);
                     }
                     
-                    JSONObject location = getAddress().toJSON();
+                    //TODO:
+                    JSONObject location = null; //getAddress().toJSON();
                     if(neighborhood != null && neighborhood.trim().length() > 0) {
                             location.put("neighborhood", neighborhood);
                     }

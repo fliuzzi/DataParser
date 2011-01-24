@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<project name="recommendation" basedir="." default="build">
+
+	<property name="src.dir" value="${basedir}/src" />
+	<property name="dist.dir" value="${basedir}/dist" />
+	<property name="class.dir" value="${dist.dir}/classes" />
+	<property name="lib.dir" value="${basedir}/lib" />
+
+	<path id="classpath">
+		<fileset dir="${lib.dir}">
+			<include name="*.jar" />
+		</fileset>
+		<pathelement path="${class.dir}" />
+	</path>
+
+	<target name="clean">
+		<delete dir="${dist.dir}" />
+	</target>
+
+	<target name="compile" depends="clean">
+		<mkdir dir="${class.dir}" />
+		<javac fork="true"
+		       destdir="${class.dir}"
+		       target="1.5"
+		       debug="true"
+		       deprecation="false"
+		       memoryinitialsize="256m"
+		       memorymaximumsize="256m"
+		       optimize="false"
+		       failonerror="true">
+			<src path="${src.dir}" />
+			<classpath refid="classpath" />
+		</javac>
+	</target>
+
+	<target name="build" depends="compile">
+	    <jar jarfile="${dist.dir}/recommendation.jar">
+	    	<fileset dir="${class.dir}"/>
+	    </jar>
+		<copy todir="${dist.dir}">
+			<fileset dir="${lib.dir}"/>
+		</copy>
+	</target>
+
+</project>
