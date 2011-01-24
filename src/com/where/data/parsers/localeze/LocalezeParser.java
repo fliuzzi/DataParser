@@ -1,11 +1,17 @@
 package com.where.data.parsers.localeze;
 
+
+import gnu.trove.TLongLongHashMap;
+
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,6 +50,8 @@ public class LocalezeParser {
 	private static Map<Long, Category> subcategories = new HashMap<Long, Category>();
 	private static Map<Long, Category> subsubcategories = new HashMap<Long, Category>();
 	private static Map<Long, String> companyCategories = new HashMap<Long, String>();
+	
+	private static TLongLongHashMap mappedExistingIDs = new TLongLongHashMap();
 
 	//TODO: need to change this once we have these stored
 	private static int startId_ = 100*1000000 +1; //Give the first 100M to cs
@@ -202,12 +210,29 @@ public class LocalezeParser {
             err.newLine();                
             return;
         }
+
+        
+        
+        
         
         long pid = Long.parseLong(rawPid);
+        
         doc.add(new Field("pid", rawPid, Field.Store.YES, Field.Index.NOT_ANALYZED));
         doc.add(new Field("rawname", pieces[3].toLowerCase().trim(), Field.Store.YES, Field.Index.NOT_ANALYZED));
         doc.add(new Field("companyname", pieces[4].toLowerCase().trim(), Field.Store.YES, Field.Index.ANALYZED_NO_NORMS));
-        doc.add(new Field("whereid", Integer.toString(whereid), Field.Store.YES, Field.Index.NOT_ANALYZED));
+        
+        
+        
+        
+        if(mappedExistingIDs.containsKey(pid))//this pid already exists, pull whereid from .map
+            doc.add(new Field("whereid", new Long(mappedExistingIDs.get(pid)).toString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
+        else
+            doc.add(new Field("whereid", Integer.toString(whereid), Field.Store.YES, Field.Index.NOT_ANALYZED));
+        
+        
+        
+        
+        
         String streetAddress = pieces[6] + " "; 
         String tmp = pieces[7].trim(); //predirection
         if(!StringUtil.isEmpty(tmp)){ streetAddress += (tmp + " ");}
@@ -271,6 +296,34 @@ public class LocalezeParser {
         writer.addDocument(doc);        
     }
     
+    
+    //returns an untaken whereid and also increments the atomicInteger
+    private synchronized static int untakenWhereID(AtomicInteger whereid){
+        int id = whereid.incrementAndGet();
+        while(mappedExistingIDs.containsValue(whereid.longValue()))
+            id = whereid.incrementAndGet();
+        
+        return id;
+    }
+    
+
+    public static TLongLongHashMap deSerializeCache(String fileName) throws IOException, ClassNotFoundException
+    {
+        ObjectInputStream ois = null;
+        try
+        {
+            FileInputStream fis = new FileInputStream(fileName);
+            BufferedInputStream buf = new BufferedInputStream(fis);
+            ois = new ObjectInputStream(buf);
+            return (TLongLongHashMap)ois.readObject();
+        }
+        finally
+        {
+            if(ois != null)
+                ois.close();            
+        }
+    }
+    
     private static void populateMainIndex(String inputDir, String mainIndexDir) throws IOException, InterruptedException, ExecutionException
     {
         String idRaw = mainIndexDir;
@@ -296,11 +349,13 @@ public class LocalezeParser {
             if(++cnt % 5000 == 0){System.out.print("+");}
             if(cnt % 200000 == 0){System.out.println();}
 
+           
+        
             final String cp = line.trim();
             
             Future<?> fut = thePool.submit(new Runnable(){public void run(){try
                                                                             {
-                                                                                writeDoc(cp, err, writer, searcher, currentWhereId.incrementAndGet());
+                                                                                writeDoc(cp, err, writer, searcher, untakenWhereID(currentWhereId));
                                                                             } 
                                                                             catch (IOException e)
                                                                             {
@@ -335,7 +390,9 @@ public class LocalezeParser {
     
 	public static void main(String[] args) throws Exception
 	{
-	    if(args.length == 3){
+	    if(args.length == 4){
+	        mappedExistingIDs = deSerializeCache(args[4]); //read in deserialized map2whereIDs
+	        
     	    System.out.println("populating category maps");
     	    populateCategoryMap(args[0]); 
     		populateSubcategoryMap(args[0]);
@@ -348,6 +405,6 @@ public class LocalezeParser {
     		populateMainIndex(args[1], args[2]);
             System.out.println("finished populating main index");
 	    }
-	    else {throw(new Exception("need 3 args"));}
+	    else {throw(new Exception("need 4 args"));}
 	}
 }
