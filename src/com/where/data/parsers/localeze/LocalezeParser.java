@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.document.Document;
@@ -178,7 +178,7 @@ public class LocalezeParser {
         return writer;
 	} 
 	
-    private static void writeDoc(String line, BufferedWriter err, IndexWriter writer, IndexSearcher searcher, int whereid) throws IOException
+    private static void writeDoc(String line, BufferedWriter err, IndexWriter writer, IndexSearcher searcher, AtomicLong MAXwhereid) throws IOException
     {
         String [] pieces = line.split("\\|");
         Document doc = new Document();
@@ -221,12 +221,21 @@ public class LocalezeParser {
         doc.add(new Field("companyname", pieces[4].toLowerCase().trim(), Field.Store.YES, Field.Index.ANALYZED_NO_NORMS));
         
         
+        String whereIDtoWrite;
         
+        if(mappedExistingIDs.containsKey(pid)){
+          //this pid already exists, pull whereid from .map
+            whereIDtoWrite = new Long(mappedExistingIDs.get(pid)).toString();
+        }
+        else 
+        {
+            //increment and get max, use as new whereid
+            whereIDtoWrite = new Long(MAXwhereid.incrementAndGet()).toString();
+        }
+
+
         
-        if(mappedExistingIDs.containsKey(pid))//this pid already exists, pull whereid from .map
-            doc.add(new Field("whereid", new Long(mappedExistingIDs.get(pid)).toString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
-        else
-            doc.add(new Field("whereid", Integer.toString(whereid), Field.Store.YES, Field.Index.NOT_ANALYZED));
+        doc.add(new Field("whereid", whereIDtoWrite, Field.Store.YES, Field.Index.NOT_ANALYZED));
         
         
         
@@ -295,20 +304,6 @@ public class LocalezeParser {
         writer.addDocument(doc);        
     }
     
-    
-    //returns an untaken whereid and also increments the atomicInteger
-    private synchronized static int untakenWhereID(AtomicInteger whereid){
-        int id = whereid.incrementAndGet();
-        while(mappedExistingIDs.containsValue((long)id))
-        {
-            System.out.println("Trying ID: " + (long)id);
-            id = whereid.incrementAndGet();
-        }
-        
-        System.out.println("***Using ID: " + id);
-        return id;
-    }
-    
 
     public static TLongLongHashMap deSerializeCache(String fileName) throws IOException, ClassNotFoundException
     {
@@ -346,7 +341,18 @@ public class LocalezeParser {
         ExecutorService thePool = Executors.newFixedThreadPool(4);
         int cnt = 0;
         ArrayList<Future<?>> jobs = new ArrayList<Future<?>>();
-        final AtomicInteger currentWhereId = new AtomicInteger(startId_);
+        
+        //find whereID max
+        long[] existingWhereIDs = mappedExistingIDs.getValues();
+        
+        int IDmax=startId_;
+        for(int i=0;i<existingWhereIDs.length;i++)
+            if(existingWhereIDs[i] > IDmax)
+                IDmax=i;
+        System.out.println("Max of existing whereids is: "+IDmax);
+        
+        //start atomic long at max value
+        final AtomicLong currentWhereId = new AtomicLong(IDmax);
         while((line = bfr.readLine()) != null)
         {
             if(++cnt % 5000 == 0){System.out.print("+");}
@@ -358,7 +364,7 @@ public class LocalezeParser {
             
             Future<?> fut = thePool.submit(new Runnable(){public void run(){try
                                                                             {
-                                                                                writeDoc(cp, err, writer, searcher, untakenWhereID(currentWhereId));
+                                                                                writeDoc(cp, err, writer, searcher, currentWhereId);
                                                                             } 
                                                                             catch (IOException e)
                                                                             {
