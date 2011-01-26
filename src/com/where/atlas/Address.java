@@ -1,34 +1,35 @@
 package com.where.atlas;
 
+import org.json.JSONObject;
 
-/**
- * Simple address domain object
- * @author ajay - Jan 6, 2011
- */
+
 public class Address {
 
-	private String street1;
-	private String street2;
+	private String address1;
+	private String address2;
 	private String neighborhood;
 	private String city;
 	private String state;
 	private String zip;
 	private String country;
+	
+	private double lat = Double.NaN;
+    private double lng = Double.NaN;
 
-	public String getStreet1() {
-		return street1;
+	public String getAddress1() {
+		return address1;
 	}
 
-	public void setStreet1(String street1) {
-		this.street1 = street1;
+	public void setAddress1(String street1) {
+		this.address1 = street1;
 	}
 
-	public String getStreet2() {
-		return street2;
+	public String getAddress2() {
+		return address2;
 	}
 
-	public void setStreet2(String street2) {
-		this.street2 = street2;
+	public void setAddress2(String street2) {
+		this.address2 = street2;
 	}
 
 	public String getNeighborhood() {
@@ -70,4 +71,53 @@ public class Address {
 	public void setCountry(String country) {
 		this.country = country;
 	}
+	
+	public double getLat() {
+        return lat;
+    }
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+    public double getLng() {
+        return lng;
+    }
+    public void setLng(double lng) {
+        this.lng = lng;
+    }
+	
+	public JSONObject toJSON() {
+        try {
+            JSONObject address = new JSONObject();
+            
+            if(getAddress1() != null) {
+                address.put("address1", getAddress1());
+            }
+            if(getAddress2() != null) {
+                address.put("address2", getAddress2());
+            }
+            if(getNeighborhood() != null) {
+                address.put("neighborhood", getNeighborhood());
+            }
+            if(getCity() != null) {
+                address.put("city", getCity());
+            }
+            if(getState() != null) {
+                address.put("state", getState());
+            }
+            if(getZip() != null) {
+                address.put("zip", getZip());
+            }
+            if(getCountry() != null) {
+                address.put("country", getCountry());
+            }
+            
+            address.put("lat", getLat());
+            address.put("lng", getLng());
+            
+            return address;
+        }
+        catch(Exception ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
 }

@@ -31,7 +31,6 @@ public class LocalezeParser implements FeedParser {
 				System.out.println(new Date() + " -- " + count);
 			}
 		}
-		
 	}
 	
 	/**
@@ -67,13 +66,13 @@ public class LocalezeParser implements FeedParser {
         	street1 += bits[i] + " ";
         }
         street1 = street1.replaceAll("\\s+", " ").trim();
-        addr.setStreet1(street1);
+        addr.setAddress1(street1);
         String street2 = new String();
         for (int i=10; i<13; i++) { 
         	street2 += bits[i] + " ";
         }
         street2 = street2.replaceAll("\\s+", " ").trim();
-        addr.setStreet2(street2);
+        addr.setAddress2(street2);
         addr.setNeighborhood(bits[13].trim());
         addr.setCity(bits[14].trim());
         addr.setState(bits[15].trim());

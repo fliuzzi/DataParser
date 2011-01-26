@@ -9,7 +9,7 @@ public class Place {
 	private String shortname;
 	private String name;
 	private String phone;
-	private Address address;
+	private Address address = new Address();
 	private Source source;
 	private String nativeId;
 	private double [] latlng;
@@ -70,6 +70,9 @@ public class Place {
 
 	public void setAddress(Address address) {
 		this.address = address;
+		//pull latlng data from address into Place
+		latlng[0] = address.getLat();
+		latlng[1] = address.getLng();
 	}
 
 	public Source getSource() {
