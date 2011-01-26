@@ -47,6 +47,7 @@ public class CSParser implements FeedParser {
         private String indexPath;
         private String idMappingPath;
         private boolean isAdvertiserFeed;
+        private CSListingIndexer indexer;
         
         public CSParser(CSParserUtils csparserutils)
         {
@@ -56,6 +57,7 @@ public class CSParser implements FeedParser {
             isAdvertiserFeed = csparserutils.isAdvertiserFeed();
             locwordWriter = csparserutils.getLocwordWriter();
             csId2whereId = csparserutils.getCsId2whereId();
+            indexer = csparserutils.getIndexer();
         }
         
         
@@ -72,14 +74,6 @@ public class CSParser implements FeedParser {
             int count = 0;
             ZipEntry zipEntry = null;
             try {
-                //if the parser is not generating a dictionary, indexer is a CSListingIndexer with arg indexPath.
-                //     else null
-                CSListingIndexer indexer = CSListingIndexer.newInstance(indexPath);
-                        
-                //loads the csId2WhereId map into the indexer instance
-                indexer.setcs2whereMapping(csId2whereId);
-                
-                
                 if(isAdvertiserFeed) {
                     new File(indexPath + "/cat_6_all_alt").mkdirs();
                     spAltCategoryIndexer = CSListingIndexer.newInstance(indexPath + "/cat_6_all_alt");
@@ -116,11 +110,10 @@ public class CSParser implements FeedParser {
                             
                             //if buffer gets big (>2000), index and clear buffer.
                             if(locationCounter > 2000) {
-                                System.out.println("LocationCounter reached 2000!    .....Indexing....");//frank debug
                                 
                                 buffer.append(line.substring(0, locationEnd+11));
                                 buffer.append("</locations>");
-                                count+=outerParse("<locations>" + buffer.toString(), indexer);
+                                count+=outerParse("<locations>" + buffer.toString(),collector);
                                 
                                 buffer.delete(0, buffer.length());
 
@@ -137,7 +130,7 @@ public class CSParser implements FeedParser {
                     
                     if(buffer.length() > -1 && buffer.toString().indexOf("<location ") > -1) {
                         buffer.append("</locations>");
-                        count+=outerParse("<locations>" + buffer.toString(), indexer);
+                        count+=outerParse("<locations>" + buffer.toString(),collector);
                     }
                 
                     zis.closeEntry();
@@ -159,34 +152,34 @@ public class CSParser implements FeedParser {
         
         }
         
-        private static int outerParse(String text, CSListingIndexer indexer) throws Exception {
+        private static int outerParse(String text,PlaceCollector collector) throws Exception {
             DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document doc = db.parse(new InputSource(new StringReader(text)));
             doc.getDocumentElement().normalize();
             
-            return parse(doc, indexer);
+            return parse(doc,collector);
         }
 
-        private static int parse(Document doc, CSListingIndexer indexer) {
+        private static int parse(Document doc,PlaceCollector collector) {
             NodeList list = doc.getDocumentElement().getElementsByTagName("location");
             if(list == null || list.getLength() == 0) return 0;
-            
+
             for(int i = 0, n = list.getLength(); i < n; i++) {
                 Element location = (Element)list.item(i);
-                
+
                 CSPlace poi = populateDetail(location);
-            
+
                 CSListingDocumentFactory.toLocationWords(poi, locwordWriter);
-                
-                System.out.println("******\nBeginning Index.\n******");
-                index(poi, indexer);
+
+                //COLLECT HERE
+                collector.collect(poi);
                 indexCategories(location, poi);
             }
             
             return list.getLength();
         }
         
-        private static void index(CSPlace poi, CSListingIndexer indexer) {
+        public static void index(CSPlace poi, CSListingIndexer indexer) {
             poi.setWhereId(Integer.toString(indexer.csId2whereId_.get(Integer.parseInt(poi.getListingId()))));
             indexer.index(poi);
         }

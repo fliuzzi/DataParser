@@ -17,6 +17,7 @@ public class CSParserUtils
     private boolean isAdvertiserFeed_;
     private PrintWriter locwordWriter_;
     private TIntIntHashMap csId2whereId_;
+    private CSListingIndexer indexer;
     
     
     public CSParserUtils(String zipPath,String indexPath, 
@@ -32,8 +33,18 @@ public class CSParserUtils
         
         //generate id map
         setCsId2whereId(generateIdMap(idMappingPath));
-
+        
+        
+        indexer = CSListingIndexer.newInstance(indexPath);
+                
+        //loads the csId2WhereId map into the indexer instance
+        indexer.setcs2whereMapping(getCsId2whereId());
     }
+    
+    public CSListingIndexer getIndexer(){
+        return indexer;
+    }
+    
     
     //Maps the cs2whereids.txt files to a TIntIntHashMap using \t delim.  
     //                  K CS_id -> V where_id
@@ -55,7 +66,7 @@ public class CSParserUtils
         return map;
     }
 
-    public void setIdMappingPath(String idMappingPath)
+    private void setIdMappingPath(String idMappingPath)
     {
         idMappingPath_ = idMappingPath;
     }

@@ -17,7 +17,7 @@ public class CSParseAndIndex {
 
             //store paths in member vars
             zipPath = args[0];       //path of enhanced CS data
-            indexPath = args[1];  //where to write index file
+            indexPath = args[1];     //where to write index file
             idMappingPath = zipPath;
             int idx = idMappingPath.lastIndexOf("/");
             idMappingPath = idMappingPath.substring(0, idx);
@@ -32,7 +32,7 @@ public class CSParseAndIndex {
             
             CSParserUtils csparserutils = new CSParserUtils(zipPath,indexPath,idMappingPath,isAdvertiserFeed);
             
-            new CSParser(csparserutils).parse(new ConsoleOutputCollector(),new FileInputStream(zipPath));
+            new CSParser(csparserutils).parse(new CSPlaceCollector(csparserutils),new FileInputStream(zipPath));
             
             //close locwordWriter
             csparserutils.getLocwordWriter().close();
