@@ -3,15 +3,20 @@ package com.where.atlas.feed;
 import com.where.atlas.CSPlace;
 import com.where.atlas.Place;
 
-public class CSPlaceCollector implements PlaceCollector
+public class CSCollectAndIndex implements PlaceCollector
 {
+    
     private CSListingIndexer indexer;
     private long counter;
+    private boolean isAdvertiser;
+    private CSListingIndexer spAltCategoryIndexer;
     
     
-    public CSPlaceCollector(CSParserUtils csparserutil)
+    public CSCollectAndIndex(CSParserUtils csparserutil)
     {
         indexer = csparserutil.getIndexer();
+        isAdvertiser = csparserutil.isAdvertiserFeed();
+        spAltCategoryIndexer = csparserutil.getAdvertiserIndexer();
         counter = 0;
     }
     
@@ -22,6 +27,18 @@ public class CSPlaceCollector implements PlaceCollector
     public void collect(Place place)
     {
         displayProgress(++counter);
+        System.out.println(((CSPlace)place).toJSON());
+        
+        
+        
+        if(isAdvertiser)
+        {
+            org.apache.lucene.document.Document doc = CSListingDocumentFactory.createCategoryDocument((CSPlace)place);
+            if(doc == null) return;
+            
+            spAltCategoryIndexer.index(doc);
+        }
+        
         
         CSParser.index((CSPlace)place, indexer);
     }
@@ -30,11 +47,15 @@ public class CSPlaceCollector implements PlaceCollector
     {
         //approx 3.5 million CS places Jan 26 2011
         // 175,000 = 5%
-        
         if(counter % 5000 == 0)
             System.out.print("+");
         if(counter % 175000 == 0)
             System.out.println("   ~"+(counter/175000)*5+"%");
+        if((counter/175000)*5 == 100)
+        {
+            System.out.println("******\nFinished Indexing....Finishing up...\n******");
+        }
+            
     }
 
     /**

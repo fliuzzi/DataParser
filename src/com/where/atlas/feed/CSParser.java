@@ -58,6 +58,11 @@ public class CSParser implements FeedParser {
             locwordWriter = csparserutils.getLocwordWriter();
             csId2whereId = csparserutils.getCsId2whereId();
             indexer = csparserutils.getIndexer();
+            
+            if(csparserutils.getAdvertiserIndexer() != null)
+            {
+                spAltCategoryIndexer = csparserutils.getAdvertiserIndexer();
+            }
         }
         
         
@@ -74,11 +79,6 @@ public class CSParser implements FeedParser {
             int count = 0;
             ZipEntry zipEntry = null;
             try {
-                if(isAdvertiserFeed) {
-                    new File(indexPath + "/cat_6_all_alt").mkdirs();
-                    spAltCategoryIndexer = CSListingIndexer.newInstance(indexPath + "/cat_6_all_alt");
-                }
-                
                 // --- begin to parse through the zipped XMLs
                 ZipInputStream zis = new ZipInputStream(new FileInputStream(zipPath));
                 
@@ -173,7 +173,7 @@ public class CSParser implements FeedParser {
 
                 //COLLECT HERE
                 collector.collect(poi);
-                indexCategories(location, poi);
+                indexCategories(location, poi,collector);
             }
             
             return list.getLength();
@@ -535,7 +535,7 @@ public class CSParser implements FeedParser {
                 category.indexOf("$") > -1;
         }
         
-        private static void indexCategories(Element location, CSPlace poi) {
+        private static void indexCategories(Element location, CSPlace poi, PlaceCollector collector) {
             if(spAltCategoryIndexer == null) return;
             
             if(poi.categories().isEmpty()) return;
@@ -547,10 +547,7 @@ public class CSParser implements FeedParser {
             if(!SP_REF_ID.equals(refid)) return;
             refcount++;
             
-            org.apache.lucene.document.Document doc = CSListingDocumentFactory.createCategoryDocument(poi);
-            if(doc == null) return;
-            
-            spAltCategoryIndexer.index(doc);
+            collector.collect(poi);
         }
         
         

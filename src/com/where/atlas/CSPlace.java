@@ -504,7 +504,7 @@ public class CSPlace extends Place implements Serializable {
         if(userReviews == null) userReviews = new ArrayList<Review>();
         
         userReviews.add(userReview);
-    }   
+    }
     
     public List<Review> userReviews() {
         if(userReviews == null) return NO_REVIEWS;

@@ -32,7 +32,7 @@ public class CSParseAndIndex {
             
             CSParserUtils csparserutils = new CSParserUtils(zipPath,indexPath,idMappingPath,isAdvertiserFeed);
             
-            new CSParser(csparserutils).parse(new CSPlaceCollector(csparserutils),new FileInputStream(zipPath));
+            new CSParser(csparserutils).parse(new CSCollectAndIndex(csparserutils),new FileInputStream(zipPath));
             
             //close locwordWriter
             csparserutils.getLocwordWriter().close();

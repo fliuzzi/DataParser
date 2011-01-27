@@ -18,6 +18,7 @@ public class CSParserUtils
     private PrintWriter locwordWriter_;
     private TIntIntHashMap csId2whereId_;
     private CSListingIndexer indexer;
+    private CSListingIndexer spAltCategoryIndexer;
     
     
     public CSParserUtils(String zipPath,String indexPath, 
@@ -35,10 +36,23 @@ public class CSParserUtils
         setCsId2whereId(generateIdMap(idMappingPath));
         
         
+        
+        if(isAdvertiser) {
+            new File(indexPath + "/cat_6_all_alt").mkdirs();
+            spAltCategoryIndexer = CSListingIndexer.newInstance(indexPath + "/cat_6_all_alt");
+        }
+        
         indexer = CSListingIndexer.newInstance(indexPath);
                 
         //loads the csId2WhereId map into the indexer instance
         indexer.setcs2whereMapping(getCsId2whereId());
+    }
+    
+    public CSListingIndexer getAdvertiserIndexer()
+    {
+        if(isAdvertiserFeed_) return spAltCategoryIndexer;
+        
+        return null;
     }
     
     public CSListingIndexer getIndexer(){
@@ -62,6 +76,8 @@ public class CSParserUtils
             int cs = Integer.parseInt(ids[0]);
             int where = Integer.parseInt(ids[1]);
             map.put(cs, where);
+            
+            
         }
         return map;
     }
