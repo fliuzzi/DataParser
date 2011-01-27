@@ -83,6 +83,8 @@ public class LocalezeParser {
 				StringTokenizer tokenizer = new StringTokenizer(line, "|");
 				Long id = Long.valueOf(tokenizer.nextToken().trim());
 				Category category = new Category(id, tokenizer.nextToken().trim());
+				
+				//if main category map doesnt have this id...
 				if(!categories.containsKey(category.getId())) {
 					Category parent = categories.get(category.stemKey());
 					category.setParent(parent);
