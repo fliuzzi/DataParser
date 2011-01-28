@@ -43,11 +43,11 @@ public class Category implements Serializable {
 		return parent;
 	}
 	
-	protected Long stemKey() {
+	public Long stemKey() {
 		return new Long((id.longValue()/SUBCATEGORY_STEM)*SUBCATEGORY_STEM);
 	}
 	
-	protected Long subStemKey() {
+	public Long subStemKey() {
 		return new Long((id.longValue()/SUB_SUBCATEGORY_STEM)*SUB_SUBCATEGORY_STEM);
 	}
 	

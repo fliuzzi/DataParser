@@ -16,6 +16,13 @@ import com.where.atlas.Place;
  * @author ajay - Jan 5, 2011
  */
 public class LocalezeParser implements FeedParser {
+    
+    LocalezeParserUtils parserutils;
+    
+    public LocalezeParser(LocalezeParserUtils Lparserutils)
+    {
+        parserutils=Lparserutils;
+    }
 
 	public void parse(PlaceCollector collector, InputStream ins) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(ins));
@@ -76,13 +83,13 @@ public class LocalezeParser implements FeedParser {
         addr.setNeighborhood(bits[13].trim());
         addr.setCity(bits[14].trim());
         addr.setState(bits[15].trim());
-        
-        
+
+
         boolean stringIsBlank = (bits[17].isEmpty()) || (bits[17]==null);
         addr.setZip(stringIsBlank ? bits[16].trim() : bits[16].trim() + "-" + bits[17].trim());
-        
+
         place.setAddress(addr);
-        
+
         // geo
         double lat = Double.parseDouble(bits[45].trim());
         double lng = Double.parseDouble(bits[46].trim());

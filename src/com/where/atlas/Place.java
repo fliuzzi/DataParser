@@ -70,9 +70,13 @@ public class Place {
 
 	public void setAddress(Address address) {
 		this.address = address;
-		//pull latlng data from address into Place
-		latlng[0] = address.getLat();
-		latlng[1] = address.getLng();
+		//pull latlng data from address into Place if CS
+		try
+		{
+		    latlng[0] = address.getLat();
+		    latlng[1] = address.getLng();
+		}
+		catch(Exception x){} //sometimes latlng is not available, if so ignore for now
 	}
 
 	public Source getSource() {
@@ -89,5 +93,10 @@ public class Place {
 
 	public void setNativeId(String nativeId) {
 		this.nativeId = nativeId;
+	}
+	
+	public String toString()
+	{
+	    return "\nPLACE: "+name+"\nWhereid:"+whereId+"PID:"+nativeId+"\nphone:"+phone+"\n";
 	}
 }

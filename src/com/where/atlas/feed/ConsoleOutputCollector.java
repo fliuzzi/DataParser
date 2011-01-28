@@ -12,7 +12,6 @@ public class ConsoleOutputCollector implements PlaceCollector {
 	@Override
 	public void collectBadInput(Object input, Exception reason) {
 		System.err.println(input + " reason: " + reason.getMessage());
-		reason.printStackTrace();
 	}
 
 }
