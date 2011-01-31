@@ -1,9 +1,7 @@
 package com.where.atlas.feed;
 
-import gnu.trove.TIntIntHashMap;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +24,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import com.where.atlas.CSPlace;
-//import com.where.data.parsers.citysearch.CSListing;
 import com.where.data.parsers.citysearch.Category;
 import com.where.data.parsers.citysearch.Offer;
 import com.where.data.parsers.citysearch.ParseUtils;
@@ -38,25 +35,17 @@ public class CSParser implements FeedParser {
         
         private static final Log logger = LogFactory.getLog(CSParser.class);
         private static PrintWriter locwordWriter;
-        private static TIntIntHashMap csId2whereId;
         private static Set<Category> allCategories = new HashSet<Category>();
         private static CSListingIndexer spAltCategoryIndexer;
         private static int refcount;
         private static final String SP_REF_ID = "6";
         private String zipPath;
-        private String indexPath;
-        private String idMappingPath;
-        private boolean isAdvertiserFeed;
         private CSListingIndexer indexer;
         
         public CSParser(CSParserUtils csparserutils)
         {
             zipPath = csparserutils.getZipPath();
-            indexPath = csparserutils.getIndexPath();
-            idMappingPath = csparserutils.getIdMappingPath();
-            isAdvertiserFeed = csparserutils.isAdvertiserFeed();
             locwordWriter = csparserutils.getLocwordWriter();
-            csId2whereId = csparserutils.getCsId2whereId();
             indexer = csparserutils.getIndexer();
             
             if(csparserutils.getAdvertiserIndexer() != null)

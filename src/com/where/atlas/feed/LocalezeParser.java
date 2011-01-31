@@ -37,7 +37,6 @@ public class LocalezeParser implements FeedParser {
 	public void parse(PlaceCollector collector, InputStream ins) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(ins));
 		String record = null;
-		long count = 0;
 		while ((record = br.readLine()) != null) {
 			try {
 				collector.collect(toPlace(record));

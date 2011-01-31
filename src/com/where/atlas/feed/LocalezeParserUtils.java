@@ -28,7 +28,6 @@ public class LocalezeParserUtils
     private String staticFilesPath_;
     private String companyFilesPath_;
     private String indexPath_;
-    private String serializedMapPath_;
     
     private static final String PID = "pid";
     private static final String DATA = "data";
@@ -47,7 +46,6 @@ public class LocalezeParserUtils
         staticFilesPath_=staticFilesPath;
         companyFilesPath_= companyFilesPath;
         indexPath_=indexPath;
-        serializedMapPath_=serializedMapPath;
         
         
         try{

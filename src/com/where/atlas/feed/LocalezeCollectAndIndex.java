@@ -1,11 +1,7 @@
 package com.where.atlas.feed;
 
-import gnu.trove.TLongLongHashMap;
-
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 
 import org.apache.lucene.analysis.SimpleAnalyzer;
@@ -21,7 +17,6 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.NIOFSDirectory;
 
@@ -39,7 +34,6 @@ public class LocalezeCollectAndIndex implements PlaceCollector
     private Directory directory;
     private IndexWriter writer;
     private IndexSearcher searcher;
-    private long startId_ = 100*1000000 +1; //Give the first 100M to cs
     
     
     private long collectorCounter;
@@ -81,9 +75,6 @@ public class LocalezeCollectAndIndex implements PlaceCollector
        
     }
     
-    //************************************************
-    //    close writers!  
-    //************************************************
     public void closeAll() throws Exception
     {
         writer.optimize();
@@ -93,10 +84,6 @@ public class LocalezeCollectAndIndex implements PlaceCollector
         err.close();
     }
     
-    /**
-     * Collect a new place
-     * @param place - place to collect
-     */
     public void collect(Place place)
     {
         Document doc = new Document();
@@ -155,11 +142,7 @@ public class LocalezeCollectAndIndex implements PlaceCollector
         }
     }
 
-    /**
-     * Log bad input to err.txt 
-     * @param input - bad input 
-     * @param reason - exception that caused it
-     */
+    //log bad input to err.txt
     public void collectBadInput(Object input, Exception reason) 
     {
         try{
