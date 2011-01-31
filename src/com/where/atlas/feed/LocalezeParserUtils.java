@@ -1,9 +1,14 @@
 package com.where.atlas.feed;
 
+import gnu.trove.TLongLongHashMap;
+
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,22 +28,26 @@ public class LocalezeParserUtils
     private String staticFilesPath_;
     private String companyFilesPath_;
     private String indexPath_;
+    private String serializedMapPath_;
     
     private static final String PID = "pid";
     private static final String DATA = "data";
     public static final String GEOHASH = "geohash";
     
+    private TLongLongHashMap mappedExistingIDs;
     private static Map<Long, Category> categories = new HashMap<Long, Category>();
     private static Map<Long, Category> subcategories = new HashMap<Long, Category>();
     private static Map<Long, Category> subsubcategories = new HashMap<Long, Category>();
     private static Map<Long, String> companyCategories = new HashMap<Long, String>();
 
     
-    public LocalezeParserUtils(String staticFilesPath,String companyFilesPath,String indexPath)
+    public LocalezeParserUtils(String staticFilesPath,String companyFilesPath,
+                                            String indexPath,String serializedMapPath)
     {
         staticFilesPath_=staticFilesPath;
         companyFilesPath_= companyFilesPath;
         indexPath_=indexPath;
+        serializedMapPath_=serializedMapPath;
         
         
         try{
@@ -62,6 +71,37 @@ public class LocalezeParserUtils
             System.err.println("Error populating company category maps!");
             e.printStackTrace();
         }
+        
+        try{
+        //deserialize the existing whereid map
+        mappedExistingIDs = deSerializeIDMap(serializedMapPath);
+        }
+        catch(Exception e){
+            System.err.println("Error deserializing ID Map!");
+            e.printStackTrace();
+        }
+    }
+    
+    public TLongLongHashMap getIDMap()
+    {
+        return mappedExistingIDs;
+    }
+    
+    private TLongLongHashMap deSerializeIDMap(String fileName) throws IOException, ClassNotFoundException
+    {
+        ObjectInputStream ois = null;
+        try
+        {
+            FileInputStream fis = new FileInputStream(fileName);
+            BufferedInputStream buf = new BufferedInputStream(fis);
+            ois = new ObjectInputStream(buf);
+            return (TLongLongHashMap)ois.readObject();
+        }
+        finally
+        {
+            if(ois != null)
+                ois.close();            
+        }
     }
     
     //Parses Localeze File: CompanyHeadings.txt
@@ -69,7 +109,6 @@ public class LocalezeParserUtils
     private static void populateCompanyCategories(String folder, String indexFolder) throws Exception {
         BufferedReader reader = new BufferedReader(new FileReader(folder + "/CompanyHeadings.txt"));
         String line = null;
-        System.out.println("about to start populating company categories");
         int cnt = 0;
         while((line = reader.readLine()) != null) {
             if(++cnt % 1000 == 0){System.out.print("+");}
@@ -119,7 +158,7 @@ public class LocalezeParserUtils
         writer.addDocument(d);
     }
     
-    private static IndexWriter newIndexWriter(String indexFolder) throws IOException {
+    public static IndexWriter newIndexWriter(String indexFolder) throws IOException {
         File index = new File(indexFolder);
         index.mkdir();
         

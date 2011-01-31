@@ -1,41 +1,48 @@
 package com.where.atlas.feed;
 
+import gnu.trove.TLongLongHashMap;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Date;
 
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 
 import com.where.atlas.Address;
 import com.where.atlas.Place;
 
-/**
- * Localeze feed parser 
- * @author ajay - Jan 5, 2011
- */
+
+
 public class LocalezeParser implements FeedParser {
     
     LocalezeParserUtils parserutils;
+    private TLongLongHashMap mappedExistingIDs = new TLongLongHashMap();  
+    long[] existingWhereIDs;
+    private long startId_ = 100*1000000 +1; //Give the first 100M to cs
     
     public LocalezeParser(LocalezeParserUtils Lparserutils)
     {
         parserutils=Lparserutils;
+        mappedExistingIDs = parserutils.getIDMap();
+        existingWhereIDs = mappedExistingIDs.getValues();
+        
+        //find whereid max
+        for(int i=0;i<existingWhereIDs.length;i++)
+            if(existingWhereIDs[i] > startId_)
+                startId_=i;
+        System.out.println("Max of existing whereids is: "+startId_);
     }
 
 	public void parse(PlaceCollector collector, InputStream ins) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(ins));
 		String record = null;
 		long count = 0;
-		while ((record = br.readLine()) != null) { 
-			try { 
+		while ((record = br.readLine()) != null) {
+			try {
 				collector.collect(toPlace(record));
-			} catch (Exception x) { 
+			} catch (Exception x) {
 				collector.collectBadInput(record, x);
-			}
-			if (count++ % 1000 == 0) { 
-				System.out.println(new Date() + " -- " + count);
 			}
 		}
 	}
@@ -47,29 +54,41 @@ public class LocalezeParser implements FeedParser {
 	 */
     public Place toPlace(String record) {
         String [] bits = record.split("\\|");
-        if (bits == null) { 
+        if (bits == null) {
         	throw new RuntimeException("bits is null");
-        } 
+        }
         if (bits.length < 47) {
         	throw new RuntimeException("bits.length (" + bits.length + ") < 47");
         }
         // new place
         Place place = new Place();
         place.setSource(Place.Source.LOCALEZE);
-        place.setNativeId(Place.Source.LOCALEZE + ":" + bits[0].trim());
-        if (bits[3].length() < bits[4].length()) { 
-        	place.setShortname(bits[3]);
-        	place.setName(bits[4]);
-        } else { 
-        	place.setShortname(bits[4]);
-        	place.setName(bits[3]);
+        place.setNativeId(bits[0].trim());
+    	place.setShortname(bits[3]);
+    	place.setName(bits[4]);
+        
+    	//calc whereid
+    	String whereIDtoWrite;
+    	long pid = Long.parseLong(place.getNativeId());
+        
+        if(mappedExistingIDs.containsKey(pid)){
+          //this pid already exists, pull whereid from .map
+            whereIDtoWrite = new Long(mappedExistingIDs.get(pid)).toString();
+        }
+        else 
+        {
+            //increment and get max, use as new whereid
+            whereIDtoWrite = new Long(++startId_).toString();
         }
         
-
+        
+        place.setWhereId(whereIDtoWrite);
+    	
+    	
         // address
         Address addr = new Address();
         String street1 = new String();
-        for (int i=6; i<10; i++) { 
+        for (int i=6; i<10; i++) {
         	street1 += bits[i] + " ";
         }
         street1 = street1.replaceAll("\\s+", " ").trim();
@@ -98,7 +117,7 @@ public class LocalezeParser implements FeedParser {
         place.setGeohash(geohash);
         
         // phone
-        place.setPhone(bits[34].trim() + "-" + bits[35].trim() + "-" + bits[36].trim());
+        place.setPhone(bits[34].trim() + bits[35].trim() + bits[36].trim());
 
         return place;
 	}

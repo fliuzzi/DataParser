@@ -71,12 +71,10 @@ public class Place {
 	public void setAddress(Address address) {
 		this.address = address;
 		//pull latlng data from address into Place if CS
-		try
-		{
+		if(getSource() == Source.CS){
 		    latlng[0] = address.getLat();
 		    latlng[1] = address.getLng();
 		}
-		catch(Exception x){} //sometimes latlng is not available, if so ignore for now
 	}
 
 	public Source getSource() {
