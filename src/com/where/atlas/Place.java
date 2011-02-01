@@ -2,7 +2,7 @@ package com.where.atlas;
 
 public class Place {
 
-	public static enum Source { LOCALEZE, CS }
+	public static enum Source { LOCALEZE, CS, YELP }
 
 	
 	private String whereId;

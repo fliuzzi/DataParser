@@ -610,7 +610,7 @@ public class Parser
 	        	System.out.println("BAD LINE: "+cnt+"  :   "+line);
 	        	t.printStackTrace();
 	        }
-        }         
+        }
     }
     
     //stores args, sets maxuserid, passes everything to Parser.processInputFiles
