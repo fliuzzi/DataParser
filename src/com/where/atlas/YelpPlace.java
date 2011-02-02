@@ -3,6 +3,7 @@ package com.where.atlas;
 import java.util.ArrayList;
 
 import com.where.atlas.feed.YelpParserUtils.InnerRating;
+import com.where.atlas.feed.YelpParserUtils.Listing;
 
 public class YelpPlace extends Place
 {
@@ -44,6 +45,31 @@ public class YelpPlace extends Place
     
     public String toString()
     {
-        return "Yelp Place:Name: " + getYelpName() + "\nCS Name" + getName() + "\ncsid:"+getNativeId()+"  Phone:"+getPhone();
+        return "Yelp Place:Name: " + getYelpName() + "\nCS Name: " + getName() 
+                            + "\ncsid: "+getNativeId()+"  Phone: "+getPhone() + "\nRatings:\t" + getRatings();
+    }
+    
+    public Listing toListing()
+    {
+        Listing listing = new Listing();
+        Address address = getAddress();
+        double[] latlng = getLatlng();
+        
+        
+        listing.name_=getYelpName();
+        listing.csId_ = Long.parseLong(getNativeId());
+        listing.csName_ = getName();
+        listing.phoneMatch_ = getPhoneMatch();
+        listing.lat_ = latlng[0];
+        listing.lng_ = latlng[1];
+        listing.geoHash_ = getGeohash();
+        listing.street_ = address.getAddress1();
+        listing.city_ = address.getCity();
+        listing.state_ = address.getState();
+        listing.zip_ = Integer.parseInt(address.getZip());
+        listing.phone_ = getPhone();
+        listing.ratings_ = getRatings();
+        
+        return listing;
     }
 }

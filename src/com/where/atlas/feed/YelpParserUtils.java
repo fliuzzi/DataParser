@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
@@ -42,8 +41,6 @@ import org.apache.lucene.util.Version;
 
 import com.where.atlas.Address;
 import com.where.atlas.YelpPlace;
-import com.where.commons.feed.citysearch.CSListingDocumentFactory;
-import com.where.data.parsers.yelp.Parser.Listing;
 import com.where.util.lucene.NullSafeGeoFilter;
 import com.where.util.lucene.NullSafeGeoFilter.GeoHashCache;
 
@@ -66,7 +63,7 @@ public class YelpParserUtils
     private String outputFileName_;
     private static String newline = System.getProperty("line.separator"); 
     private TObjectLongHashMap<String> seenUserIds_ = new TObjectLongHashMap<String>();
-    private AtomicLong maxUserId_;
+    private long maxUserId_;
     
     private Object srIdsMutex = new String();
     private Set<String> seenRecIds = new HashSet<String>();
@@ -84,19 +81,19 @@ public class YelpParserUtils
 
     public static class Listing
     {
-        long csId_;
-        String name_;
-        String csName_ = "";
-        boolean phoneMatch_ = false;
-        double lat_;
-        double lng_;
-        String geoHash_;
-        String street_;
-        String city_;
-        String state_;
-        int zip_;
-        String phone_;
-        ArrayList<InnerRating> ratings_ = new ArrayList<InnerRating>();
+        public long csId_;
+        public String name_;
+        public String csName_ = "";
+        public boolean phoneMatch_ = false;
+        public double lat_;
+        public double lng_;
+        public String geoHash_;
+        public String street_;
+        public String city_;
+        public String state_;
+        public int zip_;
+        public String phone_;
+        public ArrayList<InnerRating> ratings_ = new ArrayList<InnerRating>();
         
         
         //converts a YelpListing to a YelpPlace object
@@ -135,6 +132,8 @@ public class YelpParserUtils
         oldIndexPath_ = oldIndexPath;
         targetPath_ = targetPath;
         ratingsPath_ = ratingsPath;
+        
+        maxUserId_ = 45000000;
         
         ratings = getFiles(ratingsPath);
         
@@ -239,13 +238,18 @@ public class YelpParserUtils
                     
     public void storeListing(Listing l) {
         long placeId = l.csId_;
+        
         for(InnerRating ir : l.ratings_)
         {
+            
             try
             {
+                
                 outputChannel_.write(ByteBuffer.wrap((ir.userId_ + "," + placeId + "," + ir.rating_ + newline).getBytes()));                
             }
-            catch(Exception e){}
+            catch(Exception e){
+                
+                e.printStackTrace();}
         }
     }
     
@@ -283,39 +287,33 @@ public class YelpParserUtils
             {
                 String [] pieces = rec.split(",");
                 String recId = pieces[0];
-                synchronized(srIdsMutex)
+
+                
+                if(!seenRecIds.contains(recId))
                 {
-                    if(!seenRecIds.contains(recId))
-                    {
-                        seenRecIds.add(recId);                    
-                    }
-                    else
-                    {
-                        continue;                    
-                    }                    
+                    seenRecIds.add(recId);
                 }
+                else
+                {
+                    continue;                    
+                }       
                 String userIDraw = pieces [1];
                 long userId = getUserId(userIDraw);
                 TLongHashSet tmp = null;
-                synchronized(spMutex)
+                if(!seenPairs_.containsKey(recId))
                 {
-                    if(!seenPairs_.containsKey(recId))
-                    {
-                        tmp = new TLongHashSet();
-                        seenPairs_.put(recId, tmp);
-                    }                    
-                }
-                synchronized(tmp)
+                    tmp = new TLongHashSet();
+                    seenPairs_.put(recId, tmp);
+                }        
+                if(!tmp.contains(userId))
                 {
-                    if(!tmp.contains(userId))
-                    {
-                        tmp.add(userId);
-                        InnerRating ir = new InnerRating();
-                        ir.userId_ = userId;
-                        ir.rating_ = Integer.parseInt(pieces[2]);                
-                        l.ratings_.add(ir);                    
-                    }                    
-                }
+                    tmp.add(userId);
+                    InnerRating ir = new InnerRating();
+                    ir.userId_ = userId;
+                    ir.rating_ = Integer.parseInt(pieces[2]);                
+                    l.ratings_.add(ir);  
+                   
+                }         
             }
             catch(Exception e)
             {
@@ -326,24 +324,21 @@ public class YelpParserUtils
     
     public long getUserId(String lookup)
     {
-        synchronized(suIdMutex)
+        if(seenUserIds_.containsKey(lookup))
         {
-            if(seenUserIds_.containsKey(lookup))
-            {
-                return seenUserIds_.get(lookup);            
-            }
-            else
-            {
-               long retval = incrementAndGetMaxUserId();
-               seenUserIds_.put(lookup, retval);
-               return retval;
-            }            
+            return seenUserIds_.get(lookup);            
+        }
+        else
+        {
+           long retval = incrementAndGetMaxUserId();
+           seenUserIds_.put(lookup, retval);
+           return retval;
         }
     }
     
     public long incrementAndGetMaxUserId()
     {
-        return maxUserId_.incrementAndGet();
+        return maxUserId_++;
     }
     
     public File[] getRatings()

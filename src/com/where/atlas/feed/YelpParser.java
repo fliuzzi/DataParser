@@ -52,8 +52,9 @@ public class YelpParser implements FeedParser{
                                     if(parserutils.canUseListing(curListing))
                                     {
                                         collector.collect(curListing.toPlace());
-                                        parserutils.storeListing(curListing);
                                     }
+                                    else
+                                        collector.collectBadInput(curListing.toPlace(),new Exception());
                                 }
                                 curListing = new YelpParserUtils.Listing();
                                 curListing.name_= line.substring("name:".length());
@@ -75,6 +76,7 @@ public class YelpParser implements FeedParser{
                         {
                             try
                             {
+                                
                                 parserutils.processRatings(curListing, line.substring("ratings:".length()));
                                 state = STATE.HASRATINGS;
                                 break;                            
