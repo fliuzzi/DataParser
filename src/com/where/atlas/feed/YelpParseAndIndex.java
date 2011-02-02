@@ -34,7 +34,7 @@ public class YelpParseAndIndex
             {
                 file = ratingsFiles[i];
                 stream = new FileInputStream(file);
-                yelpparser.parse(new ConsoleOutputCollector(), stream);
+                yelpparser.parse(new YelpCollectAndOutput(parserutils), stream);
             }
         }
         catch(Exception e)
