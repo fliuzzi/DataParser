@@ -48,7 +48,6 @@ public class YelpParserUtils
 {
     
     private String oldIndexPath_;
-    private String ratingsPath_;
     private String targetPath_;
     private File[] ratings;
     private GeoHashCache geoCache_;
@@ -59,18 +58,14 @@ public class YelpParserUtils
     private FileChannel outputChannel_;
     private File outputFile_;
     private FileOutputStream outputStream_;
-    private String newDataDir_;
     private String outputFileName_;
     private static String newline = System.getProperty("line.separator"); 
     private TObjectLongHashMap<String> seenUserIds_ = new TObjectLongHashMap<String>();
     private long maxUserId_;
     
-    private Object srIdsMutex = new String();
     private Set<String> seenRecIds = new HashSet<String>();
     private Map<String, TLongHashSet> seenPairs_ = new HashMap<String, TLongHashSet>();
     
-    private Object suIdMutex = new String();
-    private Object spMutex = new String();
     
     public static class InnerRating
     {
@@ -131,7 +126,6 @@ public class YelpParserUtils
         
         oldIndexPath_ = oldIndexPath;
         targetPath_ = targetPath;
-        ratingsPath_ = ratingsPath;
         
         maxUserId_ = 45000000;
         
