@@ -35,8 +35,6 @@ public class CSListParser implements FeedParser
         }
         reader.close();
     
-        PrintWriter dymwriter = new PrintWriter(new FileWriter(parserutils.getDymFilePath()));
-        int count = 0;
         JSONObject json = new JSONObject(buffer.toString());
         JSONArray lists = json.getJSONArray("lists");
         System.out.println(lists.length() + " lists in JSON");

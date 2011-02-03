@@ -254,7 +254,10 @@ public class CSListParserUtils
                 out.println(s);
             }
         }
+        
+        
         out.close();
+        
         
         indexPlaceLookups(outputDirPath);
         

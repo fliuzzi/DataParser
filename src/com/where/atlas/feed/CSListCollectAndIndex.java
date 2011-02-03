@@ -6,6 +6,8 @@ import java.io.PrintWriter;
 import java.util.List;
 
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.store.Directory;
 
 import com.where.atlas.CSListPlace;
 import com.where.atlas.Place;
@@ -37,8 +39,14 @@ public class CSListCollectAndIndex implements PlaceCollector
             
             
             List<Document> docs = CSListParserUtils.newPlacelistDocuments((CSListPlace)place);
+            
+          
+            int count=0;
             for(Document doc:docs) {    
                 parserutils.getWriter().addDocument(doc);
+                if(count%10000 == 0){
+                    parserutils.getWriter().optimize();
+                }
             }    
         }
         catch(Exception e){
@@ -57,6 +65,8 @@ public class CSListCollectAndIndex implements PlaceCollector
         
     }
     
-    
-    ////GET DYM WRITER
+    public PrintWriter getDYMWriter()
+    {
+        return dymwriter;
+    }
 }

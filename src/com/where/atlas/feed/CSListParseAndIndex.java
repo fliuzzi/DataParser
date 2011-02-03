@@ -28,10 +28,12 @@ public class CSListParseAndIndex
         try{
             CSListParserUtils parserutils = 
                     new CSListParserUtils(listprofile,args[2],args[3],args[4]);
+            CSListCollectAndIndex collector = new CSListCollectAndIndex(parserutils);
             
-            new CSListParser(parserutils).parse(new CSListCollectAndIndex(parserutils),new FileInputStream(new File(args[2])));
-        
+            new CSListParser(parserutils).parse(collector,new FileInputStream(new File(args[2])));
+            
             parserutils.finishProcessing();
+            collector.getDYMWriter().close();
         }
         catch(Exception e){
             System.err.println("EXCEPTION\n");
