@@ -8,7 +8,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class Placelist implements Serializable {
+public class CSListPlace implements Serializable {
 	private static final long serialVersionUID = -3076392235360782173L;
 
 	public static final String DEFAULT_GROUP_NAME = "default";
@@ -191,13 +191,13 @@ public class Placelist implements Serializable {
 		}
 	}
 	
-	public static Placelist fromJSON(String jsonstr) {
+	public static CSListPlace fromJSON(String jsonstr) {
 		try { return fromJSON(new JSONObject(jsonstr)); } catch (Exception e) { throw new IllegalStateException(e); }
 	}
 	
-	public static Placelist fromJSON(JSONObject json) {
+	public static CSListPlace fromJSON(JSONObject json) {
 		try {
-			Placelist list = new Placelist();
+			CSListPlace list = new CSListPlace();
 			list.setId(json.optString("id", null));
 			list.setName(json.optString("name", null));
 			if(json.has("created")) {
@@ -240,9 +240,9 @@ public class Placelist implements Serializable {
 	
 	@Override
 	public boolean equals(Object obj) {
-		if(obj == null || !(obj instanceof Placelist)) return false;
+		if(obj == null || !(obj instanceof CSListPlace)) return false;
 		
-		Placelist p = (Placelist)obj;
+		CSListPlace p = (CSListPlace)obj;
 		return p.id.equals(id);
 	}
 	

@@ -115,7 +115,7 @@ public class ListsAPI {
 	public ModelAndView parentLists(@PathVariable String type, @PathVariable String placeid, HttpServletRequest request, HttpServletResponse response) {
 		JSONObject json = new JSONObject();
 		try {			
-			List<Placelist> lists = placelistSearch.loadParentLists(type, placeid);
+			List<CSListPlace> lists = placelistSearch.loadParentLists(type, placeid);
 			if(lists != null && !lists.isEmpty()) {
 				SearchResult result = new SearchResult();
 				result.setItemsPerPage(lists.size());

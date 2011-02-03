@@ -37,7 +37,7 @@ import com.where.commons.feed.citysearch.search.Analyzer;
 import com.where.commons.feed.citysearch.search.query.Profile;
 import com.where.commons.util.LocationUtil;
 import com.where.places.lists.GroupOfPlaces;
-import com.where.places.lists.Placelist;
+import com.where.places.lists.CSListPlace;
 import com.where.places.lists.PlacelistPlace;
 import com.where.utils.CSListingUtil;
 import com.where.utils.Utils;
@@ -79,7 +79,7 @@ public class CSListIndexer {
 	//temporary
 	private static Set<String> indexed = new HashSet<String>();
 	
-	private static Map<String, Set<Placelist>> inversed = new HashMap<String, Set<Placelist>>();
+	private static Map<String, Set<CSListPlace>> inversed = new HashMap<String, Set<CSListPlace>>();
 	
 	private CSListIndexer() {}
 	
@@ -110,22 +110,22 @@ public class CSListIndexer {
 	//indexes the cslists/places Index
 	private static void indexPlaceLookups(String indexPath) throws Exception {
 		IndexWriter writer = newIndexWriter(indexPath + "/places");
-		for(Map.Entry<String, Set<Placelist>> entry:inversed.entrySet()) {
+		for(Map.Entry<String, Set<CSListPlace>> entry:inversed.entrySet()) {
 		    
 		    
 		    //placeID = key of entry map
 			String placeid = entry.getKey();
 			
 			
-			Set<Placelist> lists = entry.getValue();
+			Set<CSListPlace> lists = entry.getValue();
 			Document document = new Document();
 			document.add(new Field(PLACE_ID, placeid, Field.Store.YES, Field.Index.NOT_ANALYZED));
 			ByteArrayOutputStream bout = new ByteArrayOutputStream();
 			ObjectOutputStream oout = new ObjectOutputStream(bout);
-			List<Placelist> lists1 = new ArrayList<Placelist>(lists);
-			Collections.sort(lists1, new Comparator<Placelist>() {
+			List<CSListPlace> lists1 = new ArrayList<CSListPlace>(lists);
+			Collections.sort(lists1, new Comparator<CSListPlace>() {
 				@Override
-				public int compare(Placelist o1, Placelist o2) {
+				public int compare(CSListPlace o1, CSListPlace o2) {
 					long diff = o2.getCreated() - o1.getCreated();
 					
 					if(diff > 0) return 1;
@@ -134,7 +134,7 @@ public class CSListIndexer {
 				}
 			});
 			List<String> ids = new ArrayList<String>();
-			for(Placelist l:lists1) {
+			for(CSListPlace l:lists1) {
 				ids.add(l.getId());
 			}
 			oout.writeObject(ids);
@@ -147,7 +147,7 @@ public class CSListIndexer {
 		writer.close();
 	}
 	
-	private static List<Document> newPlacelistDocuments(Placelist placelist) throws Exception {
+	private static List<Document> newPlacelistDocuments(CSListPlace placelist) throws Exception {
 		List<Document> docs = new ArrayList<Document>();
 		
 		//already indexed, to remove this
@@ -177,14 +177,14 @@ public class CSListIndexer {
 	
 	
 	
-	private static void addInverseLookup(Placelist placelist) {
+	private static void addInverseLookup(CSListPlace placelist) {
 		for(int i = 0, n = placelist.groupsSize(); i < n; i++) {
 			GroupOfPlaces group = placelist.group(i);
 			List<PlacelistPlace> places = group.entries();
 			for(PlacelistPlace place:places) {
-				Set<Placelist> lookupLists = inversed.get(place.getListingid());
+				Set<CSListPlace> lookupLists = inversed.get(place.getListingid());
 				if(lookupLists == null) {
-					lookupLists = new HashSet<Placelist>();
+					lookupLists = new HashSet<CSListPlace>();
 					inversed.put(place.getListingid(), lookupLists);
 				}
 				lookupLists.add(placelist);
@@ -192,7 +192,7 @@ public class CSListIndexer {
 		}
 	}
 	
-	private static Document newPlacelistDocument(Placelist placelist, double lat, double lng) throws Exception {
+	private static Document newPlacelistDocument(CSListPlace placelist, double lat, double lng) throws Exception {
 		Document document = new Document();
 		
 		document.add(new Field(ID, placelist.getId(), Field.Store.YES, Field.Index.NOT_ANALYZED));
@@ -217,7 +217,7 @@ public class CSListIndexer {
 		return document;
 	}
 	
-	private static void addPlacelistDocument(Placelist placelist, Document document) {
+	private static void addPlacelistDocument(CSListPlace placelist, Document document) {
 		try {
 			ByteArrayOutputStream bout = new ByteArrayOutputStream();
 			ObjectOutputStream oout = new ObjectOutputStream(bout);
@@ -232,7 +232,7 @@ public class CSListIndexer {
 		}
 	}
 	
-	private static boolean setPOIs(Placelist placelist) {
+	private static boolean setPOIs(CSListPlace placelist) {
 		boolean poisFound = true;
 		List<String> ids = badpois.get(placelist.getSourceUrl());
 		if(ids == null) ids = new ArrayList<String>();
@@ -287,7 +287,7 @@ public class CSListIndexer {
 		JSONArray lists = json.getJSONArray("lists");
 		System.out.println(lists.length() + " lists in JSON");
 		for(int i = 0, n = lists.length(); i < n; i++) {
-			Placelist pl = Placelist.fromJSON(lists.getJSONObject(i));
+			CSListPlace pl = CSListPlace.fromJSON(lists.getJSONObject(i));
 			
 			//set the hashed placelistID
 			pl.setId(Utils.hash(pl.getSourceUrl()));
@@ -310,7 +310,7 @@ public class CSListIndexer {
 	
 	//TODO keep this but add new function for typeahead restricted by location
 	//writeDym: writes the dym.txt file
-	private static void writeDym(PrintWriter writer, Placelist pl) throws Exception {
+	private static void writeDym(PrintWriter writer, CSListPlace pl) throws Exception {
 		writer.println(pl.getName().trim().toLowerCase());
 		String[] split = pl.getName().split(" ");
 		for(String s:split) {
@@ -318,7 +318,7 @@ public class CSListIndexer {
 		}
 		for(int i = 0, n = pl.groupsSize(); i < n; i++) {
 			GroupOfPlaces group = pl.group(i);
-			if(!group.getName().equals(Placelist.DEFAULT_GROUP_NAME)) {
+			if(!group.getName().equals(CSListPlace.DEFAULT_GROUP_NAME)) {
 				writer.println(group.getName().trim().toLowerCase());
 				split = group.getName().split(" ");
 				for(String s:split) {

@@ -40,7 +40,7 @@ public class PlacelistSearch {
 	private static Log logger = LogFactory.getLog(PlacelistSearch.class);
 	
 	private static final SearchResult EMPTY = SearchResult.nullResult();
-	private static final List<Placelist> EMPTY_LISTS = new ArrayList<Placelist>();
+	private static final List<CSListPlace> EMPTY_LISTS = new ArrayList<CSListPlace>();
 	private static final List<String> EMPTY_RESPELL = new ArrayList<String>();
 	private ListGeoFilter.ListGeoHashCache geoHashCache_ = null;
 	private static final int MAX = 1000;
@@ -129,14 +129,14 @@ public class PlacelistSearch {
 		}
 	}
 	
-	public Placelist loadList(String listid) {	
-		List<Placelist> lists = loadLists(Collections.singletonList(listid));
+	public CSListPlace loadList(String listid) {	
+		List<CSListPlace> lists = loadLists(Collections.singletonList(listid));
 		if(lists.isEmpty()) return null;
 		
 		return lists.get(0);
 	}
 	
-	public List<Placelist> loadLists(List<String> listids) {		
+	public List<CSListPlace> loadLists(List<String> listids) {		
 		try {
 			//Analyzer analyzer = new com.where.commons.feed.citysearch.search.Analyzer();
 			Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_30);
@@ -155,9 +155,9 @@ public class PlacelistSearch {
 			ScoreDoc[] sdocs = docs.scoreDocs;
 			if(sdocs.length == 0) return null;
 			
-			List<Placelist> result = new ArrayList<Placelist>();
+			List<CSListPlace> result = new ArrayList<CSListPlace>();
 			for(int i = 0, n = sdocs.length; i < n; i++) {
-				Placelist list = getPlacelistFromCache(sdocs[i].doc);
+				CSListPlace list = getPlacelistFromCache(sdocs[i].doc);
 				if(list == null) {
 					Document document = searcher.doc(sdocs[i].doc);
 					list = loadPlacelist(document, sdocs[i].doc);
@@ -173,7 +173,7 @@ public class PlacelistSearch {
 		}
 	}
 	
-	public List<Placelist> loadParentLists(String type, String placeid) {
+	public List<CSListPlace> loadParentLists(String type, String placeid) {
 		try {
 			Analyzer analyzer = new com.where.commons.feed.citysearch.search.Analyzer();
 
@@ -189,7 +189,7 @@ public class PlacelistSearch {
 			ScoreDoc[] sdocs = docs.scoreDocs;
 			if(sdocs.length == 0) return EMPTY_LISTS;
 			
-			List<Placelist> lists = getParentPlacelistsFromCache(sdocs[0].doc);
+			List<CSListPlace> lists = getParentPlacelistsFromCache(sdocs[0].doc);
 			if(lists == null) {
 				Document document = placesSearcher.doc(sdocs[0].doc);
 				lists = loadParentLists(document, sdocs[0].doc);
@@ -202,15 +202,15 @@ public class PlacelistSearch {
 		}
 	}
 	
-	private List<Placelist> collectLists(TopDocs docs, SearchCriteria criteria, IndexSearcher searcher) throws Exception {
-		List<Placelist> lists = new ArrayList<Placelist>();
+	private List<CSListPlace> collectLists(TopDocs docs, SearchCriteria criteria, IndexSearcher searcher) throws Exception {
+		List<CSListPlace> lists = new ArrayList<CSListPlace>();
 		ScoreDoc[] sdocs = docs.scoreDocs;
 		int start = criteria.page*criteria.itemsPerPage;
 		int counter = 0;
 		for(ScoreDoc sdoc:sdocs) {
 			counter++;
 			if(counter > start) {
-				Placelist list = getPlacelistFromCache(sdoc.doc);
+				CSListPlace list = getPlacelistFromCache(sdoc.doc);
 				if(list == null) {
 					Document document = searcher.doc(sdoc.doc);
 					list = loadPlacelist(document, sdoc.doc);
@@ -221,17 +221,17 @@ public class PlacelistSearch {
 		return lists;
 	}
 	
-	public static Placelist getPlacelistFromCache(int docid) {
+	public static CSListPlace getPlacelistFromCache(int docid) {
 		Object pl = MemcacheUtil.get(""+docid, "PlaceListSearch");
-		if(pl != null) return (Placelist) pl;
+		if(pl != null) return (CSListPlace) pl;
 		return null;
 	}
 	
-	public static Placelist loadPlacelist(Document document, int docid) {
+	public static CSListPlace loadPlacelist(Document document, int docid) {
 		try {
 			byte[] bytes = document.getBinaryValue(CSListIndexer.PLACELIST);
 			ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes));
-			Placelist list = (Placelist)in.readObject();
+			CSListPlace list = (CSListPlace)in.readObject();
 			//System.out.println("LIST " + list.getId() + " " + document.getField(CSListIndexer.ID));
 			in.close();
 			MemcacheUtil.set(""+docid, list, "PlaceListSearch");
@@ -243,20 +243,20 @@ public class PlacelistSearch {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<Placelist> getParentPlacelistsFromCache(int docid) {
+	public List<CSListPlace> getParentPlacelistsFromCache(int docid) {
 		Object pl = MemcacheUtil.get(""+docid, "ParentPlacelistsSearch");
-		if(pl != null) return (List<Placelist>) pl;
+		if(pl != null) return (List<CSListPlace>) pl;
 		return null;
 	}
 	
-	public List<Placelist> loadParentLists(Document document, int docid) {
+	public List<CSListPlace> loadParentLists(Document document, int docid) {
 		try {
 			byte[] bytes = document.getBinaryValue(CSListIndexer.PLACELISTS);
 			ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes));
 			@SuppressWarnings("unchecked")
 			List<String> ids = (List<String>)in.readObject();
 			in.close();
-			List<Placelist> lists = loadLists(ids);
+			List<CSListPlace> lists = loadLists(ids);
 			MemcacheUtil.set(""+docid, lists, "ParentPlacelistsSearch");
 			return lists;
 		}
@@ -307,19 +307,19 @@ public class PlacelistSearch {
 	public static class SearchResult implements Serializable {
 		private static final long serialVersionUID = 1090042242289431503L;
 		
-		private List<Placelist> lists;
+		private List<CSListPlace> lists;
 		private int page;
 		private int itemsPerPage;
 		private int totalItems;
 		
 		private List<String> didYouMean;
 
-		public List<Placelist> getLists() {
+		public List<CSListPlace> getLists() {
 			
 			return lists;
 		}
 
-		public void setLists(List<Placelist> lists) {
+		public void setLists(List<CSListPlace> lists) {
 			this.lists = lists;
 		}
 
@@ -373,7 +373,7 @@ public class PlacelistSearch {
 				if(lists == null) lists = EMPTY_LISTS;
 				
 				JSONArray a = new JSONArray();
-				for(Placelist placelist:lists) {
+				for(CSListPlace placelist:lists) {
 					a.put(placelist.toJSON());
 				}
 				json.put("lists", a);
@@ -387,7 +387,7 @@ public class PlacelistSearch {
 
 		private static SearchResult nullResult() {
 			SearchResult result = new SearchResult();
-			result.setLists(new ArrayList<Placelist>());
+			result.setLists(new ArrayList<CSListPlace>());
 			return result;
 		}
 	}
@@ -463,7 +463,7 @@ public class PlacelistSearch {
 		search.setIndexPath(args[0]);
 		SearchResult result = search.nearbyLists(criteria);
 		System.out.println("Found " + result.totalItems + " lists.");
-		for(Placelist list:result.lists) {
+		for(CSListPlace list:result.lists) {
 			System.out.println(list.getName() + " " + list.getSourceUrl());
 		}
 		System.out.println(result.lists.get(0).toJSON());

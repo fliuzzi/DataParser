@@ -33,7 +33,7 @@ import org.json.JSONObject;
 import org.xml.sax.Attributes;
 
 import com.where.places.lists.Author;
-import com.where.places.lists.Placelist;
+import com.where.places.lists.CSListPlace;
 import com.where.utils.HTTPUtils;
 
 public class CSListParser {
@@ -49,7 +49,7 @@ public class CSListParser {
 	
 	private static Set<String> badlists = new HashSet<String>();
 	
-	private static Placelist parseCSList(String url) throws Exception {
+	private static CSListPlace parseCSList(String url) throws Exception {
 		//long t1 = System.currentTimeMillis();
 		
 		HtmlParser p = new HtmlParser();
@@ -95,7 +95,7 @@ public class CSListParser {
 		
 		//System.out.println((System.currentTimeMillis()-t1)/1000);
 		
-		Placelist cslist = handler.getPlacelist();
+		CSListPlace cslist = handler.getPlacelist();
 		cslist.setSource("CS");
 		cslist.setSourceUrl(url);
 		
@@ -150,7 +150,7 @@ public class CSListParser {
 						for(int j = 0, k = urls.size(); j < k; j++) {
 							url = urls.get(j);
 							try {
-								Placelist cslist = parseCSList(url);
+								CSListPlace cslist = parseCSList(url);
 								if(cslist != null && cslist.getName() != null) {
 									array.put(cslist.toJSON());
 								}
@@ -197,7 +197,7 @@ public class CSListParser {
 	private static class CSListContentHandler extends BodyContentHandler {
 		private String element;
 		private StringBuffer buffer = new StringBuffer();
-		private Placelist list = new Placelist();
+		private CSListPlace list = new CSListPlace();
 		
 		private String listgroup;
 		private String listingid;
@@ -360,7 +360,7 @@ public class CSListParser {
 			}
 		}
 		
-		public Placelist getPlacelist() {
+		public CSListPlace getPlacelist() {
 			return list;
 		}
 	}
