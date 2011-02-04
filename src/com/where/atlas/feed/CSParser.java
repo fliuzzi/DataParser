@@ -41,6 +41,7 @@ public class CSParser implements FeedParser {
         private static final String SP_REF_ID = "6";
         private String zipPath;
         private CSListingIndexer indexer;
+        private static int whereidmax;
         
         public CSParser(CSParserUtils csparserutils)
         {
@@ -48,10 +49,25 @@ public class CSParser implements FeedParser {
             locwordWriter = csparserutils.getLocwordWriter();
             indexer = csparserutils.getIndexer();
             
+            whereidmax = findWhereIDMax();
+            
             if(csparserutils.getAdvertiserIndexer() != null)
             {
                 spAltCategoryIndexer = csparserutils.getAdvertiserIndexer();
             }
+        }
+        
+        public int findWhereIDMax()
+        {
+            int maxval=0;
+            int[] values = indexer.csId2whereId_.getValues();
+         
+            for(int i=0;i<values.length;i++)
+                if(values[i] > maxval)
+                    maxval=i;
+            System.out.println("Max of existing CS whereids is: "+maxval);
+            
+            return maxval;
         }
         
         
@@ -169,7 +185,15 @@ public class CSParser implements FeedParser {
         }
         
         public static void index(CSPlace poi, CSListingIndexer indexer) {
-            poi.setWhereId(Integer.toString(indexer.csId2whereId_.get(Integer.parseInt(poi.getListingId()))));
+            int whereid = indexer.csId2whereId_.get(Integer.parseInt(poi.getListingId()));
+            
+            if(whereid == 0)
+            {
+                whereid = ++whereidmax;
+            }
+            
+            poi.setWhereId(Integer.toString(whereid));
+            
             indexer.index(poi);
         }
         public static CSPlace populateDetail(Element location) {  

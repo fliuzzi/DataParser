@@ -2,12 +2,12 @@ package com.where.atlas.feed;
 
 import gnu.trove.TIntIntHashMap;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+
+import com.where.utils.CSIDHashMap;
 
 public class CSParserUtils
 {
@@ -64,22 +64,16 @@ public class CSParserUtils
     //                  K CS_id -> V where_id
     private TIntIntHashMap generateIdMap(String path) throws IOException
     {
-        TIntIntHashMap map = new TIntIntHashMap();
-
-        BufferedReader theReader = new BufferedReader(new FileReader(new File(path)));
-        String line;
-        line = theReader.readLine();
-        while( (line = theReader.readLine()) != null)
-        {
-            line = line.trim();
-            String [] ids = line.split("\t");
-            int cs = Integer.parseInt(ids[0]);
-            int where = Integer.parseInt(ids[1]);
-            map.put(cs, where);
-            
-            
+        
+        CSIDHashMap hashmapmaker = new CSIDHashMap(getIdMappingPath());
+        try{
+            hashmapmaker.readDocuments();
         }
-        return map;
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+        
+        return hashmapmaker.getIdMap();        
     }
 
     private void setIdMappingPath(String idMappingPath)

@@ -19,9 +19,7 @@ public class CSParseAndIndex {
             zipPath = args[0];       //path of enhanced CS data
             indexPath = args[1];     //where to write index file
             idMappingPath = zipPath;
-            int idx = idMappingPath.lastIndexOf("/");
-            idMappingPath = idMappingPath.substring(0, idx);
-            idMappingPath += "/csid2whereid.txt"; //path of cs2whereid conversion .txt
+            idMappingPath = "/idx/lis"; //path of cs2whereid conversion .txt
             
             System.out.println("Paths: \nZip Path: "+zipPath+"\nIndex Path: "+indexPath+"\nidMappingPath: "+idMappingPath);
             
