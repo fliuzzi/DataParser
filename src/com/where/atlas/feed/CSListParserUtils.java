@@ -2,7 +2,6 @@ package com.where.atlas.feed;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
@@ -50,14 +49,14 @@ public class CSListParserUtils
     public static final String PLACE_ID = "id";
     public static final String PLACELISTS = "placelists";
     
-    private static Profile profile;
+    public static Profile profile;
     private String csListFilePath;
     private String outputDirPath;
     private String dymFilePath;
     private IndexWriter writer;
     private static Set<String> indexed;
-    private static Map<String, List<String>> badpois;
     private static Map<String, Set<CSListPlace>> inversed;
+    public static Map<String, List<String>> badpois;
 
     
     
@@ -73,8 +72,10 @@ public class CSListParserUtils
         
         writer = newIndexWriter(outputDirPath);
         indexed = new HashSet<String>();
-        badpois = new HashMap<String, List<String>>();
+        
         inversed = new HashMap<String, Set<CSListPlace>>();
+        badpois = new HashMap<String, List<String>>();
+
     }
     
     //TODO keep this but add new function for typeahead restricted by location
@@ -121,7 +122,7 @@ public class CSListParserUtils
         return docs;
     }
     
-    private static void addInverseLookup(CSListPlace placelist) {
+    public static void addInverseLookup(CSListPlace placelist) {
         for(int i = 0, n = placelist.groupsSize(); i < n; i++) {
             GroupOfPlaces group = placelist.group(i);
             List<PlacelistPlace> places = group.entries();
@@ -161,23 +162,7 @@ public class CSListParserUtils
         return document;
     }
     
-    private static void addPlacelistDocument(CSListPlace placelist, Document document) {
-        try {
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            ObjectOutputStream oout = new ObjectOutputStream(bout);
-            oout.writeObject(placelist);
-            oout.close();
-            
-            byte[] bytes = bout.toByteArray();
-            document.add(new Field(PLACELIST, bytes, 0, bytes.length, Field.Store.YES));
-        }
-        catch(Exception ex) {
-            throw new IllegalArgumentException(ex);
-        }
-    }
-
-    
-    private static boolean setPOIs(CSListPlace placelist) {
+    public static boolean setPOIs(CSListPlace placelist) {
         boolean poisFound = true;
         List<String> ids = badpois.get(placelist.getSourceUrl());
         if(ids == null) ids = new ArrayList<String>();
@@ -185,7 +170,7 @@ public class CSListParserUtils
             GroupOfPlaces g = placelist.group(i);
             List<String>  badgroupplaces = new ArrayList<String>();
             for(PlacelistPlace place:g.entries()) {
-                CSListing poi = CSListingUtil.loadProfile(profile, place.getListingid()); 
+                CSListing poi = CSListingUtil.loadProfile(CSListParserUtils.profile, place.getListingid()); 
                 if(poi == null) {
                     //System.out.println("Bad POI lookup " + place.getListingid() + " " + placelist.getSourceUrl());
                     ids.add(place.getListingid());
@@ -211,6 +196,25 @@ public class CSListParserUtils
         
         return poisFound;
     }
+
+    
+    private static void addPlacelistDocument(CSListPlace placelist, Document document) {
+        try {
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            ObjectOutputStream oout = new ObjectOutputStream(bout);
+            oout.writeObject(placelist);
+            oout.close();
+            
+            byte[] bytes = bout.toByteArray();
+            document.add(new Field(PLACELIST, bytes, 0, bytes.length, Field.Store.YES));
+        }
+        catch(Exception ex) {
+            throw new IllegalArgumentException(ex);
+        }
+    }
+
+    
+
     
     public Profile getProfile()
     {
@@ -246,22 +250,8 @@ public class CSListParserUtils
         writer.optimize();
         writer.close();
     
-        // write the bad POIs to a txt...
-        PrintWriter out = new PrintWriter(new FileWriter(new File(new File(outputDirPath).getParent(), "badpois.txt")));
-        for(Map.Entry<String, List<String>> entry:badpois.entrySet()) {
-            out.println(entry.getKey());
-            for(String s:entry.getValue()) {
-                out.println(s);
-            }
-        }
-        
-        
-        out.close();
-        
         
         indexPlaceLookups(outputDirPath);
-        
-        System.out.println("Bad " + badpois.size());
     }
     
     private static void indexPlaceLookups(String indexPath) throws Exception {

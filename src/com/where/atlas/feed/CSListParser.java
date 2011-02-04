@@ -1,13 +1,9 @@
 package com.where.atlas.feed;
 
 import java.io.BufferedReader;
-import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.util.List;
 
-import org.apache.lucene.document.Document;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -44,8 +40,10 @@ public class CSListParser implements FeedParser
             //set the hashed placelistID
             pl.setId(Utils.hash(pl.getSourceUrl()));
             
-            //collect!
-            collector.collect(pl);
+            if(!CSListParserUtils.setPOIs(pl))
+                collector.collectBadInput(pl, new Exception("BadPOI"));
+            else
+                collector.collect(pl);
         }
         
     

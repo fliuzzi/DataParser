@@ -33,7 +33,9 @@ public class CSListParseAndIndex
             new CSListParser(parserutils).parse(collector,new FileInputStream(new File(args[2])));
             
             parserutils.finishProcessing();
-            collector.getDYMWriter().close();
+            collector.closeWriters();
+            System.out.println("Bad " + collector.getNumBadCounted());
+            System.out.println("Indexed "+collector.getNumGoodCounted()+" lists.");
         }
         catch(Exception e){
             System.err.println("EXCEPTION\n");
