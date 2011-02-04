@@ -42,4 +42,13 @@
 		</copy>
 	</target>
 
+	<target name="target" depends="compile">
+	    <jar jarfile="target/dataparser.jar">
+	    	<fileset dir="${class.dir}"/>
+	    </jar>
+		<copy todir="target">
+			<fileset dir="${lib.dir}"/>
+		</copy>
+	</target>
+	
 </project>
