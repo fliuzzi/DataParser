@@ -1,7 +1,7 @@
 package com.where.atlas.feed;
 
-import com.where.atlas.Place;
-import com.where.atlas.YelpPlace;
+import com.where.place.Place;
+import com.where.place.YelpPlace;
 
 
 //collects YelpPlace objects and outputs to a file in the format:

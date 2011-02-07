@@ -1,6 +1,6 @@
 package com.where.atlas.feed;
 
-import com.where.atlas.Place;
+import com.where.place.Place;
 
 /**
  * Collector interface. To be used by parsers etc.

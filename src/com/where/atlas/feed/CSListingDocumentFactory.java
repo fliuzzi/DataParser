@@ -26,8 +26,6 @@ import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.lucene.util.Version;
 
-import com.where.atlas.Address;
-import com.where.atlas.CSPlace;
 import com.where.commons.feed.citysearch.search.BaseAnalyzer;
 import com.where.commons.feed.citysearch.search.NoStemAnalyzer;
 import com.where.commons.feed.citysearch.search.budget.ExcludedCategories;
@@ -36,6 +34,8 @@ import com.where.commons.util.StringUtil;
 import com.where.data.parsers.citysearch.Category;
 import com.where.data.parsers.citysearch.Offer;
 import com.where.data.parsers.citysearch.Review;
+import com.where.place.Address;
+import com.where.place.CSPlace;
 import com.where.util.cache.ICache;
 
 public class CSListingDocumentFactory {

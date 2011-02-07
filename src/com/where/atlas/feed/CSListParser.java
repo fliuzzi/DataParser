@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.where.atlas.CSListPlace;
+import com.where.place.CSListPlace;
 import com.where.utils.Utils;
 
 public class CSListParser implements FeedParser

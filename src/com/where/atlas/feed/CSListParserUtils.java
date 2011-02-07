@@ -24,11 +24,11 @@ import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.NIOFSDirectory;
 
-import com.where.atlas.CSListPlace;
 import com.where.commons.feed.citysearch.CSListing;
 import com.where.commons.feed.citysearch.search.Analyzer;
 import com.where.commons.feed.citysearch.search.query.Profile;
 import com.where.commons.util.LocationUtil;
+import com.where.place.CSListPlace;
 import com.where.places.lists.GroupOfPlaces;
 import com.where.places.lists.PlacelistPlace;
 import com.where.utils.CSListingUtil;

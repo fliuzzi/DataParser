@@ -1,4 +1,4 @@
-package com.where.atlas;
+package com.where.place;
 
 public class Place {
 

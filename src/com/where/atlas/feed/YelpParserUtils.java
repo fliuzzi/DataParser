@@ -39,8 +39,8 @@ import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.lucene.store.NIOFSDirectory;
 import org.apache.lucene.util.Version;
 
-import com.where.atlas.Address;
-import com.where.atlas.YelpPlace;
+import com.where.place.Address;
+import com.where.place.YelpPlace;
 import com.where.util.lucene.NullSafeGeoFilter;
 import com.where.util.lucene.NullSafeGeoFilter.GeoHashCache;
 

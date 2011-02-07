@@ -1,7 +1,7 @@
 package com.where.atlas.feed;
 
-import com.where.atlas.CSPlace;
-import com.where.atlas.Place;
+import com.where.place.CSPlace;
+import com.where.place.Place;
 
 public class CSCollectAndIndex implements PlaceCollector
 {

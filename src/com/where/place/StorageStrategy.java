@@ -1,8 +1,7 @@
-package com.where.atlas.dao;
+package com.where.place;
 
-import com.where.atlas.Place;
 
-public interface PlaceDao {
+public interface StorageStrategy {
 
 	public String create(Place place);
 	

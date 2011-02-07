@@ -9,8 +9,8 @@ import java.io.InputStreamReader;
 
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 
-import com.where.atlas.Address;
-import com.where.atlas.Place;
+import com.where.place.Address;
+import com.where.place.Place;
 
 
 
