@@ -20,8 +20,8 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.NIOFSDirectory;
 
-import com.where.atlas.Place;
 import com.where.commons.util.StringUtil;
+import com.where.place.Place;
 
 public class LocalezeCollectAndIndex implements PlaceCollector
 {

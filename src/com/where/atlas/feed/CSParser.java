@@ -23,13 +23,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import com.where.atlas.CSPlace;
 import com.where.data.parsers.citysearch.Category;
 import com.where.data.parsers.citysearch.Offer;
 import com.where.data.parsers.citysearch.ParseUtils;
 import com.where.data.parsers.citysearch.Placelist;
 import com.where.data.parsers.citysearch.Review;
 import com.where.data.parsers.citysearch.Tip;
+import com.where.place.CSPlace;
 
 public class CSParser implements FeedParser {
         

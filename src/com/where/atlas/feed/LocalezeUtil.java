@@ -2,10 +2,10 @@ package com.where.atlas.feed;
 
 import org.apache.lucene.document.Document;
 
-import com.where.atlas.Address;
-import com.where.atlas.CSPlace;
-import com.where.atlas.Place;
 import com.where.commons.util.StringUtil;
+import com.where.place.Address;
+import com.where.place.CSPlace;
+import com.where.place.Place;
 
 public class LocalezeUtil {
 	public static final double DEFAULT_DISTANCE 			= 0;

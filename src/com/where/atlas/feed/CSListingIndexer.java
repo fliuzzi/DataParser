@@ -13,8 +13,8 @@ import org.apache.lucene.index.IndexWriter.MaxFieldLength;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.NIOFSDirectory;
 
-import com.where.atlas.CSPlace;
 import com.where.data.parsers.citysearch.Analyzer;
+import com.where.place.CSPlace;
 
 public class CSListingIndexer {
 	private static final Log logger = LogFactory.getLog(CSListingIndexer.class);

@@ -26,8 +26,6 @@ import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.lucene.util.Version;
 
-import com.where.atlas.Address;
-import com.where.atlas.CSPlace;
 import com.where.commons.feed.citysearch.search.BaseAnalyzer;
 import com.where.commons.feed.citysearch.search.NoStemAnalyzer;
 import com.where.commons.feed.citysearch.search.budget.ExcludedCategories;
@@ -35,7 +33,8 @@ import com.where.commons.util.LocationUtil;
 import com.where.commons.util.StringUtil;
 import com.where.data.parsers.citysearch.Category;
 import com.where.data.parsers.citysearch.Offer;
-import com.where.data.parsers.citysearch.Review;
+import com.where.place.Address;
+import com.where.place.CSPlace;
 import com.where.util.cache.ICache;
 
 public class CSListingDocumentFactory {
@@ -230,7 +229,14 @@ public class CSListingDocumentFactory {
 		document.add(new Field(GEOHASH, geohash, Field.Store.YES, Field.Index.NOT_ANALYZED));
 		
 		document.add(new Field(HAS_OFFER, poi.getOffer() != null ? "true" : "false", Field.Store.NO, Field.Index.NOT_ANALYZED));
-				
+		
+		
+		
+		/*
+		 *******************
+		 * TODO: reimple.    removing for now: backwards compat.    --Frankie
+		 *******************
+		 * 
 		int reviewCount = poi.userReviews().size();
 		document.add(new Field(USER_REVIEW_COUNT, Integer.toString(reviewCount), Field.Store.NO, Field.Index.NOT_ANALYZED_NO_NORMS));
 		
@@ -244,10 +250,15 @@ public class CSListingDocumentFactory {
 		    }
 		    avgReview = sumRating/avgReview;
 		}
+		
 		double revScore = countScore(reviewCount)*avgReview;
         document.add(new Field(USER_REVIEW_AVG, Double.toString(avgReview), Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS));
         document.add(new Field(USER_REVIEW_SCORE, Double.toString(revScore), Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS));
-		document.add(new Field(PPE, String.valueOf(poi.getPpe()), Field.Store.YES, Field.Index.NOT_ANALYZED));
+
+        */
+        
+        
+        document.add(new Field(PPE, String.valueOf(poi.getPpe()), Field.Store.YES, Field.Index.NOT_ANALYZED));
 		NumericField ppe = new NumericField(PPE_NUMBER);
 		ppe.setDoubleValue(poi.getPpe());
 		document.add(ppe);
@@ -500,7 +511,7 @@ public class CSListingDocumentFactory {
 		try {
 			ByteArrayOutputStream bout = new ByteArrayOutputStream();
 			ObjectOutputStream oout = new ObjectOutputStream(bout);
-			oout.writeObject(poi);
+			oout.writeObject(poi.toCSListing());
 			oout.close();
 			
 			byte[] bytes = bout.toByteArray();
