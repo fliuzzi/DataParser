@@ -143,6 +143,12 @@ public class YelpParserUtils
         outputChannel_ = outputStream_.getChannel();
     }
     
+    public YelpParserUtils(String CSIndex,String targetFile)
+    {
+        oldIndexPath_=CSIndex;
+        targetPath_ = targetFile;
+    }
+    
     // returns a File array of all files in path 'dirName' that end with .rating
     public static File [] getFiles(String dirName)
     {

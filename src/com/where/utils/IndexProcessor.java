@@ -28,6 +28,4 @@ public abstract class IndexProcessor
         reader.close();
         finishProcessing();
     }
-    
-   
 }

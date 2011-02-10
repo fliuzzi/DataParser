@@ -8,17 +8,17 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.where.data.parsers.citysearch.CSListing;
-import com.where.data.parsers.citysearch.CSListing.sourceEnum;
-import com.where.data.parsers.citysearch.Category;
-import com.where.data.parsers.citysearch.Location;
-import com.where.data.parsers.citysearch.Offer;
-import com.where.data.parsers.citysearch.Placelist;
-import com.where.data.parsers.citysearch.RatingStat;
-import com.where.data.parsers.citysearch.TermFreq;
-import com.where.data.parsers.citysearch.Tip;
-import com.where.data.parsers.citysearch.MicroReview;
-import com.where.data.parsers.citysearch.Review;
+import com.where.commons.feed.citysearch.CSListing;
+import com.where.commons.feed.citysearch.CSListing.sourceEnum;
+import com.where.commons.feed.citysearch.Category;
+import com.where.commons.feed.citysearch.Location;
+import com.where.commons.feed.citysearch.Offer;
+import com.where.commons.feed.citysearch.Placelist;
+import com.where.commons.feed.citysearch.RatingStat;
+import com.where.commons.feed.citysearch.TermFreq;
+import com.where.commons.feed.citysearch.Tip;
+import com.where.commons.feed.citysearch.MicroReview;
+import com.where.commons.feed.citysearch.Review;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -861,6 +861,7 @@ public class CSPlace extends Place implements Serializable {
         cslisting.setCategory(getCategory());
         cslisting.setCategories(getCategories());
         cslisting.setTermFreqs(getTermFreqs());
+        cslisting.setNeighborhood(getNeighborhood());
         cslisting.setNeighborhoods(neighborhoods());
         cslisting.setMarkets(markets());
         //address data/////////////////////////////////
@@ -907,10 +908,6 @@ public class CSPlace extends Place implements Serializable {
         cslisting.setUserReviews(userReviews());
         cslisting.setMicroReviews(reviews());
         cslisting.setRecentTweets(recentTweets());
-        
-        cslisting.setYpId("0");
-        cslisting.setSpId("0");
-        
         
         if(isNotAdvertiser()) cslisting.setNotAdvertiser();
         

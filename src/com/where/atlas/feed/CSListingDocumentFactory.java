@@ -31,8 +31,8 @@ import com.where.commons.feed.citysearch.search.NoStemAnalyzer;
 import com.where.commons.feed.citysearch.search.budget.ExcludedCategories;
 import com.where.commons.util.LocationUtil;
 import com.where.commons.util.StringUtil;
-import com.where.data.parsers.citysearch.Category;
-import com.where.data.parsers.citysearch.Offer;
+import com.where.commons.feed.citysearch.Category;
+import com.where.commons.feed.citysearch.Offer;
 import com.where.place.Address;
 import com.where.place.CSPlace;
 import com.where.util.cache.ICache;
@@ -214,7 +214,7 @@ public class CSListingDocumentFactory {
 				
 		document.add(new Field(NAME, poi.getName(), Field.Store.YES, Field.Index.ANALYZED));
         document.add(new Field(RAW_NAME, poi.getName(), Field.Store.YES, Field.Index.NOT_ANALYZED));
-        document.add(new Field(MATCH_NAME, poi.getName().toLowerCase().trim(), Field.Store.YES, Field.Index.NOT_ANALYZED));
+        //document.add(new Field(MATCH_NAME, poi.getName().toLowerCase().trim(), Field.Store.YES, Field.Index.NOT_ANALYZED));
 		
 		if(poi.getPhone() != null) {
 			document.add(new Field(PHONE, cleanPhone(poi.getPhone()), Field.Store.YES, Field.Index.NOT_ANALYZED));
