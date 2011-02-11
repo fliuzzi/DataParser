@@ -6,7 +6,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Set;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.Term;
@@ -46,7 +48,15 @@ public class YelpRawDataParser implements FeedParser {
     public final float withoutPhoneThreshold_ = .9f;
     BufferedWriter bufferedWriter;
     IndexSearcher searcher;
-    Scanner in;
+    Set<String> cityMap;
+    GeoHashCache geoCache;
+    JaroWinklerDistance jw;
+    BooleanQuery bq,mainQuery;
+    Analyzer analyzer;
+    HashMap<String,Float> boosts;
+    MultiFieldQueryParser qp;
+    int counter;
+    protected static String currentState;
     
     public YelpRawDataParser(YelpParserUtils Yparser)
     {
@@ -54,11 +64,42 @@ public class YelpRawDataParser implements FeedParser {
         try{
         bufferedWriter = new BufferedWriter(new FileWriter(parser.getTargetPath()));
         searcher = new IndexSearcher(new NIOFSDirectory(new File(parser.getOldIndexPath())));
-        in = new Scanner(new File("/home/fliuzzi/data/bostoncityCSIDS.txt"));
+        
+        cityMap = createCityMap(new Scanner(new File("/home/fliuzzi/data/bostoncityCSIDS.txt")));
+        System.out.println("Loaded city-map into memory.\nSearching State:");
+        counter=0;
+        
+        geoCache = new GeoHashCache(CSListingDocumentFactory.LATITUDE_RANGE, CSListingDocumentFactory.LONGITUDE_RANGE,
+                CSListingDocumentFactory.LISTING_ID, searcher.getIndexReader());
+        jw = new JaroWinklerDistance();
+        bq = new BooleanQuery();
+        mainQuery = new BooleanQuery();
+        analyzer = CSListingDocumentFactory.getAnalyzerWrapper();
+        boosts = new HashMap<String, Float>();
+        boosts.put(CSListingDocumentFactory.NAME,1.0f);
+        String[] fields = { CSListingDocumentFactory.NAME };
+        qp = new MultiFieldQueryParser(
+                Version.LUCENE_30, fields, analyzer, boosts);
+        qp.setDefaultOperator(Operator.OR);
+        
         }
         catch(Throwable t){
-            System.err.print("Error writing output");
+            System.err.print("Error Loading!");
         }
+    }
+    
+    public Set<String> createCityMap(Scanner in)
+    {
+        String line = null;
+        Set<String> citySet = new HashSet<String>();
+        
+        
+        while(in.hasNextLine())
+        {
+            citySet.add(in.nextLine().trim());
+        }
+        in.close();
+        return citySet;
     }
     
     public void closeWriter()
@@ -105,7 +146,7 @@ public class YelpRawDataParser implements FeedParser {
     }
     
     public void parse(PlaceCollector collector, InputStream ins) throws IOException {
-        try{              
+        try{             
                 int placeCounter=0;
                 long reviewCounter=0;
             
@@ -130,6 +171,10 @@ public class YelpRawDataParser implements FeedParser {
                     if(listingNode.getNodeType() == Node.ELEMENT_NODE){
                         Element listingElement = (Element)listingNode;
                         
+                        currentState = listingElement.getAttribute("region");
+                        
+                        
+                        
                         poi = new Place();
                         location = new Address();
                         
@@ -137,7 +182,7 @@ public class YelpRawDataParser implements FeedParser {
                         location.setZip(listingElement.getAttribute("postal_code"));//addy.ZIP
                         poi.setPhone(stripPhone(listingElement.getAttribute("phone")));//PHONE
                         location.setCity(listingElement.getAttribute("locality"));//addy.CITY
-                        location.setState(listingElement.getAttribute("region"));
+                        location.setState(currentState);
                         
                         //System.out.println(listingElement.getAttribute("region"));
                         
@@ -149,8 +194,6 @@ public class YelpRawDataParser implements FeedParser {
                         
                         poi.setAddress(location);
                         
-                        
-                        //TODO:IF THIS IS A BOSTON LOCATION.....(de-dupe)
                         if(poi.getAddress().getState().equalsIgnoreCase("MA"))
                         {
                             NodeList reviewNodes = listingElement.getElementsByTagName("reviews");
@@ -167,40 +210,20 @@ public class YelpRawDataParser implements FeedParser {
                                         String rating = reviewElement.getAttribute("rating");
                                         String reviewText = reviewElement.getAttribute("text");
                                         
-                                        //TODO: QUERY INDEX FOR POI
                                         
-                                        
-                                        
-                                        GeoHashCache geoCache = new GeoHashCache(CSListingDocumentFactory.LATITUDE_RANGE, CSListingDocumentFactory.LONGITUDE_RANGE,
-                                                CSListingDocumentFactory.LISTING_ID, searcher.getIndexReader());
-                                        
-                                        JaroWinklerDistance jw = new JaroWinklerDistance();
-                                        
-                                        
-                                        
-                                        //START QUERY
-                                        
-                                        BooleanQuery bq = new BooleanQuery();        
-                                        Analyzer analyzer = CSListingDocumentFactory.getAnalyzerWrapper();
                                         addLatLongQueryFromCriteria(bq, poi.getAddress().getLat(),poi.getAddress().getLng());
-                                        BooleanQuery mainQuery = new BooleanQuery();
-                                        HashMap<String, Float> boosts = new HashMap<String, Float>();
-                                        boosts.put(CSListingDocumentFactory.NAME,1.0f);
-                                        String[] fields = { CSListingDocumentFactory.NAME };
+                                        
                                         mainQuery.add(new TermQuery(new Term(
                                                CSListingDocumentFactory.PHONE,
                                                poi.getPhone())),
                                                Occur.SHOULD);
-
-                                        MultiFieldQueryParser qp = new MultiFieldQueryParser(
-                                                Version.LUCENE_30, fields, analyzer, boosts);
-                                        qp.setDefaultOperator(Operator.OR);
                                         
                                         try
                                         {
                                             mainQuery.add(qp.parse(poi.getName()), Occur.SHOULD);
                                             bq.add(mainQuery, Occur.MUST);
                                             Filter wrapper = new QueryWrapperFilter(bq);
+                                            
                                             Filter distanceFilter = 
                                                 new NullSafeGeoFilter(wrapper, poi.getAddress().getLat(),poi.getAddress().getLng(), 1, geoCache, CSListingDocumentFactory.GEOHASH);                     
                                             TopDocs td = searcher.search(bq, distanceFilter, 10);
@@ -227,26 +250,16 @@ public class YelpRawDataParser implements FeedParser {
                                                 
                                                 String csId = d.get(CSListingDocumentFactory.LISTING_ID).trim();
                                                 
-                                                in.reset();
-                                                String line = null;
-                                                boolean isInBostonMarket = false;
-                                                while(in.hasNextLine())
-                                                {
-                                                    line = in.nextLine().trim();
-                                                    if(line.equals(csId))
-                                                    {
-                                                        isInBostonMarket = true;
-                                                        break;
-                                                    }
-                                                }
-                                                in.close();
+
+                                                boolean isInBostonMarket = cityMap.contains(csId);
                                                 
                                                 boolean hit = (samePhone && dist > withPhoneThreshold_ && isInBostonMarket)
                                                                     || (dist > withoutPhoneThreshold_ && isInBostonMarket);
                                                 
                                                 if(hit)
                                                 {
-                                                    System.out.println("DING!");
+                                                    counter++;
+                                                    System.out.println("-"+counter+"-");
                                                     String del = "\t";
                                                     bufferedWriter.write(csId+del+rating+del+date+del+userIDHash+del+reviewText);
                                                     bufferedWriter.newLine();

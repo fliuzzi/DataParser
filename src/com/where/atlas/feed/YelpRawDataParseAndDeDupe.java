@@ -25,16 +25,24 @@ public class YelpRawDataParseAndDeDupe
             
             ZipFile zipFile = new ZipFile(new File(args[0]));
             YelpRawDataParser parser = new YelpRawDataParser(new YelpParserUtils(args[1],args[2]));
-            
+            String state = "";
             
             for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements();) {
                 
                 ZipEntry entry = (ZipEntry) e.nextElement();
                 parser.parse(new ConsoleOutputCollector(), zipFile.getInputStream(entry));
-                
+
+                if(!YelpRawDataParser.currentState.equals(state))
+                {
+                    System.out.println(YelpRawDataParser.currentState);
+                    state = YelpRawDataParser.currentState;
+                }
             }
+            
+            parser.closeWriter();
         }
         catch(Exception e){e.printStackTrace();}
+        
 
     }
 
