@@ -46,6 +46,7 @@ public class YelpRawDataParser implements FeedParser {
     public final float withoutPhoneThreshold_ = .9f;
     BufferedWriter bufferedWriter;
     IndexSearcher searcher;
+    Scanner in;
     
     public YelpRawDataParser(YelpParserUtils Yparser)
     {
@@ -53,7 +54,7 @@ public class YelpRawDataParser implements FeedParser {
         try{
         bufferedWriter = new BufferedWriter(new FileWriter(parser.getTargetPath()));
         searcher = new IndexSearcher(new NIOFSDirectory(new File(parser.getOldIndexPath())));
-        
+        in = new Scanner(new File("/home/fliuzzi/data/bostoncityCSIDS.txt"));
         }
         catch(Throwable t){
             System.err.print("Error writing output");
@@ -226,7 +227,7 @@ public class YelpRawDataParser implements FeedParser {
                                                 
                                                 String csId = d.get(CSListingDocumentFactory.LISTING_ID).trim();
                                                 
-                                                Scanner in = new Scanner(new File("/home/fliuzzi/data/bostoncityCSIDS.txt"));
+                                                in.reset();
                                                 String line = null;
                                                 boolean isInBostonMarket = false;
                                                 while(in.hasNextLine())

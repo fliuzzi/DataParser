@@ -57,6 +57,11 @@ public class CSParser implements FeedParser {
             }
         }
         
+        public static String generateExternalURL(CSPlace poi)
+        {
+            return "http://www.citysearch.com/profile/external/" + poi.getNativeId();
+        }
+        
         public int findWhereIDMax()
         {
             int maxval=0;
@@ -203,8 +208,21 @@ public class CSParser implements FeedParser {
             
             Element urls = ParseUtils.getChildByName(location, "urls");
             if(urls != null) {
+                
+//                if(ParseUtils.getChildValueByName(urls, "website_url") != null)
+//                {
+//                    System.out.println(poi.getNativeId()+poi.getName()+" "+ParseUtils.getChildValueByName(urls, "website_url"));
+//                }
+                
+                
+                
+                
+                
                  poi.setMenuUrl(ParseUtils.getChildValueByName(urls, "menu_url"));
-                 poi.setWebUrl(ParseUtils.getChildValueByName(urls, "website_url"));
+                 //poi.setWebUrl(ParseUtils.getChildValueByName(urls, "website_url"));   CITYSEARCH DEPRECATED
+                 poi.setWebUrl(generateExternalURL(poi));
+                 
+                 
                  poi.setStaticMapUrl(ParseUtils.getChildValueByName(urls, "map_url"));
                  poi.setSendToUrl(ParseUtils.getChildValueByName(urls, "send_to_friend_url"));
                  poi.setEmailUrl(ParseUtils.getChildValueByName(urls, "email_link"));
