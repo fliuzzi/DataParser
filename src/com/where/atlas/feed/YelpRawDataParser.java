@@ -48,7 +48,7 @@ public class YelpRawDataParser implements FeedParser {
     protected final float withoutPhoneThreshold_ = .9f;
     protected BufferedWriter bufferedWriter;
     protected IndexSearcher searcher;
-    protected Set<String> cityMap;
+    protected Set<String> cityMap,zipMap;
     protected GeoHashCache geoCache;
     protected JaroWinklerDistance jw;
     protected BooleanQuery bq,mainQuery,rawQuery;
@@ -67,8 +67,11 @@ public class YelpRawDataParser implements FeedParser {
         bufferedWriter = new BufferedWriter(new FileWriter(parser.getTargetPath()));
         searcher = new IndexSearcher(new NIOFSDirectory(new File(parser.getOldIndexPath())));
         
-        cityMap = createCityMap(new Scanner(new File("/home/fliuzzi/data/bostoncityCSIDS.txt")));
-        System.out.println("Loaded city-map into memory.\nSearching State:");
+        
+        zipMap = populateMapFromTxt(new Scanner(new File("/home/fliuzzi/data/bostonMarketZipCodes.txt")));
+        System.out.println("Loaded zipcode map: " + zipMap.size() + " entries.");
+        cityMap = populateMapFromTxt(new Scanner(new File("/home/fliuzzi/data/bostoncityCSIDS.txt")));
+        System.out.println("Loaded city-map: " + cityMap.size() + " entries.\nSearching State:");
         counter=0;
         
         geoCache = new GeoHashCache(CSListingDocumentFactory.LATITUDE_RANGE, CSListingDocumentFactory.LONGITUDE_RANGE,
@@ -90,18 +93,18 @@ public class YelpRawDataParser implements FeedParser {
         }
     }
     
-    public Set<String> createCityMap(Scanner in)
+    public Set<String> populateMapFromTxt(Scanner in)
     {
         String line = null;
-        Set<String> citySet = new HashSet<String>();
+        Set<String> txtSet = new HashSet<String>();
         
         
         while(in.hasNextLine())
         {
-            citySet.add(in.nextLine().trim());
+            txtSet.add(in.nextLine().trim());
         }
         in.close();
-        return citySet;
+        return txtSet;
     }
     
     public void closeWriter()
@@ -203,8 +206,6 @@ public class YelpRawDataParser implements FeedParser {
                         location.setCity(listingElement.getAttribute("locality"));//addy.CITY
                         location.setState(currentState);
                         
-                        //System.out.println(listingElement.getAttribute("region"));
-                        
                         
                         if(listingElement.getAttribute("lat").length() > 1 && listingElement.getAttribute("lon").length() > 1){
                             location.setLat(Double.parseDouble(listingElement.getAttribute("lat")));//LATITUDE
@@ -213,7 +214,8 @@ public class YelpRawDataParser implements FeedParser {
                         
                         poi.setAddress(location);
                         
-                        if(poi.getAddress().getState().equalsIgnoreCase("MA"))
+                        //Only query if poi location is in zipMap  (speeeeed)
+                        if(poi.getAddress().getZip() != null && zipMap.contains(poi.getAddress().getZip()))
                         {
                             NodeList reviewNodes = listingElement.getElementsByTagName("reviews");
                                 for(int x = 0;x < reviewNodes.getLength();x++)

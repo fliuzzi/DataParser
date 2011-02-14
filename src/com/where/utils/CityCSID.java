@@ -16,49 +16,56 @@ public class CityCSID extends IndexProcessor
     long counter;
     
     ArrayList<String> csidlist;
-    BufferedWriter bufferedWriter;
+    BufferedWriter csidWriter,zipWriter;
     
-    public CityCSID(String indexPath, String query, String output) throws IOException
+    
+    public CityCSID(String indexPath, String query, String csidoutput,String zipOutput) throws IOException
     {
         super(indexPath);
         lisIndexPath = indexPath;
         querystr = query;
-        targetFilePath = output;
+        targetFilePath = csidoutput;
         csidlist = new ArrayList<String>();
         counter=0;
         
-        bufferedWriter = new BufferedWriter(new FileWriter(output));
+        csidWriter = new BufferedWriter(new FileWriter(csidoutput));
+        zipWriter = new BufferedWriter(new FileWriter(zipOutput));
     }
     
     public void processDocument(Document doc) throws Exception{
         //grab pid and whereids from doc
-        String city = doc.get("city");
+        String city = doc.get("market");
         
-        if(city != null && city.indexOf("boston") > -1)
+        if(city != null && city.indexOf("boston ma metro") > -1)
         {
-            bufferedWriter.write(doc.get("listingid"));
-            bufferedWriter.newLine();
+            //csid file
+            csidWriter.write(doc.get("listingid"));
+            csidWriter.newLine();
+            
+            //zip code file
+            zipWriter.write(doc.get("zip"));
+            zipWriter.newLine();
+            
             counter++;
         }
     }
     
     public void finishProcessing() throws Exception{
-        bufferedWriter.close();
+        csidWriter.close();
+        zipWriter.close();
         System.out.println("Wrote "+counter+" CSIDS in the city: "+querystr);
     }
     
     public static void main(String args[])
     {
-        if (args.length!=3) return;
+        if (args.length!=4) return;
         
         try{
-            new CityCSID(args[0],args[1],args[2]).readDocuments();
+            new CityCSID(args[0],args[1],args[2],args[3]).readDocuments();
         }
         catch(Exception e){
             System.err.println("IO ERROR\n");
             e.printStackTrace();
         }
-        
-        
     }
 }
