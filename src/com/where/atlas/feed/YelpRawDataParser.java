@@ -43,24 +43,26 @@ import com.where.util.lucene.NullSafeGeoFilter.GeoHashCache;
 
 public class YelpRawDataParser implements FeedParser { 
     
-    YelpParserUtils parser;
-    public final float withPhoneThreshold_ = .65f;
-    public final float withoutPhoneThreshold_ = .9f;
-    BufferedWriter bufferedWriter;
-    IndexSearcher searcher;
-    Set<String> cityMap;
-    GeoHashCache geoCache;
-    JaroWinklerDistance jw;
-    BooleanQuery bq,mainQuery;
-    Analyzer analyzer;
-    HashMap<String,Float> boosts;
-    MultiFieldQueryParser qp;
-    int counter;
+    protected YelpParserUtils parser;
+    protected final float withPhoneThreshold_ = .65f;
+    protected final float withoutPhoneThreshold_ = .9f;
+    protected BufferedWriter bufferedWriter;
+    protected IndexSearcher searcher;
+    protected Set<String> cityMap;
+    protected GeoHashCache geoCache;
+    protected JaroWinklerDistance jw;
+    protected BooleanQuery bq,mainQuery,rawQuery;
+    protected Analyzer analyzer;
+    protected HashMap<String,Float> boosts;
+    protected MultiFieldQueryParser qp;
+    protected int counter;
     protected static String currentState;
+    
     
     public YelpRawDataParser(YelpParserUtils Yparser)
     {
         parser=Yparser;
+        BooleanQuery.setMaxClauseCount(10000);
         try{
         bufferedWriter = new BufferedWriter(new FileWriter(parser.getTargetPath()));
         searcher = new IndexSearcher(new NIOFSDirectory(new File(parser.getOldIndexPath())));
@@ -113,7 +115,21 @@ public class YelpRawDataParser implements FeedParser {
         }
     }
     
-
+    //Makes sure the first character of line is not a * or ?
+    //                                     (query safe)
+    protected String cleanForQuery(String line)
+    {
+        if(line == null || line.trim().length() == 0){return line;}
+        
+        char firstLetter = line.charAt(0);
+        
+        if(firstLetter =='*' || firstLetter == '?')
+            return cleanForQuery(line.substring(1));
+        else
+            return line;
+    }
+    
+        
     public static String stripPhone(String phone) {
         if(phone == null || phone.trim().length() == 0){return phone;}
         StringBuffer buffer = new StringBuffer();
@@ -129,8 +145,9 @@ public class YelpRawDataParser implements FeedParser {
         return tel;
     }
     
-    public void addLatLongQueryFromCriteria(BooleanQuery rawQuery, double lat, double lng)
+    public BooleanQuery getLatLongQueryFromCriteria(double lat, double lng)
     {
+        rawQuery = new BooleanQuery();
         Query latQ = NumericRangeQuery.newDoubleRange(
                 CSListingDocumentFactory.LATITUDE_RANGE,
                 lat-.5, lat+.5,
@@ -143,6 +160,8 @@ public class YelpRawDataParser implements FeedParser {
 
         rawQuery.add(latQ, Occur.MUST);
         rawQuery.add(longQ, Occur.MUST);
+        
+        return rawQuery;
     }
     
     public void parse(PlaceCollector collector, InputStream ins) throws IOException {
@@ -211,7 +230,7 @@ public class YelpRawDataParser implements FeedParser {
                                         String reviewText = reviewElement.getAttribute("text");
                                         
                                         
-                                        addLatLongQueryFromCriteria(bq, poi.getAddress().getLat(),poi.getAddress().getLng());
+                                        bq = getLatLongQueryFromCriteria(poi.getAddress().getLat(),poi.getAddress().getLng());
                                         
                                         mainQuery.add(new TermQuery(new Term(
                                                CSListingDocumentFactory.PHONE,
@@ -220,7 +239,7 @@ public class YelpRawDataParser implements FeedParser {
                                         
                                         try
                                         {
-                                            mainQuery.add(qp.parse(poi.getName()), Occur.SHOULD);
+                                            mainQuery.add(qp.parse(cleanForQuery(poi.getName())), Occur.SHOULD);
                                             bq.add(mainQuery, Occur.MUST);
                                             Filter wrapper = new QueryWrapperFilter(bq);
                                             
@@ -243,7 +262,7 @@ public class YelpRawDataParser implements FeedParser {
                                                 
                                                 
                                                 boolean samePhone=false;
-                                                if(poi.getPhone() != null)
+                                                if(poi.getPhone() != null && phone != null)
                                                    samePhone = phone.equals(poi.getPhone()); //have the same phone?
                                                 
                                                 float dist = jw.getDistance(left, right);
@@ -268,6 +287,7 @@ public class YelpRawDataParser implements FeedParser {
                                         }
                                         catch (Exception e)
                                         {
+                                            
                                             e.printStackTrace();
                                         }
                                         
@@ -277,7 +297,10 @@ public class YelpRawDataParser implements FeedParser {
                     }
                 }
         }
-        catch(Exception e){e.printStackTrace();}
+        catch(Exception e){
+            System.err.println("Parsing error.");
+            e.printStackTrace();
+            }
     }
 }
 

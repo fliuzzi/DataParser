@@ -8,6 +8,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringReader;
+import java.net.HttpURLConnection;
+import java.net.SocketException;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.zip.ZipEntry;
@@ -59,8 +63,44 @@ public class CSParser implements FeedParser {
         
         public static String generateExternalURL(CSPlace poi)
         {
-            return "http://www.citysearch.com/profile/external/" + poi.getNativeId();
+            try{
+                URL url = new URL("http://www.citysearch.com/profile/external/" + poi.getNativeId());
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                int response = con.getResponseCode();
+                
+                if(response == 404)
+                    return null;
+                else
+                    return url.toString();
+            }
+            catch(Throwable t)
+            {
+                System.err.println(t.getMessage());
+                return "";
+            }
         }
+        
+        public static String generateMenuURL(CSPlace poi)
+        {
+            try{
+                URL url = new URL("http://www.citysearch.com/profile/menu/" + poi.getNativeId());
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                int response = con.getResponseCode();
+            
+                if(response == 404)
+                    return null;
+                else
+                    return url.toString();
+            }
+            catch(Throwable t)
+            {
+                t.printStackTrace();
+                return "";
+            }
+        }
+        
+        
+        
         
         public int findWhereIDMax()
         {
@@ -209,18 +249,19 @@ public class CSParser implements FeedParser {
             Element urls = ParseUtils.getChildByName(location, "urls");
             if(urls != null) {
                 
-//                if(ParseUtils.getChildValueByName(urls, "website_url") != null)
-//                {
-//                    System.out.println(poi.getNativeId()+poi.getName()+" "+ParseUtils.getChildValueByName(urls, "website_url"));
-//                }
+                // handle deprecation of website_url tags
+                if(ParseUtils.getChildValueByName(urls, "website_url") == null)
+                {
+                    poi.setWebUrl(generateExternalURL(poi));
+                }
+                if(ParseUtils.getChildValueByName(urls, "menu_url") == null)
+                {
+                    poi.setMenuUrl(generateMenuURL(poi));
+                }
                 
                 
-                
-                
-                
-                 poi.setMenuUrl(ParseUtils.getChildValueByName(urls, "menu_url"));
-                 //poi.setWebUrl(ParseUtils.getChildValueByName(urls, "website_url"));   CITYSEARCH DEPRECATED
-                 poi.setWebUrl(generateExternalURL(poi));
+                 
+                 
                  
                  
                  poi.setStaticMapUrl(ParseUtils.getChildValueByName(urls, "map_url"));

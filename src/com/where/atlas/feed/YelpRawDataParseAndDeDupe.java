@@ -15,33 +15,51 @@ public class YelpRawDataParseAndDeDupe
     {
         if(args.length != 3)
             {
-            System.err.println("USAGE:");
-            System.err.println("ARG1: zip file");
+            System.err.println("USAGE: program will go through a directory of yelp raw data zips");
+            System.err.println("ARG1: directory of raw data .zips");
             System.err.println("ARG2: CS 'lis' index");
             System.err.println("ARG3: Output file target path");
             return;
             }
         try{
+            File zipDirectory = new File(args[0]);
+            File[] zipFiles = zipDirectory.listFiles();
             
-            ZipFile zipFile = new ZipFile(new File(args[0]));
-            YelpRawDataParser parser = new YelpRawDataParser(new YelpParserUtils(args[1],args[2]));
-            String state = "";
-            
-            for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements();) {
-                
-                ZipEntry entry = (ZipEntry) e.nextElement();
-                parser.parse(new ConsoleOutputCollector(), zipFile.getInputStream(entry));
-
-                if(!YelpRawDataParser.currentState.equals(state))
-                {
-                    System.out.println(YelpRawDataParser.currentState);
-                    state = YelpRawDataParser.currentState;
-                }
+            if(zipFiles == null){
+                System.err.println("Directory Error");
+                return;
             }
-            
-            parser.closeWriter();
+            else{
+                YelpRawDataParser parser = new YelpRawDataParser(new YelpParserUtils(args[1],args[2]));
+                
+                for(int x = 0; x < zipFiles.length; x++)
+                {
+                    System.out.println("Zip File #"+(x+1)+" : " + zipFiles[x].getName());
+                    ZipFile zipFile = new ZipFile(zipFiles[x]);
+                    
+                    String state = "";
+                    
+                    for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements();) {
+                        
+                        ZipEntry entry = (ZipEntry) e.nextElement();
+                        parser.parse(new ConsoleOutputCollector(), zipFile.getInputStream(entry));
+        
+                        String currentState = YelpRawDataParser.currentState;
+                        if(currentState != null && !currentState.equals(state))
+                        {
+                            System.out.println(YelpRawDataParser.currentState);
+                            state = YelpRawDataParser.currentState;
+                        }
+                    }
+                    zipFile.close();
+                }
+                parser.closeWriter();
+                
+            }
         }
-        catch(Exception e){e.printStackTrace();}
+        catch(Throwable e){
+            e.printStackTrace();
+            }
         
 
     }
