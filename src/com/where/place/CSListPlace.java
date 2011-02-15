@@ -236,6 +236,11 @@ public class CSListPlace extends Place implements Serializable
         }
     }
     
+    public Placelist toPlaceList()
+    {
+        
+    }
+    
     public String toTokens() {
         StringBuffer buffer = new StringBuffer();
         for(GroupOfPlaces group:groups) {

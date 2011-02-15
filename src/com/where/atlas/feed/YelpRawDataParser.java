@@ -70,7 +70,7 @@ public class YelpRawDataParser implements FeedParser {
             zipMap = populateMapFromTxt(new Scanner(new File("/home/fliuzzi/data/bostonMarketZipCodes.txt")));
             System.out.println("Loaded zipcode map: " + zipMap.size() + " entries.");
             cityMap = populateMapFromTxt(new Scanner(new File("/home/fliuzzi/data/bostoncityCSIDS.txt")));
-            System.out.println("Loaded city-map: " + cityMap.size() + " entries.\nSearching State:");
+            System.out.println("Loaded city-map: " + cityMap.size() + " entries.");
             counter=0;
             
             geoCache = new GeoHashCache(CSListingDocumentFactory.LATITUDE_RANGE, CSListingDocumentFactory.LONGITUDE_RANGE,

@@ -67,7 +67,7 @@ public class YelpRawDataParseAndDeDupe
                     
                     thePool.shutdown();
                     thePool.awaitTermination(Long.MAX_VALUE, TimeUnit.MINUTES);
-                    System.out.println("Finished zip" + zipFile.getName());
+                    System.out.println("\nFinished zip" + zipFile.getName());
                     zipFile.close();
                 }
                 
