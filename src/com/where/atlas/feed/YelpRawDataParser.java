@@ -13,6 +13,7 @@ import java.util.Set;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.MultiFieldQueryParser;
+import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.queryParser.QueryParser.Operator;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Filter;
@@ -78,11 +79,6 @@ public class YelpRawDataParser implements FeedParser {
             analyzer = CSListingDocumentFactory.getAnalyzerWrapper();
             boosts = new HashMap<String, Float>();
             boosts.put(CSListingDocumentFactory.NAME,1.0f);
-            String[] fields = { CSListingDocumentFactory.NAME };
-            qp = new MultiFieldQueryParser(
-                    Version.LUCENE_30, fields, analyzer, boosts);
-            qp.setDefaultOperator(Operator.OR);
-        
         }
         catch(Throwable t){
             System.err.print("Error Loading!");
@@ -108,7 +104,6 @@ public class YelpRawDataParser implements FeedParser {
     
     public Set<String> populateMapFromTxt(Scanner in)
     {
-        String line = null;
         Set<String> txtSet = new HashSet<String>();
         
         
@@ -151,10 +146,10 @@ public class YelpRawDataParser implements FeedParser {
         else
         {
             //get rid of unsafe characters
-            line.replace("&", "");
-            line.replace("!", "");
-            line.replace(";", "");
-            return line;
+            line.replace("&#39;", "'");
+            line.replace("&amp;", "&");
+            
+            return QueryParser.escape(line);
         }
     }
     
@@ -197,6 +192,11 @@ public class YelpRawDataParser implements FeedParser {
         try{
                 BooleanQuery bq = new BooleanQuery();
                 BooleanQuery mainQuery = new BooleanQuery();
+                
+                String[] fields = { CSListingDocumentFactory.NAME };
+                MultiFieldQueryParser qp = new MultiFieldQueryParser(
+                        Version.LUCENE_30, fields, analyzer, boosts);
+                qp.setDefaultOperator(Operator.OR);
                 
                 DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
@@ -307,6 +307,7 @@ public class YelpRawDataParser implements FeedParser {
                                         catch (Exception e)
                                         {
                                             System.err.println(e.getMessage());
+                                            e.printStackTrace();
                                         }
                                         
                                     }

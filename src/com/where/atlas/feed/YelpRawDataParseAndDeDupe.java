@@ -44,7 +44,7 @@ public class YelpRawDataParseAndDeDupe
                 
                 for(int x = 0; x < zipFiles.length; x++)
                 {
-                    ExecutorService thePool = Executors.newFixedThreadPool(20);
+                    ExecutorService thePool = Executors.newFixedThreadPool(14);
                     System.out.println("Zip File #"+(x+1)+" : " + zipFiles[x].getName());
                     final ZipFile zipFile = new ZipFile(zipFiles[x]);
                                         
