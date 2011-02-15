@@ -51,42 +51,37 @@ public class YelpRawDataParser implements FeedParser {
     protected Set<String> cityMap,zipMap;
     protected GeoHashCache geoCache;
     protected JaroWinklerDistance jw;
-    protected BooleanQuery bq,mainQuery,rawQuery;
     protected Analyzer analyzer;
     protected HashMap<String,Float> boosts;
     protected MultiFieldQueryParser qp;
     protected int counter;
-    protected static String currentState;
-    private final String del = "\t";
-    protected StringBuilder strBuilder;
+//    protected static String currentState;
+    private static final String del = "\t";
     
     public YelpRawDataParser(YelpParserUtils Yparser)
     {
         parser=Yparser;
         BooleanQuery.setMaxClauseCount(10000);
         try{
-        bufferedWriter = new BufferedWriter(new FileWriter(parser.getTargetPath()));
-        searcher = new IndexSearcher(new NIOFSDirectory(new File(parser.getOldIndexPath())));
-        
-        strBuilder = new StringBuilder();
-        zipMap = populateMapFromTxt(new Scanner(new File("/home/fliuzzi/data/bostonMarketZipCodes.txt")));
-        System.out.println("Loaded zipcode map: " + zipMap.size() + " entries.");
-        cityMap = populateMapFromTxt(new Scanner(new File("/home/fliuzzi/data/bostoncityCSIDS.txt")));
-        System.out.println("Loaded city-map: " + cityMap.size() + " entries.\nSearching State:");
-        counter=0;
-        
-        geoCache = new GeoHashCache(CSListingDocumentFactory.LATITUDE_RANGE, CSListingDocumentFactory.LONGITUDE_RANGE,
-                CSListingDocumentFactory.LISTING_ID, searcher.getIndexReader());
-        jw = new JaroWinklerDistance();
-        bq = new BooleanQuery();
-        mainQuery = new BooleanQuery();
-        analyzer = CSListingDocumentFactory.getAnalyzerWrapper();
-        boosts = new HashMap<String, Float>();
-        boosts.put(CSListingDocumentFactory.NAME,1.0f);
-        String[] fields = { CSListingDocumentFactory.NAME };
-        qp = new MultiFieldQueryParser(
-                Version.LUCENE_30, fields, analyzer, boosts);
-        qp.setDefaultOperator(Operator.OR);
+            bufferedWriter = new BufferedWriter(new FileWriter(parser.getTargetPath()));
+            searcher = new IndexSearcher(new NIOFSDirectory(new File(parser.getOldIndexPath())));
+            
+            zipMap = populateMapFromTxt(new Scanner(new File("/home/fliuzzi/data/bostonMarketZipCodes.txt")));
+            System.out.println("Loaded zipcode map: " + zipMap.size() + " entries.");
+            cityMap = populateMapFromTxt(new Scanner(new File("/home/fliuzzi/data/bostoncityCSIDS.txt")));
+            System.out.println("Loaded city-map: " + cityMap.size() + " entries.\nSearching State:");
+            counter=0;
+            
+            geoCache = new GeoHashCache(CSListingDocumentFactory.LATITUDE_RANGE, CSListingDocumentFactory.LONGITUDE_RANGE,
+                    CSListingDocumentFactory.LISTING_ID, searcher.getIndexReader());
+            jw = new JaroWinklerDistance();
+            analyzer = CSListingDocumentFactory.getAnalyzerWrapper();
+            boosts = new HashMap<String, Float>();
+            boosts.put(CSListingDocumentFactory.NAME,1.0f);
+            String[] fields = { CSListingDocumentFactory.NAME };
+            qp = new MultiFieldQueryParser(
+                    Version.LUCENE_30, fields, analyzer, boosts);
+            qp.setDefaultOperator(Operator.OR);
         
         }
         catch(Throwable t){
@@ -94,11 +89,14 @@ public class YelpRawDataParser implements FeedParser {
         }
     }
     
-    
-    private void writeEntry(StringBuilder strBuilder)
+    private synchronized void writeEntry(StringBuilder strBuilder)
     {
         counter++;
-        System.out.println("-"+counter+"-");
+        if(counter % 50 == 0)
+            System.out.print("+");
+        if(counter % 500 == 0)
+            System.out.println();
+        
         try{
             bufferedWriter.write(strBuilder.toString());
             bufferedWriter.newLine();
@@ -128,7 +126,6 @@ public class YelpRawDataParser implements FeedParser {
         review.replace("\\t", "");
         return review;
     }
-    
     
     public void closeWriter()
     {
@@ -179,7 +176,7 @@ public class YelpRawDataParser implements FeedParser {
     
     public BooleanQuery getLatLongQueryFromCriteria(double lat, double lng)
     {
-        rawQuery = new BooleanQuery();
+        BooleanQuery rawQuery = new BooleanQuery();
         Query latQ = NumericRangeQuery.newDoubleRange(
                 CSListingDocumentFactory.LATITUDE_RANGE,
                 lat-.05, lat+.05,
@@ -198,6 +195,9 @@ public class YelpRawDataParser implements FeedParser {
     
     public void parse(PlaceCollector collector, InputStream ins) throws IOException {
         try{
+                BooleanQuery bq = new BooleanQuery();
+                BooleanQuery mainQuery = new BooleanQuery();
+                
                 DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
                 Document doc = docBuilder.parse(ins);
@@ -206,7 +206,6 @@ public class YelpRawDataParser implements FeedParser {
                 
                 NodeList listOfListings = doc.getElementsByTagName("listing");
                 Node listingNode = null;
-                Node reviewNode = null;
                 Place poi = null;
                 Address location = null;
                 
@@ -218,7 +217,7 @@ public class YelpRawDataParser implements FeedParser {
                     if(listingNode.getNodeType() == Node.ELEMENT_NODE){
                         Element listingElement = (Element)listingNode;
                         
-                        currentState = listingElement.getAttribute("region");
+                        
                         
                         
                         
@@ -229,7 +228,7 @@ public class YelpRawDataParser implements FeedParser {
                         location.setZip(listingElement.getAttribute("postal_code"));//addy.ZIP
                         poi.setPhone(stripPhone(listingElement.getAttribute("phone")));//PHONE
                         location.setCity(listingElement.getAttribute("locality"));//addy.CITY
-                        location.setState(currentState);
+                        
                         
                         
                         if(listingElement.getAttribute("lat").length() > 1 && listingElement.getAttribute("lon").length() > 1){
@@ -243,13 +242,13 @@ public class YelpRawDataParser implements FeedParser {
                         if(poi.getAddress().getZip() != null && zipMap.contains(poi.getAddress().getZip()))
                         {
                             NodeList reviewNodes = listingElement.getElementsByTagName("reviews");
-                            
+                            StringBuilder strBuilder = new StringBuilder();
                                 for(int x = 0;x < reviewNodes.getLength();x++)
                                 {
                                     if (strBuilder != null && strBuilder.length() > 0)
                                         strBuilder = strBuilder.delete(0, strBuilder.length());
-                                    
-                                    reviewNode = reviewNodes.item(x);
+
+                                    Node reviewNode = reviewNodes.item(x);
                                     if(reviewNode.getNodeType() == Node.ELEMENT_NODE){
                                         Element reviewElement = (Element) reviewNode;
                                         
@@ -307,7 +306,7 @@ public class YelpRawDataParser implements FeedParser {
                                         }
                                         catch (Exception e)
                                         {
-                                            e.getMessage();
+                                            System.err.println(e.getMessage());
                                         }
                                         
                                     }
@@ -317,7 +316,7 @@ public class YelpRawDataParser implements FeedParser {
                 }
         }
         catch(Exception e){
-            e.getMessage();
+            System.err.println(e.getMessage());
             }
     }
 }

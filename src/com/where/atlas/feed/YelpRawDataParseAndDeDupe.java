@@ -2,14 +2,21 @@ package com.where.atlas.feed;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
+
+
 public class YelpRawDataParseAndDeDupe
 {
-
     
     public static void main(String[] args)
     {
@@ -22,6 +29,7 @@ public class YelpRawDataParseAndDeDupe
             return;
             }
         try{
+            
             File zipDirectory = new File(args[0]);
             File[] zipFiles = zipDirectory.listFiles();
             
@@ -30,36 +38,47 @@ public class YelpRawDataParseAndDeDupe
                 return;
             }
             else{
-                YelpRawDataParser parser = new YelpRawDataParser(new YelpParserUtils(args[1],args[2]));
+                final YelpRawDataParser parser = new YelpRawDataParser(new YelpParserUtils(args[1],args[2]));
+                
+                
                 
                 for(int x = 0; x < zipFiles.length; x++)
                 {
+                    ExecutorService thePool = Executors.newFixedThreadPool(20);
                     System.out.println("Zip File #"+(x+1)+" : " + zipFiles[x].getName());
-                    ZipFile zipFile = new ZipFile(zipFiles[x]);
-                    
-                    String state = "";
-                    
+                    final ZipFile zipFile = new ZipFile(zipFiles[x]);
+                                        
                     for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements();) {
                         
-                        ZipEntry entry = (ZipEntry) e.nextElement();
-                        parser.parse(new ConsoleOutputCollector(), zipFile.getInputStream(entry));
-        
-                        String currentState = YelpRawDataParser.currentState;
-                        if(currentState != null && !currentState.equals(state))
-                        {
-                            System.out.println(YelpRawDataParser.currentState);
-                            state = YelpRawDataParser.currentState;
-                        }
+                        final ZipEntry entry = (ZipEntry) e.nextElement();
+                        
+                        
+                        Future<?> fut = thePool.submit(
+                                new Runnable(){ public void run(){
+                                    try{
+                                        parser.parse(
+                                                new ConsoleOutputCollector(), zipFile.getInputStream(entry));
+                                    }
+                                    catch(IOException io){
+                                        throw(new RuntimeException(io));
+                                    }}});
+                        
                     }
+                    
+                    thePool.shutdown();
+                    thePool.awaitTermination(Long.MAX_VALUE, TimeUnit.MINUTES);
+                    System.out.println("Finished zip" + zipFile.getName());
                     zipFile.close();
                 }
-                parser.closeWriter();
                 
+                
+                parser.closeWriter();
             }
         }
         catch(Throwable e){
             e.printStackTrace();
             }
+        
         
 
     }
