@@ -57,7 +57,8 @@ public class YelpRawDataParser implements FeedParser {
     protected MultiFieldQueryParser qp;
     protected int counter;
     protected static String currentState;
-    
+    private final String del = "\t";
+    protected StringBuilder strBuilder;
     
     public YelpRawDataParser(YelpParserUtils Yparser)
     {
@@ -67,7 +68,7 @@ public class YelpRawDataParser implements FeedParser {
         bufferedWriter = new BufferedWriter(new FileWriter(parser.getTargetPath()));
         searcher = new IndexSearcher(new NIOFSDirectory(new File(parser.getOldIndexPath())));
         
-        
+        strBuilder = new StringBuilder();
         zipMap = populateMapFromTxt(new Scanner(new File("/home/fliuzzi/data/bostonMarketZipCodes.txt")));
         System.out.println("Loaded zipcode map: " + zipMap.size() + " entries.");
         cityMap = populateMapFromTxt(new Scanner(new File("/home/fliuzzi/data/bostoncityCSIDS.txt")));
@@ -93,6 +94,20 @@ public class YelpRawDataParser implements FeedParser {
         }
     }
     
+    
+    private void writeEntry(StringBuilder strBuilder)
+    {
+        counter++;
+        System.out.println("-"+counter+"-");
+        try{
+            bufferedWriter.write(strBuilder.toString());
+            bufferedWriter.newLine();
+        }
+        catch(Throwable t){
+            System.err.println("Error writing entry: "+strBuilder);
+        }
+    }
+    
     public Set<String> populateMapFromTxt(Scanner in)
     {
         String line = null;
@@ -106,6 +121,14 @@ public class YelpRawDataParser implements FeedParser {
         in.close();
         return txtSet;
     }
+    
+    private String cleanReview(String review)
+    {
+        review.replace("\\n","");
+        review.replace("\\t", "");
+        return review;
+    }
+    
     
     public void closeWriter()
     {
@@ -129,7 +152,13 @@ public class YelpRawDataParser implements FeedParser {
         if(firstLetter =='*' || firstLetter == '?')
             return cleanForQuery(line.substring(1));
         else
+        {
+            //get rid of unsafe characters
+            line.replace("&", "");
+            line.replace("!", "");
+            line.replace(";", "");
             return line;
+        }
     }
     
         
@@ -153,12 +182,12 @@ public class YelpRawDataParser implements FeedParser {
         rawQuery = new BooleanQuery();
         Query latQ = NumericRangeQuery.newDoubleRange(
                 CSListingDocumentFactory.LATITUDE_RANGE,
-                lat-.5, lat+.5,
+                lat-.05, lat+.05,
                 true, true);
 
         Query longQ = NumericRangeQuery.newDoubleRange(
                 CSListingDocumentFactory.LONGITUDE_RANGE,
-                lng-.5, lng+.5,
+                lng-.05, lng+.05,
                 true, true);
 
         rawQuery.add(latQ, Occur.MUST);
@@ -168,11 +197,7 @@ public class YelpRawDataParser implements FeedParser {
     }
     
     public void parse(PlaceCollector collector, InputStream ins) throws IOException {
-        try{             
-                int placeCounter=0;
-                long reviewCounter=0;
-            
-            
+        try{
                 DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
                 Document doc = docBuilder.parse(ins);
@@ -187,7 +212,7 @@ public class YelpRawDataParser implements FeedParser {
                 
                 for(int i = 0; i < listOfListings.getLength();i++)
                 {
-                    placeCounter++;
+
                     
                     listingNode = listOfListings.item(i);
                     if(listingNode.getNodeType() == Node.ELEMENT_NODE){
@@ -218,18 +243,22 @@ public class YelpRawDataParser implements FeedParser {
                         if(poi.getAddress().getZip() != null && zipMap.contains(poi.getAddress().getZip()))
                         {
                             NodeList reviewNodes = listingElement.getElementsByTagName("reviews");
+                            
                                 for(int x = 0;x < reviewNodes.getLength();x++)
                                 {
+                                    if (strBuilder != null && strBuilder.length() > 0)
+                                        strBuilder = strBuilder.delete(0, strBuilder.length());
                                     
-                                    reviewCounter++;
                                     reviewNode = reviewNodes.item(x);
                                     if(reviewNode.getNodeType() == Node.ELEMENT_NODE){
                                         Element reviewElement = (Element) reviewNode;
-                                        String date = reviewElement.getAttribute("date");
-                                        String reviewHash = reviewElement.getAttribute("id");//TODO: de-dupe reviews
-                                        String userIDHash = reviewElement.getAttribute("user_id");
-                                        String rating = reviewElement.getAttribute("rating");
-                                        String reviewText = reviewElement.getAttribute("text");
+                                        
+                                        
+                                        
+                                        strBuilder.append(reviewElement.getAttribute("date") + del);
+                                        strBuilder.append(reviewElement.getAttribute("user_id") + del);
+                                        strBuilder.append(reviewElement.getAttribute("rating") + del);
+                                        strBuilder.append(cleanReview(reviewElement.getAttribute("text")) + del);
                                         
                                         
                                         bq = getLatLongQueryFromCriteria(poi.getAddress().getLat(),poi.getAddress().getLng());
@@ -252,45 +281,33 @@ public class YelpRawDataParser implements FeedParser {
                                             for(ScoreDoc sd : sds)
                                             {
                                                 org.apache.lucene.document.Document d = searcher.getIndexReader().document(sd.doc);
-                                                String name = d.get(CSListingDocumentFactory.NAME).toLowerCase().trim();
-                                                String city = d.get(CSListingDocumentFactory.CITY).toLowerCase().trim();
-                                                String left = name + " " + city;
+                                                String csId = d.get(CSListingDocumentFactory.LISTING_ID).trim();
+                                                boolean isInBostonMarket = cityMap.contains(csId);
+                                                if(!isInBostonMarket) continue;
                                                 
-                                                String csName = left;
-                                                
-                                                String right = poi.getName() + " " + poi.getAddress().getCity();
-                                                right = right.toLowerCase().trim();
-                                                String phone = d.get(CSListingDocumentFactory.PHONE);
-                                                
-                                                
-                                                boolean samePhone=false;
-                                                if(poi.getPhone() != null && phone != null)
-                                                   samePhone = phone.equals(poi.getPhone()); //have the same phone?
-                                                
+                                                String left = d.get(CSListingDocumentFactory.NAME).toLowerCase().trim();
+                                                String right = poi.getName().toLowerCase().trim();
                                                 float dist = jw.getDistance(left, right);
                                                 
-                                                String csId = d.get(CSListingDocumentFactory.LISTING_ID).trim();
-                                                
-
-                                                boolean isInBostonMarket = cityMap.contains(csId);
-                                                
-                                                boolean hit = (samePhone && dist > withPhoneThreshold_ && isInBostonMarket)
-                                                                    || (dist > withoutPhoneThreshold_ && isInBostonMarket);
-                                                
-                                                if(hit)
+                                                if(dist > withoutPhoneThreshold_)
                                                 {
-                                                    counter++;
-                                                    System.out.println("-"+counter+"-");
-                                                    String del = "\t";
-                                                    bufferedWriter.write(csId+del+rating+del+date+del+userIDHash+del+reviewText);
-                                                    bufferedWriter.newLine();
+                                                    writeEntry(strBuilder.insert(0, csId+del));
+                                                    break;
+                                                }
+                                                else
+                                                {
+                                                    String phone = d.get(CSListingDocumentFactory.PHONE);
+                                                    if(poi.getPhone() != null && phone != null && phone.equals(poi.getPhone()))
+                                                    {
+                                                        writeEntry(strBuilder.insert(0, csId+del));
+                                                        break;
+                                                    }
                                                 }
                                             }
                                         }
                                         catch (Exception e)
                                         {
-                                            
-                                            e.printStackTrace();
+                                            e.getMessage();
                                         }
                                         
                                     }
@@ -300,8 +317,7 @@ public class YelpRawDataParser implements FeedParser {
                 }
         }
         catch(Exception e){
-            System.err.println("Parsing error.");
-            e.printStackTrace();
+            e.getMessage();
             }
     }
 }
