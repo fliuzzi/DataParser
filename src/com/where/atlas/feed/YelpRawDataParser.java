@@ -93,9 +93,9 @@ public class YelpRawDataParser implements FeedParser {
     private synchronized void writeEntry(StringBuilder strBuilder)
     {
         counter++;
-        if(counter % 50 == 0)
-            System.out.print("+");
         if(counter % 500 == 0)
+            System.out.print("+");
+        if(counter % 20000 == 0)
             System.out.println();
         
         try{
