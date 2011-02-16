@@ -38,6 +38,7 @@ public class CSListCollectAndIndex implements PlaceCollector
     public void collect(Place place)
     {
         try{
+            
             //writes the dym.txt file by passing the writer and a placeList
             CSListParserUtils.writeDym(dymwriter, ((CSListPlace)place).toPlacelist());
             

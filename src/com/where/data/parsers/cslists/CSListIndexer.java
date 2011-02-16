@@ -195,6 +195,7 @@ public class CSListIndexer {
 	private static Document newPlacelistDocument(CSListPlace placelist, double lat, double lng) throws Exception {
 		Document document = new Document();
 		
+		
 		document.add(new Field(ID, placelist.getId(), Field.Store.YES, Field.Index.NOT_ANALYZED));
 		
 		//Is this the best way or should be broken into fields I.M.

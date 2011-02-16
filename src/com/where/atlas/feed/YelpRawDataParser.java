@@ -7,8 +7,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.Term;
@@ -50,6 +52,7 @@ public class YelpRawDataParser implements FeedParser {
     protected BufferedWriter bufferedWriter;
     protected IndexSearcher searcher;
     protected Set<String> cityMap,zipMap;
+    protected Map<Place,String> searchedPlaces; 
     protected GeoHashCache geoCache;
     protected JaroWinklerDistance jw;
     protected Analyzer analyzer;
@@ -64,6 +67,8 @@ public class YelpRawDataParser implements FeedParser {
         parser=Yparser;
         BooleanQuery.setMaxClauseCount(10000);
         try{
+            searchedPlaces = new ConcurrentHashMap<Place,String>();
+            
             bufferedWriter = new BufferedWriter(new FileWriter(parser.getTargetPath()));
             searcher = new IndexSearcher(new NIOFSDirectory(new File(parser.getOldIndexPath())));
             
@@ -241,78 +246,97 @@ public class YelpRawDataParser implements FeedParser {
                         //Only query if poi location is in zipMap  (speeeeed)
                         if(poi.getAddress().getZip() != null && zipMap.contains(poi.getAddress().getZip()))
                         {
-                            NodeList reviewNodes = listingElement.getElementsByTagName("reviews");
-                            StringBuilder strBuilder = new StringBuilder();
-                                for(int x = 0;x < reviewNodes.getLength();x++)
-                                {
-                                    if (strBuilder != null && strBuilder.length() > 0)
-                                        strBuilder = strBuilder.delete(0, strBuilder.length());
-
-                                    Node reviewNode = reviewNodes.item(x);
-                                    if(reviewNode.getNodeType() == Node.ELEMENT_NODE){
-                                        Element reviewElement = (Element) reviewNode;
-                                        
-                                        
-                                        
-                                        strBuilder.append(reviewElement.getAttribute("date") + del);
-                                        strBuilder.append(reviewElement.getAttribute("user_id") + del);
-                                        strBuilder.append(reviewElement.getAttribute("rating") + del);
-                                        strBuilder.append(cleanReview(reviewElement.getAttribute("text")) + del);
-                                        
-                                        
-                                        bq = getLatLongQueryFromCriteria(poi.getAddress().getLat(),poi.getAddress().getLng());
-                                        
-                                        mainQuery.add(new TermQuery(new Term(
-                                               CSListingDocumentFactory.PHONE,
-                                               poi.getPhone())),
-                                               Occur.SHOULD);
-                                        
-                                        try
-                                        {
-                                            mainQuery.add(qp.parse(cleanForQuery(poi.getName())), Occur.SHOULD);
-                                            bq.add(mainQuery, Occur.MUST);
-                                            Filter wrapper = new QueryWrapperFilter(bq);
+                                NodeList reviewNodes = listingElement.getElementsByTagName("reviews");
+                                StringBuilder strBuilder = new StringBuilder();
+                                    for(int x = 0;x < reviewNodes.getLength();x++)
+                                    {
+                                        if (strBuilder != null && strBuilder.length() > 0)
+                                            strBuilder = strBuilder.delete(0, strBuilder.length());
+    
+                                        Node reviewNode = reviewNodes.item(x);
+                                        if(reviewNode.getNodeType() == Node.ELEMENT_NODE){
+                                            Element reviewElement = (Element) reviewNode;
                                             
-                                            Filter distanceFilter = 
-                                                new NullSafeGeoFilter(wrapper, poi.getAddress().getLat(),poi.getAddress().getLng(), 1, geoCache, CSListingDocumentFactory.GEOHASH);                     
-                                            TopDocs td = searcher.search(bq, distanceFilter, 10);
-                                            ScoreDoc [] sds = td.scoreDocs;
-                                            for(ScoreDoc sd : sds)
+                                            
+                                            
+                                            strBuilder.append(reviewElement.getAttribute("date") + del);
+                                            strBuilder.append(reviewElement.getAttribute("user_id") + del);
+                                            strBuilder.append(reviewElement.getAttribute("rating") + del);
+                                            strBuilder.append(cleanReview(reviewElement.getAttribute("text")) + del);
+                                            
+                                            
+                                            if(!searchedPlaces.containsKey(poi))
                                             {
-                                                org.apache.lucene.document.Document d = searcher.getIndexReader().document(sd.doc);
-                                                String csId = d.get(CSListingDocumentFactory.LISTING_ID).trim();
-                                                boolean isInBostonMarket = cityMap.contains(csId);
-                                                if(!isInBostonMarket) continue;
+                                            
+                                                bq = getLatLongQueryFromCriteria(poi.getAddress().getLat(),poi.getAddress().getLng());
                                                 
-                                                String left = d.get(CSListingDocumentFactory.NAME).toLowerCase().trim();
-                                                String right = poi.getName().toLowerCase().trim();
-                                                float dist = jw.getDistance(left, right);
-                                                
-                                                if(dist > withoutPhoneThreshold_)
+                                                mainQuery.add(new TermQuery(new Term(
+                                                       CSListingDocumentFactory.PHONE,
+                                                       poi.getPhone())),
+                                                       Occur.SHOULD);
+                                            
+                                                try
                                                 {
-                                                    writeEntry(strBuilder.insert(0, csId+del));
-                                                    break;
-                                                }
-                                                else
-                                                {
-                                                    String phone = d.get(CSListingDocumentFactory.PHONE);
-                                                    if(poi.getPhone() != null && phone != null && phone.equals(poi.getPhone()))
+                                                    mainQuery.add(qp.parse(cleanForQuery(poi.getName())), Occur.SHOULD);
+                                                    bq.add(mainQuery, Occur.MUST);
+                                                    Filter wrapper = new QueryWrapperFilter(bq);
+                                                    
+                                                    Filter distanceFilter = 
+                                                        new NullSafeGeoFilter(wrapper, poi.getAddress().getLat(),poi.getAddress().getLng(), 1, geoCache, CSListingDocumentFactory.GEOHASH);                     
+                                                    TopDocs td = searcher.search(bq, distanceFilter, 10);  //TODO: tweak with 10
+                                                    ScoreDoc [] sds = td.scoreDocs;
+                                                    for(ScoreDoc sd : sds)
                                                     {
-                                                        writeEntry(strBuilder.insert(0, csId+del));
-                                                        break;
+                                                        org.apache.lucene.document.Document d = searcher.getIndexReader().document(sd.doc);
+                                                        String csId = d.get(CSListingDocumentFactory.LISTING_ID).trim();
+                                                        boolean isInBostonMarket = cityMap.contains(csId);
+                                                        if(!isInBostonMarket) continue;
+                                                        
+                                                        String left = d.get(CSListingDocumentFactory.NAME).toLowerCase().trim();
+                                                        String right = poi.getName().toLowerCase().trim();
+                                                        float dist = jw.getDistance(left, right);
+                                                        
+                                                        
+                                                        searchedPlaces.put(poi, csId);
+                                                        
+                                                        
+                                                        if(dist > withoutPhoneThreshold_)
+                                                        {
+                                                            writeEntry(strBuilder.insert(0, csId+del));
+                                                            break;
+                                                        }
+                                                        else
+                                                        {
+                                                            String phone = d.get(CSListingDocumentFactory.PHONE);
+                                                            if(poi.getPhone() != null && phone != null && phone.equals(poi.getPhone()))
+                                                            {
+                                                                writeEntry(strBuilder.insert(0, csId+del));
+                                                                break;
+                                                            }
+                                                        }
                                                     }
                                                 }
+                                                catch (Exception e)
+                                                {
+                                                    System.err.println(e.getMessage());
+                                                    e.printStackTrace();
+                                                }
+                                                
+                                                
+                                            }
+                                            else  //POI is recognized, dont need to query...
+                                            {
+                                                String csId = searchedPlaces.get(poi);
+                                                writeEntry(strBuilder.insert(0, csId+del));
                                             }
                                         }
-                                        catch (Exception e)
-                                        {
-                                            System.err.println(e.getMessage());
-                                            e.printStackTrace();
-                                        }
-                                        
                                     }
-                                }
+                            
+                            
                         }
+                            
+                            
+                            
                     }
                 }
         }
