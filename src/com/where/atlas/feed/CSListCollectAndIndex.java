@@ -51,9 +51,8 @@ public class CSListCollectAndIndex implements PlaceCollector
                 
                 if(++goodCounter%200 == 0) System.out.print("+");
                 if(goodCounter%1000 == 0) System.out.println();
-                if(goodCounter%2000 == 0){
-                    parserutils.getWriter().optimize();
-                }
+                //if(goodCounter%6000 == 0)
+                   // parserutils.getWriter().optimize();
             }    
         }
         catch(Exception e){
