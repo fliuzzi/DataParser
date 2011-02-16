@@ -29,7 +29,7 @@ public final class Placelist implements Serializable {
 	
 	private final List<GroupOfPlaces> groups;
 	
-	private Placelist(Builder builder)
+	public Placelist(Builder builder)
 	{
 		this.id = builder.id;
 		this.name = builder.name;

@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.lucene.document.Document;
 
 import com.where.place.CSListPlace;
+import com.where.places.lists.Placelist;
 import com.where.place.Place;
 
 public class CSListCollectAndIndex implements PlaceCollector
@@ -38,10 +39,10 @@ public class CSListCollectAndIndex implements PlaceCollector
     {
         try{
             //writes the dym.txt file by passing the writer and a placeList
-            CSListParserUtils.writeDym(dymwriter, (CSListPlace)place);
+            CSListParserUtils.writeDym(dymwriter, ((CSListPlace)place).toPlacelist());
             
             
-            List<Document> docs = CSListParserUtils.newPlacelistDocuments((CSListPlace)place);
+            List<Document> docs = CSListParserUtils.newPlacelistDocuments(((CSListPlace)place).toPlacelist());
             
           
             for(Document doc:docs) {    
