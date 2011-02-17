@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.Term;
@@ -38,6 +40,7 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import com.where.atlas.feed.YelpRawDataParseAndDeDupe.WriterThread;
 import com.where.place.Address;
 import com.where.place.Place;
 import com.where.util.lucene.NullSafeGeoFilter;
@@ -46,10 +49,11 @@ import com.where.util.lucene.NullSafeGeoFilter.GeoHashCache;
 
 public class YelpRawDataParser implements FeedParser { 
     
+    
     protected YelpParserUtils parser;
     protected final float withPhoneThreshold_ = .65f;
     protected final float withoutPhoneThreshold_ = .9f;
-    protected BufferedWriter bufferedWriter;
+    private static BufferedWriter bufferedWriter;
     protected IndexSearcher searcher;
     protected Set<String> cityMap,zipMap;
     protected Map<Place,String> searchedPlaces; 
@@ -58,8 +62,8 @@ public class YelpRawDataParser implements FeedParser {
     protected Analyzer analyzer;
     protected HashMap<String,Float> boosts;
     protected MultiFieldQueryParser qp;
-    protected int counter;
-//    protected static String currentState;
+    protected static AtomicInteger counter;
+    protected WriterThread writerThread;
     private static final String del = "\t";
     
     public YelpRawDataParser(YelpParserUtils Yparser)
@@ -67,16 +71,23 @@ public class YelpRawDataParser implements FeedParser {
         parser=Yparser;
         BooleanQuery.setMaxClauseCount(10000);
         try{
+            
+            
             searchedPlaces = new ConcurrentHashMap<Place,String>();
             
             bufferedWriter = new BufferedWriter(new FileWriter(parser.getTargetPath()));
+            
+            
+          //this excepts 
+            writerThread = new WriterThread(bufferedWriter);
+            
             searcher = new IndexSearcher(new NIOFSDirectory(new File(parser.getOldIndexPath())));
             
             zipMap = populateMapFromTxt(new Scanner(new File("/home/fliuzzi/data/bostonMarketZipCodes.txt")));
             System.out.println("Loaded zipcode map: " + zipMap.size() + " entries.");
             cityMap = populateMapFromTxt(new Scanner(new File("/home/fliuzzi/data/bostoncityCSIDS.txt")));
             System.out.println("Loaded city-map: " + cityMap.size() + " entries.");
-            counter=0;
+            counter=new AtomicInteger(0);
             
             geoCache = new GeoHashCache(CSListingDocumentFactory.LATITUDE_RANGE, CSListingDocumentFactory.LONGITUDE_RANGE,
                     CSListingDocumentFactory.LISTING_ID, searcher.getIndexReader());
@@ -90,17 +101,21 @@ public class YelpRawDataParser implements FeedParser {
         }
     }
     
-    private synchronized void writeEntry(StringBuilder strBuilder)
+    protected static BufferedWriter bufferedWriter()
     {
-        counter++;
-        if(counter % 500 == 0)
+        return bufferedWriter;
+    }
+    
+    
+    private void writeEntry(StringBuilder strBuilder)
+    {
+        if(counter.incrementAndGet() % 500 == 0)
             System.out.print("+");
-        if(counter % 20000 == 0)
+        if(counter.get() % 20000 == 0)
             System.out.println();
         
         try{
-            bufferedWriter.write(strBuilder.toString());
-            bufferedWriter.newLine();
+            writerThread.addTask(strBuilder.toString());
         }
         catch(Throwable t){
             System.err.println("Error writing entry: "+strBuilder);
@@ -130,7 +145,9 @@ public class YelpRawDataParser implements FeedParser {
     public void closeWriter()
     {
         try{
+            writerThread.finish();
             bufferedWriter.close();
+            System.out.println("Finished Writing");
         }
         catch(Exception e)
         {
