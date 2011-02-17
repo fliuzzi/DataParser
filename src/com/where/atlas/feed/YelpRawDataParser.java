@@ -106,6 +106,10 @@ public class YelpRawDataParser implements FeedParser {
         return bufferedWriter;
     }
     
+    protected void resetCounter()
+    {
+        counter.set(0);
+    }
     
     private void writeEntry(StringBuilder strBuilder)
     {

@@ -129,7 +129,7 @@ public class YelpRawDataParseAndDeDupe
                     
                     
                     
-                    
+                    parser.resetCounter();
                     zipFile.close();
                 }
                 
