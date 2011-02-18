@@ -8,15 +8,17 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.where.data.parsers.citysearch.CSListing;
-import com.where.data.parsers.citysearch.Category;
-import com.where.data.parsers.citysearch.Offer;
-import com.where.data.parsers.citysearch.Placelist;
-import com.where.data.parsers.citysearch.RatingStat;
-import com.where.data.parsers.citysearch.TermFreq;
-import com.where.data.parsers.citysearch.Tip;
-import com.where.data.parsers.citysearch.MicroReview;
-import com.where.data.parsers.citysearch.Review;
+import com.where.commons.feed.citysearch.CSListing;
+import com.where.commons.feed.citysearch.CSListing.sourceEnum;
+import com.where.commons.feed.citysearch.Category;
+import com.where.commons.feed.citysearch.Location;
+import com.where.commons.feed.citysearch.Offer;
+import com.where.commons.feed.citysearch.Placelist;
+import com.where.commons.feed.citysearch.RatingStat;
+import com.where.commons.feed.citysearch.TermFreq;
+import com.where.commons.feed.citysearch.Tip;
+import com.where.commons.feed.citysearch.MicroReview;
+import com.where.commons.feed.citysearch.Review;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -109,7 +111,7 @@ public class CSPlace extends Place implements Serializable {
     private boolean updated;
             
     ///////////////
-    //Constructor// 
+    //Constructor//
     public CSPlace() {
         setSource(Source.CS);
     }
@@ -843,6 +845,75 @@ public class CSPlace extends Place implements Serializable {
         catch(Exception ex) {
             throw new IllegalStateException(ex);
         }
+    }
+    
+    //TODO: Eliminate Hackery...
+    public CSListing toCSListing()
+    {
+        CSListing cslisting = new CSListing();
+        cslisting.setSource(sourceEnum.Citysearch);
+        cslisting.setListingId(getListingId());
+        cslisting.setWhereId(getWhereId());
+        cslisting.setReferenceId(getReferenceId());
+        cslisting.setName(getName());
+        cslisting.setSubtitle(getSubtitle());
+        cslisting.setPhone(getPhone());
+        cslisting.setCategory(getCategory());
+        cslisting.setCategories(getCategories());
+        cslisting.setTermFreqs(getTermFreqs());
+        cslisting.setNeighborhood(getNeighborhood());
+        cslisting.setNeighborhoods(neighborhoods());
+        cslisting.setMarkets(markets());
+        //address data/////////////////////////////////
+        Location loc = new Location();
+        loc.setAddress1(getAddress().getAddress1());
+        loc.setCity(getAddress().getCity());
+        loc.setLat(getAddress().getLat());
+        loc.setLng(getAddress().getLng());
+        loc.setState(getAddress().getState());
+        loc.setZip(getAddress().getZip());
+        cslisting.setAddress(loc);
+        ////////////////////////////////////////////////
+        cslisting.setLists(lists());
+        cslisting.setBecause(getBecause());
+        cslisting.setSimilar(getSimilar());
+        Double d = getRating();
+        cslisting.setRating(d.toString());
+        cslisting.setReviewCount(getReviewCount());
+        cslisting.setMyRating(getMyRating());
+        cslisting.setWebUrl(getWebUrl());
+        cslisting.setMenuUrl(getMenuUrl());
+        cslisting.setSendToUrl(getSendToUrl());
+        cslisting.setEmailUrl(getEmailUrl());
+        cslisting.setStaticMapUrl(getStaticMapUrl());
+        cslisting.setThumbUrl(getThumbUrl());
+        cslisting.setCustomerMessage(getCustomerMessage());
+        cslisting.setTagline(getTagline());
+        cslisting.setBusinessHours(getBusinessHours());
+        cslisting.setParking(getParking());
+        cslisting.setPriceLevel(getPriceLevel());
+        cslisting.setPpe(getPpe());
+        cslisting.setReservationId(getReservationId());
+        cslisting.setReservationUrl(getReservationUrl());
+        cslisting.setMaxCap(getMaxCap());
+        cslisting.setOffer(getOffer());
+        cslisting.setDistance(getDistance());
+        cslisting.setClicksRemained(getClicksRemained());
+        cslisting.setUpdated(isUpdated());
+        cslisting.setBullets(bullets());
+        cslisting.setAttributes(attributes());
+        cslisting.setTips(tips());
+        cslisting.setImages(images());
+        cslisting.setEditorials(editorials());
+        cslisting.setUserReviews(userReviews());
+        cslisting.setMicroReviews(reviews());
+        cslisting.setRecentTweets(recentTweets());
+        
+        if(isNotAdvertiser()) cslisting.setNotAdvertiser();
+        
+        
+        return cslisting;
+        
     }
 
 }

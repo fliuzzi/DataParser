@@ -36,8 +36,8 @@ import com.where.commons.feed.citysearch.CSListing;
 import com.where.commons.feed.citysearch.search.Analyzer;
 import com.where.commons.feed.citysearch.search.query.Profile;
 import com.where.commons.util.LocationUtil;
-import com.where.places.lists.GroupOfPlaces;
 import com.where.places.lists.CSListPlace;
+import com.where.places.lists.GroupOfPlaces;
 import com.where.places.lists.PlacelistPlace;
 import com.where.utils.CSListingUtil;
 import com.where.utils.Utils;
@@ -194,6 +194,7 @@ public class CSListIndexer {
 	
 	private static Document newPlacelistDocument(CSListPlace placelist, double lat, double lng) throws Exception {
 		Document document = new Document();
+		
 		
 		document.add(new Field(ID, placelist.getId(), Field.Store.YES, Field.Index.NOT_ANALYZED));
 		

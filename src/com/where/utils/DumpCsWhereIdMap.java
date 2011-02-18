@@ -20,7 +20,7 @@ public class DumpCsWhereIdMap extends IndexProcessor {
     }
     
     public void processDocument(Document doc) throws Exception {
-    	writer.write(doc.get("listingid") + "|" + doc.get("whereid"));
+    	writer.write(doc.get("listingid") + "|" + doc.get("whereid")+"\n");
     }
     
     public void finishProcessing() throws Exception{
@@ -28,7 +28,7 @@ public class DumpCsWhereIdMap extends IndexProcessor {
     }
     
     public static void main(String args[]) throws Exception {
-        if (args.length != 3) {
+        if (args.length != 2) {
         	System.out.println("usage: com.where.utils.DumpCsWhereIdMap <lucene_index_dir> <output_map_file>");
         	System.exit(1);
         }

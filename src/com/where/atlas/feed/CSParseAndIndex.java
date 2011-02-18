@@ -11,17 +11,14 @@ public class CSParseAndIndex {
     
         public static void main(String[] args) throws IOException{
       
-            if(args.length != 2){System.err.println("need 2 args"); return;}
+            if(args.length != 3){System.err.println("need 3 args"); return;}
             if(!args[0].endsWith(".zip")){System.err.println("req args: .zip path, idx to_write path"); return;}
 
 
             //store paths in member vars
             zipPath = args[0];       //path of enhanced CS data
             indexPath = args[1];     //where to write index file
-            idMappingPath = zipPath;
-            int idx = idMappingPath.lastIndexOf("/");
-            idMappingPath = idMappingPath.substring(0, idx);
-            idMappingPath += "/csid2whereid.txt"; //path of cs2whereid conversion .txt
+            idMappingPath = args[2]; //path of existing index (for whereids)
             
             System.out.println("Paths: \nZip Path: "+zipPath+"\nIndex Path: "+indexPath+"\nidMappingPath: "+idMappingPath);
             

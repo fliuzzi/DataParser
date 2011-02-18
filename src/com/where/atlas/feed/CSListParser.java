@@ -40,7 +40,7 @@ public class CSListParser implements FeedParser
             //set the hashed placelistID
             pl.setId(Utils.hash(pl.getSourceUrl()));
             
-            if(!CSListParserUtils.setPOIs(pl))
+            if(!CSListParserUtils.setPOIs(pl.toPlacelist()))
                 collector.collectBadInput(pl, new Exception("BadPOI"));
             else
                 collector.collect(pl);

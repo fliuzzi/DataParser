@@ -27,7 +27,6 @@ public class CSCollectAndIndex implements PlaceCollector
     public void collect(Place place)
     {
         displayProgress(++counter);
-        System.out.println(((CSPlace)place).toJSON());
         
         
         
@@ -50,12 +49,7 @@ public class CSCollectAndIndex implements PlaceCollector
         if(counter % 5000 == 0)
             System.out.print("+");
         if(counter % 175000 == 0)
-            System.out.println("   ~"+(counter/175000)*5+"%");
-        if((counter/175000)*5 == 100)
-        {
-            System.out.println("******\nFinished Indexing....Finishing up...\n******");
-        }
-            
+            System.out.println("   ~"+(counter/175000)*5+"%"); 
     }
 
     /**

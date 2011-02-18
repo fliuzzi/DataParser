@@ -11,10 +11,13 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-//import com.where.commons.feed.citysearch.Category;
 import com.where.commons.feed.citysearch.search.query.twitter.Tweet;
+import com.where.util.common.StringUtil;
 
 public class CSListing implements Serializable {
+    
+    ///NOTE: THIS FILE MUST BE THE MOST RECENT VERSION OR PLACES CANNOT SEARCH AGAINST IT
+    //        (BINARY SERIALIZATION)
 	private static final long serialVersionUID = -7943816525234309314L;
 	
 	private static final DecimalFormat DECIMAL =  new DecimalFormat("#,##0.0");
@@ -98,7 +101,7 @@ public class CSListing implements Serializable {
 	
 	private sourceEnum source_ = sourceEnum.Citysearch;
 	
-    public  enum sourceEnum {Citysearch, Localeze};
+    public  enum sourceEnum {Citysearch, Localeze, Where };
 	
     public sourceEnum getSource()
     {
@@ -118,517 +121,570 @@ public class CSListing implements Serializable {
 		return categories;
 	}
 	
+	
 	public String getListingId() {
 		return listingId;
 	}
 
-	public void setListingId(String listingId) {
-		this.listingId = listingId;
-	}
+    public void setListingId(String listingId) {
+        this.listingId = listingId;
+    }
 
-	public String getYpId() {
-		return ypId;
-	}
+    public String getYpId() {
+        return ypId;
+    }
 
-	public void setYpId(String ypId) {
-		this.ypId = ypId;
-	}
-	
-	public String getSpId() {
-		return spId;
-	}
+    public void setYpId(String ypId) {
+        this.ypId = ypId;
+    }
+    
+    public String getSpId() {
+        return spId;
+    }
 
-	public void setSpId(String spId) {
-		this.spId = spId;
-	}	
+    public void setSpId(String spId) {
+        this.spId = spId;
+    }
 
-	public String getWhereId() {
-		return whereId;
-	}
+    public String getWhereId() {
+        return whereId;
+    }
 
-	public void setWhereId(String whereId) {
-		this.whereId = whereId;
-	}
+    public void setWhereId(String whereId) {
+        this.whereId = whereId;
+    }
 
-	public String getReferenceId() {
-		return referenceId;
-	}
+    public String getReferenceId() {
+        return referenceId;
+    }
 
-	public void setReferenceId(String referenceId) {
-		this.referenceId = referenceId;
-	}
+    public void setReferenceId(String referenceId) {
+        this.referenceId = referenceId;
+    }
 
-	public List<Category> categories() {
-		return categories;
-	}
-	
-	public void addCategory(Category category) {
-		categories.add(category);
-	}
+    public List<Category> categories() {
+        return categories;
+    }
+    
+    public void addCategory(Category category) {
+        categories.add(category);
+    }
+    
+    public void setCategories(List<Category> c)
+    {
+        categories = c;
+    }
+    
+    public void setNeighborhoods(List<String> neigh)
+    {
+        neighborhoods = neigh;
+    }
 
-	protected String getCategory() {
-		return category;
-	}
+    protected String getCategory() {
+        return category;
+    }
 
-	public void setCategory(String category) {
-		this.category = category;
-	}
+    public void setCategory(String category) {
+        this.category = category;
+    }
 
-	public double getPpe() {
-		return ppe;
-	}
+    public double getPpe() {
+        return ppe;
+    }
 
-	public void setPpe(double ppe) {
-		this.ppe = ppe;
-	}
+    public void setPpe(double ppe) {
+        this.ppe = ppe;
+    }
 
-	public double getMaxCap() {
-		return maxCap;
-	}
+    public double getMaxCap() {
+        return maxCap;
+    }
 
-	public void setMaxCap(double maxCap) {
-		this.maxCap = maxCap;
-	}
+    public void setMaxCap(double maxCap) {
+        this.maxCap = maxCap;
+    }
 
-	public List<Placelist> lists() {
-		return lists;
-	}
+    public List<Placelist> lists() {
+        return lists;
+    }
 
-	public void setLists(List<Placelist> lists) {
-		this.lists = lists;
-	}
+    public void setLists(List<Placelist> lists) {
+        this.lists = lists;
+    }
 
-	public String getSubtitle() {
-		return subtitle;
-	}
+    public String getSubtitle() {
+        return subtitle;
+    }
 
-	public void setSubtitle(String subtitle) {
-		this.subtitle = subtitle;
-	}
+    public void setSubtitle(String subtitle) {
+        this.subtitle = subtitle;
+    }
 
-	public String getPhone() {
-		return phone;
-	}
+    public String getPhone() {
+        return phone;
+    }
 
-	public void setPhone(String phone) {
-		this.phone = phone;
-	}
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
 
-	public String getNeighborhood() {
-		return neighborhood;
-	}
+    public String getNeighborhood() {
+        return neighborhood;
+    }
 
-	public void setNeighborhood(String neighborhood) {
-		this.neighborhood = neighborhood;
-	}
-	
-	public void addNeighborhood(String n) {
-		if(n == null) return;
-		
-		if(neighborhoods == null) neighborhoods = new ArrayList<String>();
-		
-		neighborhoods.add(n);
-	}
-	
-	public List<String> neighborhoods() {
-		if(neighborhoods == null) return NO_VALUES;
-		
-		return neighborhoods;
-	}
-	
-	public void addMarket(String m) {
-		if(m == null) return;
-		
-		if(markets == null) markets = new ArrayList<String>();
-		
-		markets.add(m);
-	}
-	
-	public List<String> markets() {
-		if(markets == null) return NO_VALUES;
-		
-		return markets;
-	}
+    public void setNeighborhood(String neighborhood) {
+        this.neighborhood = neighborhood;
+    }
+    
+    public void addNeighborhood(String n) {
+        if(n == null) return;
+        
+        if(neighborhoods == null) neighborhoods = new ArrayList<String>();
+        
+        neighborhoods.add(n);
+    }
+    
+    public List<String> neighborhoods() {
+        if(neighborhoods == null) return NO_VALUES;
+        
+        return neighborhoods;
+    }
+    
+    public void addMarket(String m) {
+        if(m == null) return;
+        
+        if(markets == null) markets = new ArrayList<String>();
+        
+        markets.add(m);
+    }
+    
+    public List<String> markets() {
+        if(markets == null) return NO_VALUES;
+        
+        return markets;
+    }
+    
+    public void setMarkets(List<String> mark)
+    {
+        markets=mark;
+    }
 
-	public String getThumbUrl() {
-		return thumbUrl;
-	}
+    public String getThumbUrl() {
+        return thumbUrl;
+    }
 
-	public void setThumbUrl(String thumbUrl) {
-		this.thumbUrl = thumbUrl;
-	}
+    public void setThumbUrl(String thumbUrl) {
+        this.thumbUrl = thumbUrl;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public Location getAddress() {
-		return address;
-	}
+    public Location getAddress() {
+        return address;
+    }
 
-	public void setAddress(Location address) {
-		this.address = address;
-	}
+    public void setAddress(Location address) {
+        this.address = address;
+    }
 
-	public double getRating() {
-		try {
-			return rating == null ? 0 : Double.parseDouble(rating)/2;
-		}
-		catch(Exception ex) {
-			return 0;
-		}
-	}
-	
-	public void setRating(String rating) {
-		this.rating = rating;
-	}
-	
-	public void setMyRating(double myrating) {
-		this.myrating = myrating;
-	}
-	
-	public double getMyRating() {
-		return myrating/2;
-	}
-	
-	public String getReviewCount() {
-		if(reviewCount == null) return "0";
-		return reviewCount;
-	}
-	
-	public void setReviewCount(String reviewCount) {
-		this.reviewCount = reviewCount;
-	}
-	
-	public List<RatingStat> getRatingStats() {
-		List<RatingStat> stats = new ArrayList<RatingStat>();
-		
-		RatingStat five = new RatingStat(5);
-		RatingStat four = new RatingStat(4);
-		RatingStat three = new RatingStat(3);
-		RatingStat two = new RatingStat(2);
-		RatingStat one = new RatingStat(1);
-		
-		int countall = 0;
-		if(!userReviews().isEmpty()) {
-			for(Review review:userReviews) {
-				if((int)review.getRating() == 5) five.setCount(five.getCount()+1);
-				if((int)review.getRating() == 4) four.setCount(four.getCount()+1);
-				if((int)review.getRating() == 3) three.setCount(three.getCount()+1);
-				if((int)review.getRating() == 2) two.setCount(two.getCount()+1);
-				if((int)review.getRating() == 1) one.setCount(one.getCount()+1);
-			}
-		
-			countall = userReviews.size();
-		}
-		
-		if(countall > 0) {
-			five.setPercentage((int)(five.getCount()*100/countall));
-			four.setPercentage((int)(four.getCount()*100/countall));
-			three.setPercentage((int)(three.getCount()*100/countall));
-			two.setPercentage((int)(two.getCount()*100/countall));
-			one.setPercentage((int)(one.getCount()*100/countall));
-		}
-		
-		stats.add(five);
-		stats.add(four);
-		stats.add(three);
-		stats.add(two);
-		stats.add(one);
-		
-		return stats;
-	}
-	
-	public String getMenuUrl() {
-		return menuUrl;
-	}
-	
-	public void setMenuUrl(String menuUrl) {
-		if(menuUrl != null) {
-			if(menuUrl.indexOf("?") == -1) {
-				menuUrl = menuUrl + "?t=" + System.currentTimeMillis();
-			}
-			else menuUrl = menuUrl + "&t=" + System.currentTimeMillis();
-		}		
-		
-		this.menuUrl = menuUrl;
-	}
-	
-	public String getWebUrl() {
-		return webUrl;
-	}
-	
-	public void setWebUrl(String webUrl) {
-		if(webUrl != null) {
-			if(webUrl.indexOf("?") == -1) {
-				webUrl = webUrl + "?t=" + System.currentTimeMillis();
-			}
-			else webUrl = webUrl + "&t=" + System.currentTimeMillis();
-		}		
-		
-		this.webUrl = webUrl;
-	}
-	
-	public String getSendToUrl() {
-		return sendToUrl;
-	}
-	
-	public void setSendToUrl(String sendToUrl) {
-		if(sendToUrl != null) {
-			if(sendToUrl.indexOf("?") == -1) {
-				sendToUrl = sendToUrl + "?t=" + System.currentTimeMillis();
-			}
-			else sendToUrl = sendToUrl + "&t=" + System.currentTimeMillis();
-		}		
-		
-		this.sendToUrl = sendToUrl;
-	}
-	
-	public String getEmailUrl() {
-		return emailUrl;
-	}
-	
-	public void setEmailUrl(String emailUrl) {
-		if(emailUrl != null) {
-			if(emailUrl.indexOf("?") == -1) {
-				emailUrl = emailUrl + "?t=" + System.currentTimeMillis();
-			}
-			else emailUrl = emailUrl + "&t=" + System.currentTimeMillis();
-		}		
-		
-		this.emailUrl = emailUrl;
-	}
-	
-	public String getStaticMapUrl() {
-		return staticMapUrl;
-	}
-	
-	public void setStaticMapUrl(String staticMapUrl) {
-		if(staticMapUrl != null) {
-			if(staticMapUrl.indexOf("?") == -1) {
-				staticMapUrl = staticMapUrl + "?t=" + System.currentTimeMillis();
-			}
-			else staticMapUrl = staticMapUrl + "&t=" + System.currentTimeMillis();
-		}		
-		
-		this.staticMapUrl = staticMapUrl;
-	}
-	
-	public String getCustomerMessage() {
-		return customerMessage;
-	}
-	
-	public void setCustomerMessage(String customerMessage) {
-		this.customerMessage = customerMessage;
-	}
-	
-	public String getTagline() {
-		return tagline;
-	}
-	
-	public void setTagline(String tagline) {
-		this.tagline = tagline;
-	}
-	
-	public String getBusinessHours() {
-		return businessHours;
-	}
-	
-	public void setBusinessHours(String businessHours) {
-		this.businessHours = businessHours;
-	}
-	
-	public String getParking() {
-		return parking;
-	}
-	
-	public void setParking(String parking) {
-		this.parking = parking;
-	}
-	
-	public String getReservationId() {
-		return reservationId;
-	}
-	
-	public void setReservationId(String reservationId) {
-		this.reservationId = reservationId;
-	}
-	
-	public String getReservationUrl() {
-		return reservationUrl;
-	}
+    public double getRating() {
+        try {
+            return rating == null ? 0 : Double.parseDouble(rating)/2;
+        }
+        catch(Exception ex) {
+            return 0;
+        }
+    }
+    
+    public void setRating(String rating) {
+        this.rating = rating;
+    }
+    
+    public void setMyRating(double myrating) {
+        this.myrating = myrating;
+    }
+    
+    public double getMyRating() {
+        return myrating/2;
+    }
+    
+    public String getReviewCount() {
+        if(reviewCount == null) return "0";
+        return reviewCount;
+    }
+    
+    public void setReviewCount(String reviewCount) {
+        this.reviewCount = reviewCount;
+    }
+    
+    public List<RatingStat> getRatingStats() {
+        List<RatingStat> stats = new ArrayList<RatingStat>();
+        
+        RatingStat five = new RatingStat(5);
+        RatingStat four = new RatingStat(4);
+        RatingStat three = new RatingStat(3);
+        RatingStat two = new RatingStat(2);
+        RatingStat one = new RatingStat(1);
+        
+        int countall = 0;
+        if(!userReviews().isEmpty()) {
+            for(Review review:userReviews) {
+                if((int)review.getRating() == 5) five.setCount(five.getCount()+1);
+                if((int)review.getRating() == 4) four.setCount(four.getCount()+1);
+                if((int)review.getRating() == 3) three.setCount(three.getCount()+1);
+                if((int)review.getRating() == 2) two.setCount(two.getCount()+1);
+                if((int)review.getRating() == 1) one.setCount(one.getCount()+1);
+            }
+        
+            countall = userReviews.size();
+        }
+        
+        if(countall > 0) {
+            five.setPercentage((int)(five.getCount()*100/countall));
+            four.setPercentage((int)(four.getCount()*100/countall));
+            three.setPercentage((int)(three.getCount()*100/countall));
+            two.setPercentage((int)(two.getCount()*100/countall));
+            one.setPercentage((int)(one.getCount()*100/countall));
+        }
+        
+        stats.add(five);
+        stats.add(four);
+        stats.add(three);
+        stats.add(two);
+        stats.add(one);
+        
+        return stats;
+    }
+    
+    public String getMenuUrl() {
+        return menuUrl;
+    }
+    
+    public void setMenuUrl(String menuUrl) {
+        if(menuUrl != null) {
+            if(menuUrl.indexOf("?") == -1) {
+                menuUrl = menuUrl + "?t=" + System.currentTimeMillis();
+            }
+            else menuUrl = menuUrl + "&t=" + System.currentTimeMillis();
+        }       
+        
+        this.menuUrl = menuUrl;
+    }
+    
+    public String getWebUrl() {
+        return webUrl;
+    }
+    
+    public void setWebUrl(String webUrl) {
+        if(webUrl != null) {
+            if(webUrl.indexOf("?") == -1) {
+                webUrl = webUrl + "?t=" + System.currentTimeMillis();
+            }
+            else webUrl = webUrl + "&t=" + System.currentTimeMillis();
+        }       
+        
+        this.webUrl = webUrl;
+    }
+    
+    public String getSendToUrl() {
+        return sendToUrl;
+    }
+    
+    public void setSendToUrl(String sendToUrl) {
+        if(sendToUrl != null) {
+            if(sendToUrl.indexOf("?") == -1) {
+                sendToUrl = sendToUrl + "?t=" + System.currentTimeMillis();
+            }
+            else sendToUrl = sendToUrl + "&t=" + System.currentTimeMillis();
+        }       
+        
+        this.sendToUrl = sendToUrl;
+    }
+    
+    public String getEmailUrl() {
+        return emailUrl;
+    }
+    
+    public void setEmailUrl(String emailUrl) {
+        if(emailUrl != null) {
+            if(emailUrl.indexOf("?") == -1) {
+                emailUrl = emailUrl + "?t=" + System.currentTimeMillis();
+            }
+            else emailUrl = emailUrl + "&t=" + System.currentTimeMillis();
+        }       
+        
+        this.emailUrl = emailUrl;
+    }
+    
+    public String getStaticMapUrl() {
+        return staticMapUrl;
+    }
+    
+    public void setStaticMapUrl(String staticMapUrl) {
+        if(staticMapUrl != null) {
+            if(staticMapUrl.indexOf("?") == -1) {
+                staticMapUrl = staticMapUrl + "?t=" + System.currentTimeMillis();
+            }
+            else staticMapUrl = staticMapUrl + "&t=" + System.currentTimeMillis();
+        }       
+        
+        this.staticMapUrl = staticMapUrl;
+    }
+    
+    public String getCustomerMessage() {
+        return customerMessage;
+    }
+    
+    public void setCustomerMessage(String customerMessage) {
+        this.customerMessage = customerMessage;
+    }
+    
+    public String getTagline() {
+        return tagline;
+    }
+    
+    public void setTagline(String tagline) {
+        this.tagline = tagline;
+    }
+    
+    public String getBusinessHours() {
+        return businessHours;
+    }
+    
+    public void setBusinessHours(String businessHours) {
+        this.businessHours = businessHours;
+    }
+    
+    public String getParking() {
+        return parking;
+    }
+    
+    public void setParking(String parking) {
+        this.parking = parking;
+    }
+    
+    public String getReservationId() {
+        return reservationId;
+    }
+    
+    public void setReservationId(String reservationId) {
+        this.reservationId = reservationId;
+    }
+    
+    public String getReservationUrl() {
+        return reservationUrl;
+    }
 
-	public void setReservationUrl(String reservationUrl) {
-		this.reservationUrl = reservationUrl;
-	}
+    public void setReservationUrl(String reservationUrl) {
+        this.reservationUrl = reservationUrl;
+    }
 
-	public void addBullet(String bullet) {
-		if(bullet == null) return;
-		
-		if(bullets == null) bullets = new ArrayList<String>();
-		
-		bullets.add(bullet);
-	}
-	
-	public List<String> bullets() {
-		if(bullets == null) return NO_VALUES;
-		
-		return bullets;
-	}
-	
-	public void addAttribute(String attribute) {
-		if(attribute == null) return;
-		
-		if(attributes == null) attributes = new ArrayList<String>();
-		
-		attributes.add(attribute);
-	}	
-	
-	public List<String> attributes() {
-		if(attributes == null) return NO_VALUES;
-		
-		return attributes;
-	}	
-	
-	public void addTip(Tip tip) {
-		if(tip == null) return;
-		
-		if(tips == null) tips = new ArrayList<Tip>();
-		
-		tips.add(tip);
-	}	
-	
-	public List<Tip> tips() {
-		if(tips == null) return NO_TIPS;
-		
-		return tips;
-	}	
-	
-	public List<TermFreq> getTermFreqs() {
-		return termFreqs;
-	}
+    public void addBullet(String bullet) {
+        if(bullet == null) return;
+        
+        if(bullets == null) bullets = new ArrayList<String>();
+        
+        bullets.add(bullet);
+    }
+    
+    
+    public List<String> bullets() {
+        if(bullets == null) return NO_VALUES;
+        
+        return bullets;
+    }
+    
+    public void setBullets(List<String> bulls)
+    {
+        bullets = bulls;
+    }
+    
+    public void addAttribute(String attribute) {
+        if(attribute == null) return;
+        
+        if(attributes == null) attributes = new ArrayList<String>();
+        
+        attributes.add(attribute);
+    }   
+    
+    public List<String> attributes() {
+        if(attributes == null) return NO_VALUES;
+        
+        return attributes;
+    }   
+    
+    public void setAttributes(List<String> attr)
+    {
+        attributes = attr;
+    }
+    
+    public void addTip(Tip tip) {
+        if(tip == null) return;
+        
+        if(tips == null) tips = new ArrayList<Tip>();
+        
+        tips.add(tip);
+    }   
+    
+    public List<Tip> tips() {
+        if(tips == null) return NO_TIPS;
+        
+        return tips;
+    }   
+    
+    public void setTips(List<Tip> tiplist)
+    {
+        tips=tiplist;
+    }
+    
+    public List<TermFreq> getTermFreqs() {
+        return termFreqs;
+    }
 
-	public void setTermFreqs(List<TermFreq> termFreqs) {
-		this.termFreqs = termFreqs;
-	}
+    public void setTermFreqs(List<TermFreq> termFreqs) {
+        this.termFreqs = termFreqs;
+    }
 
-	public void addImage(String image) {
-		if(image == null) return;
-		
-		if(images == null) images = new ArrayList<String>();
-		
-		images.add(image);
-	}	
-	
-	public List<String> images() {
-		if(images == null) return NO_VALUES;
-		
-		return images;
-	}	
-	
-	public void addEditorial(Review editorial) {
-		if(editorial == null) return;
-		
-		if(editorials == null) editorials = new ArrayList<Review>();
-		
-		editorials.add(editorial);
-	}	
-	
-	public List<Review> editorials() {
-		if(editorials == null) return NO_REVIEWS;
-		
-		return editorials;
-	}	
-	
-	public void addUserReview(Review userReview) {
-		if(userReview == null) return;
-		
-		if(userReviews == null) userReviews = new ArrayList<Review>();
-		
-		userReviews.add(userReview);
-	}	
-	
-	public List<Review> userReviews() {
-		if(userReviews == null) return NO_REVIEWS;
-		
-		return userReviews;
-	}
-	public void setMicroReviews(List<MicroReview> reviews) {
-		this.reviews = reviews;
-	}
-	public List<MicroReview> reviews() {
-		return reviews;
-	}	
-	public Offer getOffer() {
-		return offer;
-	}
-	public void setOffer(Offer offer) {
-		this.offer = offer;
-	}
-	public String getPriceLevel() {
-		return priceLevel;
-	}
-	public void setPriceLevel(String priceLevel) {
-		this.priceLevel = priceLevel;
-	}
-	
-	public void addRecentTweets(List<Tweet> tweets) {
-		recentTweets.addAll(tweets);
-	}
-	
-	public List<Tweet> recentTweets() {
-		return recentTweets;
-	}
+    public void addImage(String image) {
+        if(image == null) return;
+        
+        if(images == null) images = new ArrayList<String>();
+        
+        images.add(image);
+    }   
+    
+    public List<String> images() {
+        if(images == null) return NO_VALUES;
+        
+        return images;
+    }   
+    
+    public void setImages(List<String> imagelist)
+    {
+        images = imagelist;
+    }
+    
+    public void addEditorial(Review editorial) {
+        if(editorial == null) return;
+        
+        if(editorials == null) editorials = new ArrayList<Review>();
+        
+        editorials.add(editorial);
+    }   
+    
+    public List<Review> editorials() {
+        if(editorials == null) return NO_REVIEWS;
+        
+        return editorials;
+    }   
+    
+    public void setEditorials(List<Review> reviewlist)
+    {
+        editorials=reviewlist;
+    }
+    
+    public void addUserReview(Review userReview) {
+        if(userReview == null) return;
+        
+        if(userReviews == null) userReviews = new ArrayList<Review>();
+        
+        userReviews.add(userReview);
+    }   
+    
+    public List<Review> userReviews() {
+        if(userReviews == null) return NO_REVIEWS;
+        
+        return userReviews;
+    }
+    
+    public void setUserReviews(List<Review> reviewlist)
+    {
+        userReviews=reviewlist;
+    }
+    
+    public void setMicroReviews(List<MicroReview> reviews) {
+        this.reviews = reviews;
+    }
+    public List<MicroReview> reviews() {
+        return reviews;
+    }   
+    public Offer getOffer() {
+        return offer;
+    }
+    public void setOffer(Offer offer) {
+        this.offer = offer;
+    }
+    public String getPriceLevel() {
+        return priceLevel;
+    }
+    public void setPriceLevel(String priceLevel) {
+        this.priceLevel = priceLevel;
+    }
+    
+    public void addRecentTweets(List<Tweet> tweets) {
+        recentTweets.addAll(tweets);
+    }
+    
+    public List<Tweet> recentTweets() {
+        return recentTweets;
+    }
+    
+    public void setRecentTweets(List<Tweet> tweetlist)
+    {
+        recentTweets = tweetlist;
+    }
 
-	public double getDistance() {
-		return distance;
-	}
+    public double getDistance() {
+        return distance;
+    }
 
-	public void setDistance(double distance) {
-		this.distance = distance;
-	}
+    public void setDistance(double distance) {
+        this.distance = distance;
+    }
+    
+    public long getClicksRemained() {
+        return clicksRemained;
+    }
+
+    public void setClicksRemained(long clicksRemained) {
+        this.clicksRemained = clicksRemained;
+    }
+
+    public boolean isNotAdvertiser() {
+        return notAdvertiser;
+    }
+
+    public void setNotAdvertiser() {
+        notAdvertiser = true;
+    }
+
+    public boolean isUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(boolean updated) {
+        this.updated = updated;
+    }
+    
+    public void setBecause(List<CSListing> because) {
+        this.because = because;
+    }
+    public List<CSListing> getBecause() {
+        return because;
+    }
+    public void setSimilar(List<CSListing> similar) {
+        this.similar = similar;
+    }   
+    public List<CSListing> getSimilar() {
+        return similar;
+    }
 	
-	public long getClicksRemained() {
-		return clicksRemained;
-	}
-
-	public void setClicksRemained(long clicksRemained) {
-		this.clicksRemained = clicksRemained;
-	}
-
-	public boolean isNotAdvertiser() {
-		return notAdvertiser;
-	}
-
-	public void setNotAdvertiser() {
-		notAdvertiser = true;
-	}
-
-	public boolean isUpdated() {
-		return updated;
-	}
-
-	public void setUpdated(boolean updated) {
-		this.updated = updated;
-	}
-	
-	public void setBecause(List<CSListing> because) {
-		this.because = because;
-	}
-	public List<CSListing> getBecause() {
-		return because;
-	}
-	public void setSimilar(List<CSListing> similar) {
-		this.similar = similar;
-	}	
-	public List<CSListing> getSimilar() {
-		return similar;
-	}
-
 	@Override
 	public int hashCode() {
 		return listingId.hashCode();
@@ -638,7 +694,28 @@ public class CSListing implements Serializable {
 	public boolean equals(Object obj) {
 		if(obj == null || !(obj instanceof CSListing)) return false;
 		
-		return listingId.equals(((CSListing)obj).listingId);
+		return listingId != null && listingId.equals(((CSListing)obj).listingId) || listingId == null && getWhereId() != null && getWhereId().equals(((CSListing)obj).getWhereId());
+	}
+	
+	// The overridden equals function is not reflexive in nature as it should be
+	// But, since its already used at other place so need to write a new function instead of fixing it
+	public boolean equalsTo(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof CSListing))
+			return false;
+		
+		CSListing objCSListing = (CSListing)obj;
+		
+		if (StringUtil.isEmpty(this.listingId) || StringUtil.isEmpty(objCSListing.listingId)) {
+			if (StringUtil.isEmpty(this.getWhereId()) || StringUtil.isEmpty(objCSListing.getWhereId())) {
+				return false;
+			} else
+				return (this.getWhereId().equalsIgnoreCase(objCSListing.getWhereId())) ? true : false;
+		} else
+			return (this.listingId.equalsIgnoreCase(objCSListing.listingId)) ? true : false;
 	}
 	
 	public JSONObject toJSONSnippet() {

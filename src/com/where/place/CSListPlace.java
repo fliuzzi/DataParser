@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import com.where.places.lists.Author;
 import com.where.places.lists.GroupOfPlaces;
+import com.where.places.lists.Placelist;
 import com.where.places.lists.PlacelistPlace;
 
 public class CSListPlace extends Place implements Serializable
@@ -24,6 +25,7 @@ public class CSListPlace extends Place implements Serializable
     private String description;
     private long created;
     private long modified;
+    private boolean isPublic=true;
     
     private String source;
     private String sourceUrl;
@@ -34,6 +36,10 @@ public class CSListPlace extends Place implements Serializable
         setSource(Source.CSLIST);
     }
     
+    public void setIsPublic(boolean bool)
+    {
+        this.isPublic=bool;
+    }
     public String getId() {
         return id;
     }
@@ -132,6 +138,23 @@ public class CSListPlace extends Place implements Serializable
         return groups.get(index);
     }
     
+    public Placelist toPlacelist()
+    {
+        Placelist.Builder placeBuilder = new Placelist.Builder();
+        placeBuilder.name(name)
+                    .id(id)
+                    .author(author)
+                    .created(created)
+                    .modified(modified)
+                    .groups(groups)
+                    .ispublic(isPublic)
+                    .source(source)
+                    .sourceUrl(sourceUrl)
+                    .description(description);
+        
+        return new Placelist(placeBuilder);
+    }
+    
     public String toString() {
         StringBuffer buffer = new StringBuffer();
         if(!groups.isEmpty()) {
@@ -208,6 +231,7 @@ public class CSListPlace extends Place implements Serializable
         try {
             CSListPlace list = new CSListPlace();
             list.setId(json.optString("id", null));
+            list.setIsPublic(json.optBoolean("ispublic", true));
             list.setName(json.optString("name", null));
             if(json.has("created")) {
                 list.setCreated(json.getLong("created"));

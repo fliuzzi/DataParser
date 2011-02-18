@@ -8,6 +8,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringReader;
+import java.net.HttpURLConnection;
+import java.net.SocketException;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.zip.ZipEntry;
@@ -23,12 +27,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import com.where.data.parsers.citysearch.Category;
-import com.where.data.parsers.citysearch.Offer;
-import com.where.data.parsers.citysearch.ParseUtils;
-import com.where.data.parsers.citysearch.Placelist;
-import com.where.data.parsers.citysearch.Review;
-import com.where.data.parsers.citysearch.Tip;
+import com.where.commons.feed.citysearch.Category;
+import com.where.commons.feed.citysearch.Offer;
+import com.where.commons.feed.citysearch.ParseUtils;
+import com.where.commons.feed.citysearch.Placelist;
+import com.where.commons.feed.citysearch.Review;
+import com.where.commons.feed.citysearch.Tip;
 import com.where.place.CSPlace;
 
 public class CSParser implements FeedParser {
@@ -41,6 +45,7 @@ public class CSParser implements FeedParser {
         private static final String SP_REF_ID = "6";
         private String zipPath;
         private CSListingIndexer indexer;
+        private static int whereidmax;
         
         public CSParser(CSParserUtils csparserutils)
         {
@@ -48,10 +53,66 @@ public class CSParser implements FeedParser {
             locwordWriter = csparserutils.getLocwordWriter();
             indexer = csparserutils.getIndexer();
             
+            whereidmax = findWhereIDMax();
+            
             if(csparserutils.getAdvertiserIndexer() != null)
             {
                 spAltCategoryIndexer = csparserutils.getAdvertiserIndexer();
             }
+        }
+        
+        public static String generateExternalURL(CSPlace poi)
+        {
+            try{
+                URL url = new URL("http://www.citysearch.com/profile/external/" + poi.getNativeId());
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                int response = con.getResponseCode();
+                
+                if(response == 404)
+                    return null;
+                else
+                    return url.toString();
+            }
+            catch(Throwable t)
+            {
+                System.err.println(t.getMessage());
+                return "";
+            }
+        }
+        
+        public static String generateMenuURL(CSPlace poi)
+        {
+            try{
+                URL url = new URL("http://www.citysearch.com/profile/menu/" + poi.getNativeId());
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                int response = con.getResponseCode();
+            
+                if(response == 404)
+                    return null;
+                else
+                    return url.toString();
+            }
+            catch(Throwable t)
+            {
+                t.printStackTrace();
+                return "";
+            }
+        }
+        
+        
+        
+        
+        public int findWhereIDMax()
+        {
+            int maxval=0;
+            int[] values = indexer.csId2whereId_.getValues();
+         
+            for(int i=0;i<values.length;i++)
+                if(values[i] > maxval)
+                    maxval=i;
+            System.out.println("Max of existing CS whereids is: "+maxval);
+            
+            return maxval;
         }
         
         
@@ -121,7 +182,6 @@ public class CSParser implements FeedParser {
                         buffer.append("</locations>");
                         count+=outerParse("<locations>" + buffer.toString(),collector);
                     }
-                
                     zis.closeEntry();
                 }
                 zis.close();
@@ -169,7 +229,15 @@ public class CSParser implements FeedParser {
         }
         
         public static void index(CSPlace poi, CSListingIndexer indexer) {
-            poi.setWhereId(Integer.toString(indexer.csId2whereId_.get(Integer.parseInt(poi.getListingId()))));
+            int whereid = indexer.csId2whereId_.get(Integer.parseInt(poi.getListingId()));
+            
+            if(whereid == 0)
+            {
+                whereid = ++whereidmax;
+            }
+            
+            poi.setWhereId(Integer.toString(whereid));
+            
             indexer.index(poi);
         }
         public static CSPlace populateDetail(Element location) {  
@@ -180,8 +248,22 @@ public class CSParser implements FeedParser {
             
             Element urls = ParseUtils.getChildByName(location, "urls");
             if(urls != null) {
-                 poi.setMenuUrl(ParseUtils.getChildValueByName(urls, "menu_url"));
-                 poi.setWebUrl(ParseUtils.getChildValueByName(urls, "website_url"));
+                
+                // handle deprecation of website_url tags
+                if(ParseUtils.getChildValueByName(urls, "website_url") == null)
+                {
+                    poi.setWebUrl(generateExternalURL(poi));
+                }
+                if(ParseUtils.getChildValueByName(urls, "menu_url") == null)
+                {
+                    poi.setMenuUrl(generateMenuURL(poi));
+                }
+                
+                
+                 
+                 
+                 
+                 
                  poi.setStaticMapUrl(ParseUtils.getChildValueByName(urls, "map_url"));
                  poi.setSendToUrl(ParseUtils.getChildValueByName(urls, "send_to_friend_url"));
                  poi.setEmailUrl(ParseUtils.getChildValueByName(urls, "email_link"));
