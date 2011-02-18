@@ -112,7 +112,7 @@ public class LocalezeCollectAndIndex implements PlaceCollector
                 String cats  = tmpdoc.get("data");
                 if(!StringUtil.isEmpty(cats))
                 {
-                    doc.add(new Field("category", cats, Store.YES, Index.NOT_ANALYZED));                   
+                    doc.add(new Field("category", cats, Store.YES, Index.ANALYZED_NO_NORMS));                   
                 }
             }
         
