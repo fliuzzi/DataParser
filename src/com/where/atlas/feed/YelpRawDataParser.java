@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.lucene.analysis.Analyzer;
@@ -85,7 +84,7 @@ public class YelpRawDataParser implements FeedParser {
             
             zipMap = populateMapFromTxt(new Scanner(new File("/home/fliuzzi/data/bostonMarketZipCodes.txt")));
             System.out.println("Loaded zipcode map: " + zipMap.size() + " entries.");
-            cityMap = populateMapFromTxt(new Scanner(new File("/home/fliuzzi/data/bostoncityCSIDS.txt")));
+            cityMap = populateMapFromTxt(new Scanner(new File("/home/fliuzzi/data/citySUBSET.txt")));
             System.out.println("Loaded city-map: " + cityMap.size() + " entries.");
             counter=new AtomicInteger(0);
             
@@ -126,7 +125,7 @@ public class YelpRawDataParser implements FeedParser {
         }
     }
     
-    public Set<String> populateMapFromTxt(Scanner in)
+    public static Set<String> populateMapFromTxt(Scanner in)
     {
         Set<String> txtSet = new HashSet<String>();
         
@@ -254,7 +253,7 @@ public class YelpRawDataParser implements FeedParser {
                         location.setZip(listingElement.getAttribute("postal_code"));//addy.ZIP
                         poi.setPhone(stripPhone(listingElement.getAttribute("phone")));//PHONE
                         location.setCity(listingElement.getAttribute("locality"));//addy.CITY
-                        
+                        location.setState(listingElement.getAttribute("region"));
                         
                         
                         if(listingElement.getAttribute("lat").length() > 1 && listingElement.getAttribute("lon").length() > 1){
@@ -265,7 +264,7 @@ public class YelpRawDataParser implements FeedParser {
                         poi.setAddress(location);
                         
                         //Only query if poi location is in zipMap  (speeeeed)
-                        if(poi.getAddress().getZip() != null && zipMap.contains(poi.getAddress().getZip()))
+                        if(poi.getAddress().getZip() != null  && zipMap.contains(poi.getAddress().getZip()))
                         {
                                 NodeList reviewNodes = listingElement.getElementsByTagName("reviews");
                                 StringBuilder strBuilder = new StringBuilder();
@@ -304,7 +303,7 @@ public class YelpRawDataParser implements FeedParser {
                                                     
                                                     Filter distanceFilter = 
                                                         new NullSafeGeoFilter(wrapper, poi.getAddress().getLat(),poi.getAddress().getLng(), 1, geoCache, CSListingDocumentFactory.GEOHASH);                     
-                                                    TopDocs td = searcher.search(bq, distanceFilter, 10);  //TODO: tweak with 10
+                                                    TopDocs td = searcher.search(bq, distanceFilter, 50);  //TODO: tweak with 10
                                                     ScoreDoc [] sds = td.scoreDocs;
                                                     for(ScoreDoc sd : sds)
                                                     {
