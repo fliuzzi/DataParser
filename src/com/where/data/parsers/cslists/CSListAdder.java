@@ -10,6 +10,7 @@ import org.json.JSONObject;
 public class CSListAdder extends CSListMerger
 {
     
+    @SuppressWarnings("unused")
     private static Set<String> badLists = new HashSet<String>();
     
     

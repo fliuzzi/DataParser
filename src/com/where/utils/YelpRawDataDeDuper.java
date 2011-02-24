@@ -65,7 +65,7 @@ public class YelpRawDataDeDuper
         }
         
         System.out.println("Wrote "+uniqueCount+" uniques and de-duped "+dupeCount);
-        System.out.println("amongst "+uniqueCitySet.size());
+        System.out.println("amongst "+uniqueCitySet.size()+" unique pois");
     }
 
     

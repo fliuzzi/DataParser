@@ -38,7 +38,6 @@ public class CSXmlScanner
                 
                 NodeList listOfListings = doc.getElementsByTagName("id");
                 Node listingNode = null;
-                Node childNode = null;
                 
                 for(int i = 0; i < listOfListings.getLength();i++)
                 {
