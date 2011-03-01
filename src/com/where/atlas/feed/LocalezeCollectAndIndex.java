@@ -4,7 +4,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 
-import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.NumericField;
@@ -21,6 +20,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.NIOFSDirectory;
 
 import com.where.commons.util.StringUtil;
+import com.where.util.lucene.LocalezeTools;
 import com.where.place.Place;
 
 public class LocalezeCollectAndIndex implements PlaceCollector
@@ -37,7 +37,6 @@ public class LocalezeCollectAndIndex implements PlaceCollector
     
     
     private long collectorCounter;
-
     
     
     LocalezeCollectAndIndex(LocalezeParserUtils Lparserutils)
@@ -61,7 +60,7 @@ public class LocalezeCollectAndIndex implements PlaceCollector
             index = new File(idRaw);
             index.mkdir();
             directory = new NIOFSDirectory(index);
-            writer = new IndexWriter(directory, new SimpleAnalyzer(), true, MaxFieldLength.UNLIMITED);
+            writer = new IndexWriter(directory, LocalezeTools.localezeAnalyzer(), true, MaxFieldLength.UNLIMITED);
             writer.setMergeFactor(100000);
             writer.setMaxMergeDocs(Integer.MAX_VALUE);        
             
