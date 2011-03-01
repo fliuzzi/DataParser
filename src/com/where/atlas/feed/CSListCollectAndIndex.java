@@ -9,7 +9,6 @@ import java.util.List;
 import org.apache.lucene.document.Document;
 
 import com.where.place.CSListPlace;
-import com.where.places.lists.Placelist;
 import com.where.place.Place;
 
 public class CSListCollectAndIndex implements PlaceCollector

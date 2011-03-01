@@ -4,11 +4,11 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.StringTokenizer;
+
+import com.where.atlas.feed.YelpRawDataParser;
 
 public class YelpRawDataDeDuper
 {
@@ -16,12 +16,12 @@ public class YelpRawDataDeDuper
     {
         final String del = "\t";
         
-        if(args.length != 2) return;
+        if(args.length != 3) return;
 
         int stringCount=0;
         int uniqueCount=0;
         int dupeCount=0;
-        
+        Set<String> uniqueCitySet = new HashSet<String>();
         try{
             Set<Integer>reviewSet = new HashSet<Integer>();
             BufferedWriter writer = new BufferedWriter(new FileWriter(args[1]));
@@ -29,7 +29,8 @@ public class YelpRawDataDeDuper
             Scanner reader = new Scanner(new File(args[0])).useDelimiter("\\n");
             StringBuilder strBuilder = new StringBuilder();
             
-            String test = "";
+            Set<String> neighborSet = YelpRawDataParser.populateMapFromTxt(new Scanner(new File(args[2])));
+            
             
             while(reader.hasNext())
             {
@@ -46,7 +47,10 @@ public class YelpRawDataDeDuper
                 }
                 strBuilder.delete(strBuilder.lastIndexOf(del),strBuilder.length());
                         
-                    if(reviewSet.add(strBuilder.toString().hashCode())){
+                    if(reviewSet.add(strBuilder.toString().hashCode()) && 
+                                neighborSet.contains(strBuilder.substring(0, strBuilder.indexOf("\t"))))
+                    {
+                        uniqueCitySet.add(strBuilder.substring(0,strBuilder.indexOf("\t")));
                         writer.write(strBuilder.toString());
                         writer.newLine();
                         uniqueCount++;
@@ -61,6 +65,7 @@ public class YelpRawDataDeDuper
         }
         
         System.out.println("Wrote "+uniqueCount+" uniques and de-duped "+dupeCount);
+        System.out.println("amongst "+uniqueCitySet.size()+" unique pois");
     }
 
     
@@ -69,7 +74,6 @@ public class YelpRawDataDeDuper
     
     public Set<String> populateMapFromTxt(Scanner in)
     {
-        String line = null;
         Set<String> txtSet = new HashSet<String>();
         
         

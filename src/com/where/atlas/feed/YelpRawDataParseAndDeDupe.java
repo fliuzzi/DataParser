@@ -2,21 +2,14 @@ package com.where.atlas.feed;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 
 
 
@@ -111,11 +104,14 @@ public class YelpRawDataParseAndDeDupe
                         final ZipEntry entry = (ZipEntry) e.nextElement();
                         
                         
+                        @SuppressWarnings("unused")
                         Future<?> fut = thePool.submit(
                                 new Runnable(){ public void run(){
                                     try{
+                                        
                                         parser.parse(
                                                 new ConsoleOutputCollector(), zipFile.getInputStream(entry));
+                                        System.out.println("Finished XML File: " + entry.getName());
                                     }
                                     catch(IOException io){
                                         throw(new RuntimeException(io));
