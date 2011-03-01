@@ -38,7 +38,9 @@ public class CSListParser implements FeedParser
             CSListPlace pl = CSListPlace.fromJSON(lists.getJSONObject(i));
             
             //set the hashed placelistID
-            pl.setId(Utils.hash(pl.getSourceUrl()));
+            String key = Utils.hash(pl.getSourceUrl());
+            pl.setId(key);
+            System.out.println("* "+pl.getSourceUrl()+" id: "+key);
             
             if(!CSListParserUtils.setPOIs(pl.toPlacelist()))
                 collector.collectBadInput(pl, new Exception("BadPOI"));
