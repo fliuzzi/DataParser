@@ -5,12 +5,12 @@
 	<classpathentry kind="lib" path="lib/JSON.jar"/>
 	<classpathentry kind="lib" path="lib/json_simple.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-core-3.0.2.jar" sourcepath="/home/fliuzzi/ThirdPartyCode/lucene-3.0.2/src"/>
+	<classpathentry kind="lib" path="lib/lucene-core-3.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-spatial-3.0.2.jar"/>
-	<classpathentry kind="lib" path="lib/where_utils.jar"/>
+	<classpathentry kind="lib" path="lib/where_utils.jar" sourcepath="/Utilities/src"/>
 	<classpathentry kind="lib" path="lib/lucene-spellchecker-3.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/ostermillerutils_1_07_00.jar"/>
-	<classpathentry kind="lib" path="lib/search.jar" sourcepath="/home/fliuzzi/workspace/dataparser/lib/search.jar"/>
+	<classpathentry kind="lib" path="lib/search.jar" sourcepath="/search/src"/>
 	<classpathentry kind="lib" path="lib/tika-core-0.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/tika-parsers-0.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/org.springframework.web-3.0.3.RELEASE.jar"/>
