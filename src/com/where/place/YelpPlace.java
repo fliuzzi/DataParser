@@ -2,8 +2,8 @@ package com.where.place;
 
 import java.util.ArrayList;
 
-import com.where.atlas.feed.YelpParserUtils.InnerRating;
-import com.where.atlas.feed.YelpParserUtils.Listing;
+import com.where.atlas.feed.yelp.YelpParserUtils.InnerRating;
+import com.where.atlas.feed.yelp.YelpParserUtils.Listing;
 
 public class YelpPlace extends Place
 {

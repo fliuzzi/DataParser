@@ -1,4 +1,4 @@
-package com.where.atlas.feed;
+package com.where.atlas.feed.yelp;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -10,6 +10,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import com.where.atlas.feed.ConsoleOutputCollector;
 
 
 

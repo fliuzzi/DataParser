@@ -1,4 +1,4 @@
-package com.where.atlas.feed;
+package com.where.atlas.feed.citysearch;
 
 
 import java.io.BufferedReader;
@@ -25,6 +25,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import com.where.atlas.feed.FeedParser;
+import com.where.atlas.feed.PlaceCollector;
 import com.where.commons.feed.citysearch.Category;
 import com.where.commons.feed.citysearch.Offer;
 import com.where.commons.feed.citysearch.ParseUtils;

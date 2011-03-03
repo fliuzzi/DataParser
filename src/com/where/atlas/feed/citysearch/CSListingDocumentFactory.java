@@ -1,4 +1,4 @@
-package com.where.atlas.feed;
+package com.where.atlas.feed.citysearch;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -26,6 +26,7 @@ import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.lucene.util.Version;
 
+import com.where.atlas.feed.localeze.LocalezeUtil;
 import com.where.commons.feed.citysearch.search.BaseAnalyzer;
 import com.where.commons.feed.citysearch.search.NoStemAnalyzer;
 import com.where.commons.feed.citysearch.search.budget.ExcludedCategories;

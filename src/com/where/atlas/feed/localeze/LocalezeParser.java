@@ -1,4 +1,4 @@
-package com.where.atlas.feed;
+package com.where.atlas.feed.localeze;
 
 import gnu.trove.TLongLongHashMap;
 
@@ -9,6 +9,8 @@ import java.io.InputStreamReader;
 
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 
+import com.where.atlas.feed.FeedParser;
+import com.where.atlas.feed.PlaceCollector;
 import com.where.place.Address;
 import com.where.place.Place;
 

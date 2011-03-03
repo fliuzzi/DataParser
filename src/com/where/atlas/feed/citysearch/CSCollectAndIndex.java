@@ -1,5 +1,6 @@
-package com.where.atlas.feed;
+package com.where.atlas.feed.citysearch;
 
+import com.where.atlas.feed.PlaceCollector;
 import com.where.place.CSPlace;
 import com.where.place.Place;
 

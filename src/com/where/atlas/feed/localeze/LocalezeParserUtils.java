@@ -1,4 +1,4 @@
-package com.where.atlas.feed;
+package com.where.atlas.feed.localeze;
 
 import gnu.trove.TLongLongHashMap;
 

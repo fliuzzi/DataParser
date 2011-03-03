@@ -1,4 +1,4 @@
-package com.where.atlas.feed;
+package com.where.atlas.feed.citysearch;
 
 import gnu.trove.TIntIntHashMap;
 

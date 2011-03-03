@@ -1,4 +1,4 @@
-package com.where.atlas.feed;
+package com.where.atlas.feed.yelp;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -39,7 +39,10 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import com.where.atlas.feed.YelpRawDataParseAndDeDupe.WriterThread;
+import com.where.atlas.feed.FeedParser;
+import com.where.atlas.feed.PlaceCollector;
+import com.where.atlas.feed.citysearch.CSListingDocumentFactory;
+import com.where.atlas.feed.yelp.YelpRawDataParseAndDeDupe.WriterThread;
 import com.where.place.Address;
 import com.where.place.Place;
 import com.where.util.lucene.NullSafeGeoFilter;

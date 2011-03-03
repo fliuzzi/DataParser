@@ -1,4 +1,4 @@
-package com.where.atlas.feed;
+package com.where.atlas.feed.cslists;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.where.atlas.feed.FeedParser;
+import com.where.atlas.feed.PlaceCollector;
 import com.where.place.CSListPlace;
 import com.where.utils.Utils;
 

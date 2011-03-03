@@ -8,7 +8,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import com.where.atlas.feed.YelpRawDataParser;
+import com.where.atlas.feed.yelp.YelpRawDataParser;
 
 public class YelpRawDataDeDuper
 {

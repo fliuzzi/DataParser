@@ -1,4 +1,4 @@
-package com.where.atlas.feed;
+package com.where.atlas.feed.yelp;
 
 import gnu.trove.TLongHashSet;
 import gnu.trove.TObjectLongHashMap;
@@ -39,6 +39,7 @@ import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.lucene.store.NIOFSDirectory;
 import org.apache.lucene.util.Version;
 
+import com.where.atlas.feed.citysearch.CSListingDocumentFactory;
 import com.where.place.Address;
 import com.where.place.YelpPlace;
 import com.where.util.lucene.NullSafeGeoFilter;

@@ -1,4 +1,4 @@
-package com.where.atlas.feed;
+package com.where.atlas.feed.localeze;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -19,6 +19,7 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.NIOFSDirectory;
 
+import com.where.atlas.feed.PlaceCollector;
 import com.where.commons.util.StringUtil;
 import com.where.util.lucene.LocalezeTools;
 import com.where.place.Place;

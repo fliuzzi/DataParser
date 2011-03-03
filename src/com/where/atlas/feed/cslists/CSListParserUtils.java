@@ -1,4 +1,4 @@
-package com.where.atlas.feed;
+package com.where.atlas.feed.cslists;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

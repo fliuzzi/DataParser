@@ -1,4 +1,4 @@
-package com.where.atlas.feed;
+package com.where.atlas.feed.cslists;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.lucene.document.Document;
 
+import com.where.atlas.feed.PlaceCollector;
 import com.where.place.CSListPlace;
 import com.where.place.Place;
 
