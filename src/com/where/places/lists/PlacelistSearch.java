@@ -33,7 +33,7 @@ import org.apache.lucene.util.Version;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.where.data.parsers.cslists.CSListIndexer;
+import com.where.data.cslists.CSListIndexer;
 import com.where.util.lucene.ListGeoFilter;
 
 public class PlacelistSearch {

@@ -21,7 +21,7 @@ import org.apache.lucene.store.NIOFSDirectory;
 
 import com.Ostermiller.util.StringTokenizer;
 import com.where.commons.feed.citysearch.search.Analyzer;
-import com.where.data.parsers.localeze.Category;
+import com.where.data.localeze.Category;
 
 public class LocalezeParserUtils
 {

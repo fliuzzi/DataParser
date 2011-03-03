@@ -13,7 +13,7 @@ import org.apache.lucene.index.IndexWriter.MaxFieldLength;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.NIOFSDirectory;
 
-import com.where.data.parsers.citysearch.Analyzer;
+import com.where.data.citysearch.Analyzer;
 import com.where.place.CSPlace;
 
 public class CSListingIndexer {
