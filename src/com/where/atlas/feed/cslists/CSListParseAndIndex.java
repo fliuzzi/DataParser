@@ -2,6 +2,11 @@ package com.where.atlas.feed.cslists;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.store.NIOFSDirectory;
 
 import com.where.commons.feed.citysearch.search.query.Profile;
 
@@ -21,11 +26,15 @@ public class CSListParseAndIndex
         }
         
         Profile listprofile = new Profile();
-        listprofile.setIndexPath(args[0]);
-        listprofile.setAdIndexPath(args[1]);
-        listprofile.setLocalezeIndexPath("/idx/localeze");
         
         try{
+        	IndexSearcher smbsearcher = new IndexSearcher(new NIOFSDirectory(new File("/idx/smb")));
+            Profile.setSmbSearcher(smbsearcher, new ReentrantReadWriteLock());
+            listprofile.setIndexPath(args[0]);
+            listprofile.setAdIndexPath(args[1]);
+            listprofile.setLocalezeIndexPath("/idx/localeze");
+        	
+        	
             CSListParserUtils parserutils = 
                     new CSListParserUtils(listprofile,args[2],args[3],args[4]);
             CSListCollectAndIndex collector = new CSListCollectAndIndex(parserutils);

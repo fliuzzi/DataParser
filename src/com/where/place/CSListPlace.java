@@ -230,7 +230,12 @@ public class CSListPlace extends Place implements Serializable
     public static CSListPlace fromJSON(JSONObject json) {
         try {
             CSListPlace list = new CSListPlace();
+            
+            
             list.setId(json.optString("id", null));
+            
+            
+            
             list.setIsPublic(json.optBoolean("ispublic", true));
             list.setName(json.optString("name", null));
             if(json.has("created")) {

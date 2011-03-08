@@ -170,6 +170,9 @@ public class CSListParserUtils
             GroupOfPlaces g = placelist.group(i);
             List<String>  badgroupplaces = new ArrayList<String>();
             for(PlacelistPlace place:g.entries()) {
+            	
+            	
+            	
                 CSListing poi = CSListingUtil.loadProfile(CSListParserUtils.profile, place.getListingid()); 
                 if(poi == null) {
                     //System.out.println("Bad POI lookup " + place.getListingid() + " " + placelist.getSourceUrl());

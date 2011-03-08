@@ -25,7 +25,11 @@ public class CSListAdder extends CSListMerger
         if(sourceSmall != null && nameBig != null && nameSmall != null && sourceBig != null) {
             String uriBig = sourceBig.optString("url");
             String uriSmall = sourceSmall.optString("url");
-            if(uriBig != null && uriSmall != null && uriBig.equalsIgnoreCase(uriSmall) && nameSmall.equalsIgnoreCase(nameBig)) return true;
+            if(uriBig != null && uriSmall != null && uriBig.equalsIgnoreCase(uriSmall) && nameSmall.equalsIgnoreCase(nameBig))
+        	{
+        		System.out.println("Replaced an old list!");
+        		return true;
+        	}
         }
         return false;
     }
