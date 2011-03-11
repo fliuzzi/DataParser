@@ -44,7 +44,7 @@ public class FixCatsInLis
                 catNames.append(cat.getName());
                 if(cnt > 0) {catIds.append(",");}
                 catIds.append(cat.getId());
-		cnt++
+		cnt++;
             }
             
             doc.add(new Field("catnames", catNames.toString(), Field.Store.YES, Index.ANALYZED_NO_NORMS));
