@@ -19,10 +19,11 @@ import com.where.place.CSPlace;
 public class CSListingIndexer {
 	private static final Log logger = LogFactory.getLog(CSListingIndexer.class);
 	
+	private long count;
 	private IndexWriter writer;
 	private String indexPath;
 	
-	private CSListingIndexer() {}
+	private CSListingIndexer() {count=0;}
 	
 	public static CSListingIndexer newInstance(String indexPath) {
 		try {
@@ -60,6 +61,10 @@ public class CSListingIndexer {
 		try {
 			//TODO: find the thread where we can begin with the analyzerwrapper
 			writer.addDocument(CSListingDocumentFactory.createDocument(poi));
+			count++;
+			
+			if(count % 20000 == 0)
+				writer.optimize();
 		}
 		catch(Exception ex) {
 			throw new IllegalArgumentException(ex);
