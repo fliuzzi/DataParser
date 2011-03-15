@@ -2,7 +2,6 @@ package com.where.atlas.feed.cslists;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.lucene.search.IndexSearcher;
