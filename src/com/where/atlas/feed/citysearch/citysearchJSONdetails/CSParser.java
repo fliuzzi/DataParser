@@ -8,8 +8,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.zip.ZipEntry;
@@ -62,43 +60,43 @@ public class CSParser implements FeedParser {
             }
         }
         
-        public static String generateExternalURL(CSPlace poi)
-        {
-            try{
-                URL url = new URL("http://www.citysearch.com/profile/external/" + poi.getNativeId());
-                HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                int response = con.getResponseCode();
-                
-                if(response == 404)
-                    return null;
-                else
-                    return url.toString();
-            }
-            catch(Throwable t)
-            {
-                System.err.println(t.getMessage());
-                return "";
-            }
-        }
-        
-        public static String generateMenuURL(CSPlace poi)
-        {
-            try{
-                URL url = new URL("http://www.citysearch.com/profile/menu/" + poi.getNativeId());
-                HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                int response = con.getResponseCode();
-            
-                if(response == 404)
-                    return null;
-                else
-                    return url.toString();
-            }
-            catch(Throwable t)
-            {
-                t.printStackTrace();
-                return "";
-            }
-        }
+//        public static String generateExternalURL(CSPlace poi)
+//        {
+//            try{
+//                URL url = new URL("http://www.citysearch.com/profile/external/" + poi.getNativeId());
+//                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+//                int response = con.getResponseCode();
+//                
+//                if(response == 404)
+//                    return null;
+//                else
+//                    return url.toString();
+//            }
+//            catch(Throwable t)
+//            {
+//                System.err.println(t.getMessage());
+//                return "";
+//            }
+//        }
+//        
+//        public static String generateMenuURL(CSPlace poi)
+//        {
+//            try{
+//                URL url = new URL("http://www.citysearch.com/profile/menu/" + poi.getNativeId());
+//                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+//                int response = con.getResponseCode();
+//            
+//                if(response == 404)
+//                    return null;
+//                else
+//                    return url.toString();
+//            }
+//            catch(Throwable t)
+//            {
+//                t.printStackTrace();
+//                return "";
+//            }
+//        }
         
         
         
