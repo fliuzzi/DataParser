@@ -7,7 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import com.where.atlas.feed.citysearch.CSListingIndexer;
+import com.where.atlas.feed.citysearch.citysearchJSONdetails.CSListingIndexer;
 import com.where.utils.CSIDHashMap;
 
 public class CSParserUtils

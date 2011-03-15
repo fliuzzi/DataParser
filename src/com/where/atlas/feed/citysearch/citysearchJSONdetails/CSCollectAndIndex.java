@@ -1,7 +1,7 @@
 package com.where.atlas.feed.citysearch.citysearchJSONdetails;
 
 import com.where.atlas.feed.PlaceCollector;
-import com.where.atlas.feed.citysearch.CSListingIndexer;
+import com.where.atlas.feed.citysearch.citysearchJSONdetails.CSListingIndexer;
 import com.where.place.CSPlace;
 import com.where.place.Place;
 

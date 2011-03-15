@@ -103,7 +103,7 @@ public class CSListingDocumentFactory {
 	public static final String LIST_NAME = "list";
 	public static final String LIST_URL = "listurl";
 	
-	public static final String POI = "poi";
+	public static final String DETAIL_JSON = "details";
 	
 	public static final String GEOHASH = "geohash";
 	
@@ -270,7 +270,7 @@ public class CSListingDocumentFactory {
 			document.add(new Field(THUMB_URL, poi.getThumbUrl(), Field.Store.YES, Field.Index.NOT_ANALYZED));			
 		}
 		
-		addCSListing(poi, document);
+		addDetailJSON(poi, document);
 		
 		if(poi.getMenuUrl() != null && poi.getThumbUrl() != null) {
 			document.setBoost(document.getBoost()*1.08f);
@@ -506,8 +506,8 @@ public class CSListingDocumentFactory {
 		return document;
 	}
 	
-	private static void addCSListing(CSPlace poi, Document document) {
-		Field toStore = new Field(POI, poi.toJSON(true).toString(), Field.Store.YES, Field.Index.NOT_ANALYZED);
+	private static void addDetailJSON(CSPlace poi, Document document) {
+		Field toStore = new Field(DETAIL_JSON, poi.toJSON(true).toString(), Field.Store.YES, Field.Index.NOT_ANALYZED);
 		toStore.setOmitNorms(true);
         toStore.setOmitTermFreqAndPositions(true);
 		
@@ -527,7 +527,7 @@ public class CSListingDocumentFactory {
 				if(cachedob != null) poi = (CSPlace) cachedob;
 			} 
 			if(poi == null) {
-				byte[] bytes = document.getBinaryValue(POI);
+				byte[] bytes = document.getBinaryValue(DETAIL_JSON);
 				if(bytes != null) {			
 					ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes));
 					poi = (CSPlace)in.readObject();
@@ -591,7 +591,7 @@ public class CSListingDocumentFactory {
 				
 		document.add(new Field(META, buffer.toString(), Field.Store.NO, Field.Index.ANALYZED));
 		
-		addCSListing(poi, document);
+		addDetailJSON(poi, document);
 		
 		return document;
 	}	
