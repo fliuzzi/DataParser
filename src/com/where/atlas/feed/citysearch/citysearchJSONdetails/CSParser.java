@@ -250,15 +250,15 @@ public class CSParser implements FeedParser {
             Element urls = ParseUtils.getChildByName(location, "urls");
             if(urls != null) {
                 
-                // handle deprecation of website_url tags
-                if(ParseUtils.getChildValueByName(urls, "website_url") == null)
-                {
-                    poi.setWebUrl(generateExternalURL(poi));
-                }
-                if(ParseUtils.getChildValueByName(urls, "menu_url") == null)
-                {
-                    poi.setMenuUrl(generateMenuURL(poi));
-                }
+//                // handle deprecation of website_url tags
+//                if(ParseUtils.getChildValueByName(urls, "website_url") == null)
+//                {
+//                    poi.setWebUrl(generateExternalURL(poi));
+//                }
+//                if(ParseUtils.getChildValueByName(urls, "menu_url") == null)
+//                {
+//                    poi.setMenuUrl(generateMenuURL(poi));
+//                }
                 
                 
                  
