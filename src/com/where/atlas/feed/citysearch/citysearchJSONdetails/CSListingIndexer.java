@@ -61,9 +61,9 @@ public class CSListingIndexer {
 		try {
 			//TODO: find the thread where we can begin with the analyzerwrapper
 			writer.addDocument(CSListingDocumentFactory.createDocument(poi));
-			count++;
 			
-			if(count % 20000 == 0)
+			//optimize frequently!
+			if(++count % 20000 == 0)
 				writer.optimize();
 		}
 		catch(Exception ex) {

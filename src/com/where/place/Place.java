@@ -2,7 +2,7 @@ package com.where.place;
 
 public class Place {
 
-	public static enum Source { LOCALEZE, CS, YELP, CSLIST}
+	public static enum Source { LOCALEZE, CS, YELP, CSLIST, YP }
 
 	
 	private String whereId;
@@ -95,6 +95,6 @@ public class Place {
 	
 	public String toString()
 	{
-	    return "\nPLACE: "+name+"\nWhereid:"+whereId+"PID:"+nativeId+"\nphone:"+phone+"\n";
+	    return "PLACE: "+name+"\nWhereid:"+whereId+"\tPID:"+nativeId+"\nphone:"+phone;
 	}
 }
