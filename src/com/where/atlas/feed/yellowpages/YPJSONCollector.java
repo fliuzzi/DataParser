@@ -7,7 +7,7 @@ public class YPJSONCollector implements PlaceCollector{
 
 	@Override
 	public void collect(Place place) {
-		System.out.println(place);
+		//System.out.println(place);
 	}
 
 	@Override

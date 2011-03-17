@@ -258,8 +258,13 @@ public class YPRawDataParser implements FeedParser {
                         NodeList URLlist = listingElement.getElementsByTagName("URL");
                         Element URL = (Element) URLlist.item(0);
                         
-                        
-                        poi.setYPurl(URL.getTextContent());
+                        try{
+                        	poi.setYPurl(URL.getTextContent());
+                        }
+                        catch(NullPointerException np)
+                        {
+                        	
+                        }
                         	
                         if(poi.getName().length() <= 0)
                     		collector.collectBadInput(poi, new Exception("Nullname"));

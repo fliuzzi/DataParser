@@ -116,11 +116,11 @@ public class YPPlace extends Place {
 	    	}
 	    	if(YPName != null)
 	    		json.put("ypname", YPName);
-	    	if(hours != null)
+	    	if(hours != null && hours.length() > 0)
 	    		json.put("hours", hours);
 	    	if(YPurl != null)
 	    		json.put("ypurl",YPurl);
-	    	if(biz_url != null)
+	    	if(biz_url != null && biz_url.length() > 0)
 	    		json.put("biz_url",biz_url);
 	    	if(categories.size() > 0)
 	    	{
