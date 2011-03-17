@@ -111,8 +111,12 @@ public class Address {
                 address.put("country", getCountry());
             }
             
-            address.put("lat", getLat());
-            address.put("lng", getLng());
+            //round off
+            Double lat = (double)Math.round(getLat() * 100000) / 100000;
+            Double lng = (double)Math.round(getLng() * 100000) / 100000;
+            
+            address.put("lat", lat);
+            address.put("lng", lng);
             
             return address;
         }

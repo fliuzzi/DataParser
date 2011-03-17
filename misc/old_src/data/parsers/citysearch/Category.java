@@ -2,7 +2,7 @@ package com.where.data.parsers.citysearch;
 
 import java.io.Serializable;
 
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 public class Category implements Serializable {
 	private static final long serialVersionUID = 4974348956014571136L;
