@@ -48,7 +48,7 @@ public class FixCatsInLis
             }
             
             doc.add(new Field("catnames", catNames.toString(), Field.Store.YES, Index.ANALYZED_NO_NORMS));
-            doc.add(new Field("catids", catNames.toString(), Field.Store.YES, Index.ANALYZED_NO_NORMS));
+            doc.add(new Field("catids", catIds.toString(), Field.Store.YES, Index.ANALYZED_NO_NORMS));
             catNames.delete(0, catNames.length());
             catIds.delete(0, catNames.length());
             writer.addDocument(doc);
