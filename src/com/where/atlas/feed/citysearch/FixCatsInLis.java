@@ -42,7 +42,7 @@ public class FixCatsInLis
             {
                 if(cnt > 0) {catNames.append("|");}
                 catNames.append(cat.getName());
-                if(cnt > 0) {catIds.append("|");}
+                if(cnt > 0) {catIds.append(" ");}
                 catIds.append(cat.getId());
 		cnt++;
             }
