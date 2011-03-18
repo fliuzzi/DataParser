@@ -218,6 +218,9 @@ public class YPRawDataParser implements FeedParser {
                 doc.getDocumentElement().normalize();
                 
                 NodeList listOfListings = doc.getElementsByTagName("listing");
+                NodeList listOfDetails = doc.getElementsByTagName("business_details");
+                NodeList listOfReviews = doc.getElementsByTagName("business_reviews");
+                
                 Node listingNode = null;
                 YPPlace poi = null;
                 Address location = null;

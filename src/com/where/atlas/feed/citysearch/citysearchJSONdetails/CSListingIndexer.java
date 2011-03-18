@@ -63,7 +63,7 @@ public class CSListingIndexer {
 			writer.addDocument(CSListingDocumentFactory.createDocument(poi));
 			
 			//optimize frequently!
-			if(++count % 20000 == 0)
+			if(++count % 550000 == 0)
 				writer.optimize();
 		}
 		catch(Exception ex) {

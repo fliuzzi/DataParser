@@ -11,6 +11,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import com.where.utils.XMLfixer;
+
 
 
 
@@ -74,7 +76,7 @@ public class YPParseAndDeDupe
     {
         if(args.length != 3)
         {
-            System.err.println("USAGE: program will go through a directory of yelp raw data zips");
+            System.err.println("USAGE: program will go through a directory of yellow pages raw data zips");
             System.err.println("ARG1: directory of raw data .zips");
             System.err.println("ARG2: CS 'lis' index to de-dupe against");
             System.err.println("ARG3: Output flatfile target path");
@@ -83,7 +85,7 @@ public class YPParseAndDeDupe
         try{
             
             File zipDirectory = new File(args[0]);
-            File[] zipFiles = zipDirectory.listFiles();
+            final File[] zipFiles = zipDirectory.listFiles();
             
             if(zipFiles == null){
                 System.err.println("Directory Error");
@@ -91,48 +93,52 @@ public class YPParseAndDeDupe
             }
             else{
                 final YPRawDataParser parser = new YPRawDataParser(new YPParserUtils(args[1],args[2]));
-                
+                ExecutorService thePool = Executors.newFixedThreadPool(5);
                 
                 
                 for(int x = 0; x < zipFiles.length; x++)
                 {
-                    ExecutorService thePool = Executors.newFixedThreadPool(5);
-                    System.out.println("Zip File #"+(x+1)+" : " + zipFiles[x].getName());
-                    final ZipFile zipFile = new ZipFile(zipFiles[x]);
-                                        
-                    for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements();) {
+                    final int lcv = x;
+                	@SuppressWarnings("unused")
+					Future<?> fut = thePool.submit(
+                            new Runnable(){ public void run(){
+                            	try{
+                            	final ZipFile zipFile = new ZipFile(zipFiles[lcv]);
+                            	
+                            	for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements();) {
+                            		
+                            		final ZipEntry entry = (ZipEntry) e.nextElement();
                         
-                        final ZipEntry entry = (ZipEntry) e.nextElement();
                         
-                        
-                        @SuppressWarnings("unused")
-                        Future<?> fut = thePool.submit(
-                                new Runnable(){ public void run(){
-                                    try{
-                                        parser.parse(
-                                                new YPJSONCollector(), zipFile.getInputStream(entry));
-                                        System.out.println("Finished XML File: " + entry.getName());
-                                    }
-                                    catch(IOException io){
-                                        throw(new RuntimeException(io));
-                                    }}});
+                                	System.out.println("Zip File #"+(lcv+1)+" : " + zipFiles[lcv].getName());
+                                	
+                                    parser.parse(new YPJSONCollector(), 
+                                    		XMLfixer.repairXML(zipFile.getInputStream(entry)));
+                                    
+									zipFile.close();
+                                    System.out.println("\nFinished zip" + zipFile.getName());
+                            	}
+                            }
+                            catch(Exception e)
+                            {}
+                            
+                            }});
                         
                     }
                     
                     thePool.shutdown();
                     thePool.awaitTermination(Long.MAX_VALUE, TimeUnit.MINUTES);
-                    System.out.println("\nFinished zip" + zipFile.getName());
+                    
                     
                     
                     
                     parser.resetCounter();
-                    zipFile.close();
+                    parser.closeWriter();
                 }
                 
                 
-                parser.closeWriter();
+                
             }
-        }
         catch(Throwable e){
             e.printStackTrace();
             }
