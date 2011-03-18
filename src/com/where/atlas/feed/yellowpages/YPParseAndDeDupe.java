@@ -95,6 +95,7 @@ public class YPParseAndDeDupe
                 final YPRawDataParser parser = new YPRawDataParser(new YPParserUtils(args[1],args[2]));
                 ExecutorService thePool = Executors.newFixedThreadPool(5);
                 
+                final YPJSONCollector collector = new YPJSONCollector();
                 
                 for(int x = 0; x < zipFiles.length; x++)
                 {
@@ -112,7 +113,7 @@ public class YPParseAndDeDupe
                         
                                 	System.out.println("Zip File #"+(lcv+1)+" : " + zipFiles[lcv].getName());
                                 	
-                                    parser.parse(new YPJSONCollector(), 
+                                    parser.parse(collector, 
                                     		XMLfixer.repairXML(zipFile.getInputStream(entry)));
                                     
 									zipFile.close();
@@ -130,7 +131,8 @@ public class YPParseAndDeDupe
                     thePool.awaitTermination(Long.MAX_VALUE, TimeUnit.MINUTES);
                     
                     
-                    
+                    //TODO:  write to file
+                    System.out.println(collector.retrieveJSON());                    
                     
                     parser.resetCounter();
                     parser.closeWriter();

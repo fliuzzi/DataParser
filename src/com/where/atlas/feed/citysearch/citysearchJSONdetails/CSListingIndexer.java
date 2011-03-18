@@ -14,7 +14,6 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.NIOFSDirectory;
 
 import com.where.data.citysearch.Analyzer;
-import com.where.place.CSPlace;
 
 public class CSListingIndexer {
 	private static final Log logger = LogFactory.getLog(CSListingIndexer.class);
@@ -57,7 +56,7 @@ public class CSListingIndexer {
 		return indexPath;
 	}
 	
-	public void index(CSPlace poi) {
+	public void index(CSJSONPlace poi) {
 		try {
 			//TODO: find the thread where we can begin with the analyzerwrapper
 			writer.addDocument(CSListingDocumentFactory.createDocument(poi));

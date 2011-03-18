@@ -225,6 +225,8 @@ public class YPRawDataParser implements FeedParser {
                 YPPlace poi = null;
                 Address location = null;
                 
+                
+                //// <LISTING>
                 for(int i = 0; i < listOfListings.getLength();i++)
                 {   
                     listingNode = listOfListings.item(i);
@@ -275,7 +277,23 @@ public class YPRawDataParser implements FeedParser {
                         	collector.collect(poi);
                     }
                 }
-        }
+                
+                
+//                //// <BUSINESS_DETAILS>
+//                for(int i = 0; i < listOfDetails.getLength();i++)
+//                {
+//                    listingNode = listOfDetails.item(i);
+//                    if(listingNode.getNodeType() == Node.ELEMENT_NODE){
+//                        Element detailElement = (Element)listingNode;
+//                        
+//                        poi = new YPPlace();
+//                        location = new Address();
+//                        
+//                        NodeList detailElement
+//                        }}
+                	
+                
+    	}
         catch(Exception e){
             System.err.println(e.getMessage());
             }

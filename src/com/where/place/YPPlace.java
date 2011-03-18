@@ -1,16 +1,10 @@
 package com.where.place;
 
-import java.math.BigDecimal;
+
 import java.util.ArrayList;
-import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import com.where.commons.feed.citysearch.CSListing;
-import com.where.commons.feed.citysearch.Category;
-import com.where.commons.feed.citysearch.RatingStat;
-import com.where.commons.feed.citysearch.Tip;
 
 public class YPPlace extends Place {
 

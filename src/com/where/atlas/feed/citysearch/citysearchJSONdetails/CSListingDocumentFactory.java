@@ -24,16 +24,14 @@ import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.lucene.util.Version;
 
-import com.where.atlas.feed.localeze.LocalezeUtil;
+
 import com.where.commons.feed.citysearch.search.BaseAnalyzer;
 import com.where.commons.feed.citysearch.search.NoStemAnalyzer;
 import com.where.commons.feed.citysearch.search.budget.ExcludedCategories;
 import com.where.commons.util.LocationUtil;
 import com.where.commons.util.StringUtil;
-import com.where.commons.feed.citysearch.Category;
 import com.where.commons.feed.citysearch.Offer;
 import com.where.place.Address;
-import com.where.place.CSPlace;
 import com.where.util.cache.ICache;
 
 public class CSListingDocumentFactory {
@@ -178,7 +176,7 @@ public class CSListingDocumentFactory {
 	    return 100/(1+ Math.exp(-.9*(count-85)));
 	}
 	
-	public static Document createDocument(CSPlace poi) {
+	public static Document createDocument(CSJSONPlace poi) {
 		Document document = new Document();
 		
 		document.add(new Field(LISTING_ID, String.valueOf(poi.getListingId()), Field.Store.YES, Field.Index.NOT_ANALYZED));
@@ -298,7 +296,7 @@ public class CSListingDocumentFactory {
 	}
 	
 	private static Pattern metroMatch = Pattern.compile("(.*?)\\p{Space}+(\\w\\w)\\p{Space}+(metro|area)\\p{Space}*$");
-	private static void addLocationFields(CSPlace poi, Document doc)
+	private static void addLocationFields(CSJSONPlace poi, Document doc)
 	{
 		if(poi == null) {return;}		
 		Address addr = poi.getAddress();
@@ -363,7 +361,7 @@ public class CSListingDocumentFactory {
 		}					
 	}
 	
-	public static void toLocationWords(CSPlace poi, PrintWriter writer) {
+	public static void toLocationWords(CSJSONPlace poi, PrintWriter writer) {
 		writer.println( raw2addressFormat(poi.getAddress().getCity()));
 		writer.println( raw2addressFormat(poi.getAddress().getZip()));		
 		writer.println( raw2addressFormat(poi.getAddress().getCity() + " " + poi.getAddress().getState()));
@@ -398,7 +396,7 @@ public class CSListingDocumentFactory {
 		return tel;
 	}
 	
-	public static void toWords(CSPlace poi, PrintWriter writer) {
+	public static void toWords(CSJSONPlace poi, PrintWriter writer) {
 		collectLines(poi.getName(), writer);
 		
 		for(Category c : poi.categories()) {
@@ -466,7 +464,7 @@ public class CSListingDocumentFactory {
 		return buffer.toString();
 	}
 	
-	public static Document createCategoryDocument(CSPlace poi) {
+	public static Document createCategoryDocument(CSJSONPlace poi) {
 		if(poi.categories().isEmpty()) return null;
 		
 		Document document = new Document();
@@ -506,7 +504,7 @@ public class CSListingDocumentFactory {
 		return document;
 	}
 	
-	private static void addDetailJSON(CSPlace poi, Document document) {
+	private static void addDetailJSON(CSJSONPlace poi, Document document) {
 		Field toStore = new Field(DETAIL_JSON, poi.toJSON(true).toString(), Field.Store.YES, Field.Index.NOT_ANALYZED);
 		toStore.setOmitNorms(true);
         toStore.setOmitTermFreqAndPositions(true);
@@ -514,23 +512,23 @@ public class CSListingDocumentFactory {
 		document.add(toStore);
 	}
 	
-	public static CSPlace createCSListing(Document document, int documentId) {
+	public static CSJSONPlace createCSListing(Document document, int documentId) {
 		return createCSListing(document, documentId, null, false);
 	}
 	
-	public static CSPlace createCSListing(Document document, int documentId, ICache cache, boolean checkcache) {
+	public static CSJSONPlace createCSListing(Document document, int documentId, ICache cache, boolean checkcache) {
 		if(document == null) return null;
 		try {
-			CSPlace poi = null;
+			CSJSONPlace poi = null;
 			if(checkcache && cache != null) {
 				Object cachedob = cache.getObject(""+documentId);
-				if(cachedob != null) poi = (CSPlace) cachedob;
+				if(cachedob != null) poi = (CSJSONPlace) cachedob;
 			} 
 			if(poi == null) {
 				byte[] bytes = document.getBinaryValue(DETAIL_JSON);
 				if(bytes != null) {			
 					ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes));
-					poi = (CSPlace)in.readObject();
+					poi = (CSJSONPlace)in.readObject();
 					in.close();
 				} else poi = LocalezeUtil.generateListing(document);
 				if(poi != null && cache != null) {
@@ -546,14 +544,14 @@ public class CSListingDocumentFactory {
 		}
 	}
 	
-	public static CSPlace getCSListingFromCache(int docid, ICache cache) {
+	public static CSJSONPlace getCSListingFromCache(int docid, ICache cache) {
 		if(cache == null) return null;
 		Object cachedob = cache.getObject(""+docid);
 		if(cachedob == null) return null;
-		return (CSPlace) cachedob;
+		return (CSJSONPlace) cachedob;
 	}
 	
-	public static Document createAdDocument(CSPlace poi) {
+	public static Document createAdDocument(CSJSONPlace poi) {
 		Document document = new Document();
 		
 		document.add(new Field(LISTING_ID, String.valueOf(poi.getListingId()), Field.Store.YES, Field.Index.NOT_ANALYZED));
@@ -596,7 +594,7 @@ public class CSListingDocumentFactory {
 		return document;
 	}	
 	
-	private static void excludeFromPublishers(CSPlace poi, Document document) {
+	private static void excludeFromPublishers(CSJSONPlace poi, Document document) {
 		StringBuffer buffer = new StringBuffer();
 		
 		Map<String, Set<String>> excluded = ExcludedCategories.excludedCategoriesbyPublisher();
@@ -619,7 +617,7 @@ public class CSListingDocumentFactory {
 		document.add(new Field(EXCLUDED_PUBLISHERS, buffer.toString().trim(), Field.Store.NO, Field.Index.ANALYZED));
 	}
 	
-	public static Document createLocationDocument(CSPlace poi) {
+	public static Document createLocationDocument(CSJSONPlace poi) {
 		Document document = new Document();
 				
 		document.add(new Field(META, poi.getAddress().getCity().toLowerCase().trim(), Field.Store.NO, Field.Index.ANALYZED));
@@ -630,9 +628,9 @@ public class CSListingDocumentFactory {
 	}			
 	
 	
-	public static CSPlace createAdCSListing(Document document) {
+	public static CSJSONPlace createAdCSListing(Document document) {
 		try {
-		    CSPlace poi = new CSPlace();
+			CSJSONPlace poi = new CSJSONPlace();
 			poi.setListingId(document.get(LISTING_ID));
 			poi.setName(document.get(NAME));
 			poi.setPpe(Double.parseDouble(document.get(PPE)));

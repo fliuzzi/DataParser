@@ -2,7 +2,6 @@ package com.where.atlas.feed.citysearch.citysearchJSONdetails;
 
 import com.where.atlas.feed.PlaceCollector;
 import com.where.atlas.feed.citysearch.citysearchJSONdetails.CSListingIndexer;
-import com.where.place.CSPlace;
 import com.where.place.Place;
 
 public class CSCollectAndIndex implements PlaceCollector
@@ -34,14 +33,14 @@ public class CSCollectAndIndex implements PlaceCollector
         
         if(isAdvertiser)
         {
-            org.apache.lucene.document.Document doc = CSListingDocumentFactory.createCategoryDocument((CSPlace)place);
+            org.apache.lucene.document.Document doc = CSListingDocumentFactory.createCategoryDocument((CSJSONPlace)place);
             if(doc == null) return;
             
             spAltCategoryIndexer.index(doc);
         }
         
         
-        CSParser.index((CSPlace)place, indexer);
+        CSParser.index((CSJSONPlace)place, indexer);
     }
     
     private void displayProgress(long counter)

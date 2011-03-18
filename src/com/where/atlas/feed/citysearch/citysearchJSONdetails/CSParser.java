@@ -26,13 +26,11 @@ import org.xml.sax.InputSource;
 import com.where.atlas.feed.FeedParser;
 import com.where.atlas.feed.PlaceCollector;
 import com.where.atlas.feed.citysearch.citysearchJSONdetails.CSListingIndexer;
-import com.where.commons.feed.citysearch.Category;
 import com.where.commons.feed.citysearch.Offer;
 import com.where.commons.feed.citysearch.ParseUtils;
 import com.where.commons.feed.citysearch.Placelist;
 import com.where.commons.feed.citysearch.Review;
 import com.where.commons.feed.citysearch.Tip;
-import com.where.place.CSPlace;
 
 public class CSParser implements FeedParser {
         
@@ -215,7 +213,7 @@ public class CSParser implements FeedParser {
             for(int i = 0, n = list.getLength(); i < n; i++) {
                 Element location = (Element)list.item(i);
 
-                CSPlace poi = populateDetail(location);
+                CSJSONPlace poi = populateDetail(location);
 
                 CSListingDocumentFactory.toLocationWords(poi, locwordWriter);
 
@@ -227,7 +225,7 @@ public class CSParser implements FeedParser {
             return list.getLength();
         }
         
-        public static void index(CSPlace poi, CSListingIndexer indexer) {
+        public static void index(CSJSONPlace poi, CSListingIndexer indexer) {
             int whereid = indexer.csId2whereId_.get(Integer.parseInt(poi.getListingId()));
             
             if(whereid == 0)
@@ -239,8 +237,8 @@ public class CSParser implements FeedParser {
             
             indexer.index(poi);
         }
-        public static CSPlace populateDetail(Element location) {  
-            CSPlace poi = new CSPlace();
+        public static CSJSONPlace populateDetail(Element location) {  
+        	CSJSONPlace poi = new CSJSONPlace();
             
             populateBasic(poi, location);
             
@@ -413,7 +411,7 @@ public class CSParser implements FeedParser {
             return poi;
         }
         
-        private static void populateBasic(CSPlace poi, Element location) {
+        private static void populateBasic(CSJSONPlace poi, Element location) {
             poi.setListingId(ParseUtils.getChildValueByName(location, "id"));       
             
             setWhereId(poi);
@@ -586,7 +584,7 @@ public class CSParser implements FeedParser {
             }
         }   
         
-        private static void setWhereId(CSPlace poi) {
+        private static void setWhereId(CSJSONPlace poi) {
             poi.setWhereId(poi.getListingId());
         }
         
@@ -605,7 +603,7 @@ public class CSParser implements FeedParser {
                 category.indexOf("$") > -1;
         }
         
-        private static void indexCategories(Element location, CSPlace poi, PlaceCollector collector) {
+        private static void indexCategories(Element location, CSJSONPlace poi, PlaceCollector collector) {
             if(spAltCategoryIndexer == null) return;
             
             if(poi.categories().isEmpty()) return;
