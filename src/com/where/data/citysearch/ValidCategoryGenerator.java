@@ -43,7 +43,6 @@ public class ValidCategoryGenerator
             "Dog Trainers",
             "Pet Grooming",
             "Festivals",
-            "Festivals",
             "Housing Rental",
             "Bookstores",
             "Recreational Activities",
