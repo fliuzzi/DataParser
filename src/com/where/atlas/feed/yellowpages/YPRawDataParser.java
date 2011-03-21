@@ -1,28 +1,10 @@
 package com.where.atlas.feed.yellowpages;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.queryParser.MultiFieldQueryParser;
-import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.search.BooleanClause.Occur;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.NumericRangeQuery;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.spell.JaroWinklerDistance;
-import org.apache.lucene.store.NIOFSDirectory;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -34,62 +16,25 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import com.where.atlas.feed.FeedParser;
 import com.where.atlas.feed.PlaceCollector;
-import com.where.atlas.feed.citysearch.CSListingDocumentFactory;
-import com.where.atlas.feed.yelp.YelpRawDataParseAndDeDupe.WriterThread;
 import com.where.place.Address;
-import com.where.place.Place;
 import com.where.place.YPPlace;
-import com.where.util.lucene.NullSafeGeoFilter;
-import com.where.util.lucene.NullSafeGeoFilter.GeoHashCache;
 
 
 public class YPRawDataParser implements FeedParser { 
     
     
     protected YPParserUtils parser;
-    protected final float withPhoneThreshold_ = .65f;
-    protected final float withoutPhoneThreshold_ = .9f;
     private static BufferedWriter bufferedWriter;
-    protected IndexSearcher searcher;
-    protected Set<String> cityMap,zipMap;
-    protected Map<Place,String> searchedPlaces; 
-    protected GeoHashCache geoCache;
-    protected JaroWinklerDistance jw;
-    protected Analyzer analyzer;
-    protected HashMap<String,Float> boosts;
-    protected MultiFieldQueryParser qp;
-    protected static AtomicInteger counter;
-    protected WriterThread writerThread;
+
     
     public YPRawDataParser(YPParserUtils Yparser)
     {
         parser=Yparser;
-        BooleanQuery.setMaxClauseCount(10000);
         try{
-            
-            
-            searchedPlaces = new ConcurrentHashMap<Place,String>();
-            
             bufferedWriter = new BufferedWriter(new FileWriter(parser.getTargetPath()));
             
-            
-          //this excepts 
-            //writerThread = new WriterThread(bufferedWriter);
-            
-            searcher = new IndexSearcher(new NIOFSDirectory(new File(parser.getOldIndexPath())));
-            
-            zipMap = populateMapFromTxt(new Scanner(new File("/home/fliuzzi/data/bostonMarketZipCodes.txt")));
-            System.out.println("Loaded zipcode map: " + zipMap.size() + " entries.");
-            cityMap = populateMapFromTxt(new Scanner(new File("/home/fliuzzi/data/citySUBSET.txt")));
-            System.out.println("Loaded city-map: " + cityMap.size() + " entries.");
-            counter=new AtomicInteger(0);
-            
-            geoCache = new GeoHashCache(CSListingDocumentFactory.LATITUDE_RANGE, CSListingDocumentFactory.LONGITUDE_RANGE,
-                    CSListingDocumentFactory.LISTING_ID, searcher.getIndexReader());
-            jw = new JaroWinklerDistance();
-            analyzer = CSListingDocumentFactory.getAnalyzerWrapper();
-            boosts = new HashMap<String, Float>();
-            boosts.put(CSListingDocumentFactory.NAME,1.0f);
+            //Start the JSON Array
+            bufferedWriter.write("[");
         }
         catch(Throwable t){
             System.err.print("Error Loading!");
@@ -101,80 +46,20 @@ public class YPRawDataParser implements FeedParser {
         return bufferedWriter;
     }
     
-    protected void resetCounter()
-    {
-        counter.set(0);
-    }
-    
-    private void writeEntry(StringBuilder strBuilder)
-    {
-        if(counter.incrementAndGet() % 500 == 0)
-            System.out.print("+");
-        if(counter.get() % 20000 == 0)
-            System.out.println();
-        
-        try{
-            writerThread.addTask(strBuilder.toString());
-        }
-        catch(Throwable t){
-            System.err.println("Error writing entry: "+strBuilder);
-        }
-    }
-    
-    public static Set<String> populateMapFromTxt(Scanner in)
-    {
-        Set<String> txtSet = new HashSet<String>();
-        
-        
-        while(in.hasNextLine())
-        {
-            txtSet.add(in.nextLine().trim());
-        }
-        in.close();
-        return txtSet;
-    }
-    
-    private String cleanReview(String review)
+    public static String cleanReview(String review)
     {
         review.replace("\\n","");
         review.replace("\\t", "");
         return review;
     }
     
-    public void closeWriter()
+    public void closeWriter() throws IOException
     {
-        try{
-            writerThread.finish();
-            bufferedWriter.close();
-            System.out.println("Finished Writing");
-        }
-        catch(Exception e)
-        {
-            System.err.println("err closing output file");
-        }
+    	//close the array and close the writer
+    	bufferedWriter.write("]");
+        bufferedWriter.close();
     }
     
-    //Makes sure the first character of line is not a * or ?
-    //                                     (query safe)
-    protected String cleanForQuery(String line)
-    {
-        if(line == null || line.trim().length() == 0){return line;}
-        
-        char firstLetter = line.charAt(0);
-        
-        if(firstLetter =='*' || firstLetter == '?')
-            return cleanForQuery(line.substring(1));
-        else
-        {
-            //get rid of unsafe characters
-            line.replace("&#39;", "'");
-            line.replace("&amp;", "&");
-            
-            return QueryParser.escape(line);
-        }
-    }
-    
-        
     public static String stripPhone(String phone) {
         if(phone == null || phone.trim().length() == 0){return phone;}
         StringBuffer buffer = new StringBuffer();
@@ -190,24 +75,6 @@ public class YPRawDataParser implements FeedParser {
         return tel;
     }
     
-    public BooleanQuery getLatLongQueryFromCriteria(double lat, double lng)
-    {
-        BooleanQuery rawQuery = new BooleanQuery();
-        Query latQ = NumericRangeQuery.newDoubleRange(
-                CSListingDocumentFactory.LATITUDE_RANGE,
-                lat-.05, lat+.05,
-                true, true);
-
-        Query longQ = NumericRangeQuery.newDoubleRange(
-                CSListingDocumentFactory.LONGITUDE_RANGE,
-                lng-.05, lng+.05,
-                true, true);
-
-        rawQuery.add(latQ, Occur.MUST);
-        rawQuery.add(longQ, Occur.MUST);
-        
-        return rawQuery;
-    }
     
     public void parse(PlaceCollector collector, InputStream ins) throws IOException {
         try{
@@ -218,8 +85,8 @@ public class YPRawDataParser implements FeedParser {
                 doc.getDocumentElement().normalize();
                 
                 NodeList listOfListings = doc.getElementsByTagName("listing");
-                NodeList listOfDetails = doc.getElementsByTagName("business_details");
-                NodeList listOfReviews = doc.getElementsByTagName("business_reviews");
+                //NodeList listOfDetails = doc.getElementsByTagName("business_details");
+                //NodeList listOfReviews = doc.getElementsByTagName("business_reviews");
                 
                 Node listingNode = null;
                 YPPlace poi = null;
@@ -313,13 +180,15 @@ public class YPRawDataParser implements FeedParser {
 	                json.put("rating", review.getAttribute("rating"));
 	                json.put("date", review.getAttribute("date"));
 	                json.put("text", review.getAttribute("text"));
+	                
+	                poi.addReview(json);
                 }
                 catch(Exception e)
                 {
                 	System.out.println("Error constructing review json: "+e.getMessage());
                 }
                 
-                poi.addReview(json);
+                
                 
         	}
         }

@@ -4,11 +4,13 @@ package com.where.place;
 import java.util.ArrayList;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.where.atlas.feed.yellowpages.YPRawDataParser;
 
 public class YPPlace extends Place {
 
-	String YPName;
 	String hours;
 	String YPurl;
 	String biz_url;
@@ -21,9 +23,9 @@ public class YPPlace extends Place {
 		reviews = new ArrayList<JSONObject>();
 	}
 	
-	public void addReview(JSONObject rev)
+	public void addReview(JSONObject rev) throws JSONException
 	{
-		reviews.add(rev);
+		reviews.add(new JSONObject(YPRawDataParser.cleanReview(rev.toString())));
 	}
 	
 	public ArrayList<JSONObject> getReviews()
@@ -71,15 +73,6 @@ public class YPPlace extends Place {
 		return biz_url;
 	}
 	
-	public void setYPName(String name)
-	{
-		YPName = name;
-	}
-	
-	public String getYPName()
-	{
-		return YPName;
-	}
 	
 	public JSONObject toJSON()
 	{
@@ -108,8 +101,8 @@ public class YPPlace extends Place {
 	    		json.put("lat", getLatlng()[0]);
 	    		json.put("long", getLatlng()[1]);
 	    	}
-	    	if(YPName != null)
-	    		json.put("ypname", YPName);
+	    	if(getName() != null)
+	    		json.put("name", getName());
 	    	if(hours != null && hours.length() > 0)
 	    		json.put("hours", hours);
 	    	if(YPurl != null)

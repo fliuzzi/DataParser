@@ -5,13 +5,10 @@ import gnu.trove.TObjectLongHashMap;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,7 +17,6 @@ import java.util.Set;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.MultiFieldQueryParser;
 import org.apache.lucene.queryParser.QueryParser.Operator;
@@ -36,7 +32,6 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.spell.JaroWinklerDistance;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.apache.lucene.store.NIOFSDirectory;
 import org.apache.lucene.util.Version;
 
 import com.where.atlas.feed.citysearch.CSListingDocumentFactory;

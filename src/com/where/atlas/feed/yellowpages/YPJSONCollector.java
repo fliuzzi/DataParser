@@ -1,6 +1,6 @@
 package com.where.atlas.feed.yellowpages;
 
-import org.json.JSONArray;
+import java.io.IOException;
 
 import com.where.atlas.feed.PlaceCollector;
 import com.where.place.Place;
@@ -8,27 +8,23 @@ import com.where.place.YPPlace;
 
 public class YPJSONCollector implements PlaceCollector{
 	
-	private JSONArray places;
-	
-	public YPJSONCollector()
-	{
-		places = new JSONArray();
-	}
 
-	@Override
+	@Override// TODO Auto-generated catch block
 	public void collect(Place place) {
 		YPPlace ypplace = (YPPlace)place;
-		places.put(ypplace.toJSON());
+		try {
+			
+			YPRawDataParser.bufferedWriter().write(ypplace.toJSON().toString());
+			
+		} catch (IOException e) {
+			System.err.println("error writing:"+ypplace+"\t"+e.getMessage());
+		}
 	}
 
 	@Override
 	public void collectBadInput(Object input, Exception reason) {
 				
 	}
-	
-	public JSONArray getJSON()
-	{
-		return places;
-	}
 
 }
+

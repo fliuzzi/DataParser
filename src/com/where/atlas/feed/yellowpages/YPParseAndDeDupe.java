@@ -1,8 +1,6 @@
 package com.where.atlas.feed.yellowpages;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.IOException;
 import java.util.Enumeration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,59 +16,6 @@ import com.where.utils.XMLfixer;
 
 public class YPParseAndDeDupe
 {
-    
-    public static class WriterWorker implements Runnable{
-        
-        String toWrite;
-        BufferedWriter writer;
-        
-        public WriterWorker(String s, BufferedWriter w)
-        {
-            toWrite = s;
-            writer = w;
-        }
-        
-        
-        public void run(){
-            
-            try{
-                writer.write(toWrite);
-                writer.newLine();
-            }
-            
-            catch(Throwable t){
-                System.err.println("Err writing");
-            }
-        }
-    }
-    
-    
-    public static class WriterThread{
-        
-        private BufferedWriter writer;
-        ExecutorService myPool;
-        
-        public WriterThread(BufferedWriter w){
-            writer = w;
-            
-            //keep single threaded!
-            myPool = Executors.newFixedThreadPool(1);
-        }
-        
-        public void addTask(String t)
-        {
-            myPool.execute(new WriterWorker(t,writer));
-        }
-        
-        public void finish() throws IOException,InterruptedException
-        {
-            writer.close();
-            myPool.shutdown();
-            myPool.awaitTermination(Long.MAX_VALUE, TimeUnit.MINUTES);
-        }
-    
-    }
-    
     
     public static void main(String[] args)
     {
@@ -131,12 +76,8 @@ public class YPParseAndDeDupe
                     thePool.shutdown();
                     thePool.awaitTermination(Long.MAX_VALUE, TimeUnit.MINUTES);
                     
-                    
-                    //write to file
-                    System.out.print("Beginning JSON dump.....");
-                    YPRawDataParser.bufferedWriter().write(collector.getJSON().toString());
-                    System.out.println("Done!");
                     parser.closeWriter();
+                    System.out.println("Done!");
                 }
                 
                 
