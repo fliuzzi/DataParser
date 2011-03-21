@@ -26,7 +26,7 @@ public class YPJSONCollector implements PlaceCollector{
 				
 	}
 	
-	public JSONArray retrieveJSON()
+	public JSONArray getJSON()
 	{
 		return places;
 	}

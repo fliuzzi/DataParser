@@ -144,6 +144,7 @@ public class YPParserUtils
         outputChannel_ = outputStream_.getChannel();
     }
     
+    
     public YPParserUtils(String CSIndex,String targetFile)
     {
         oldIndexPath_=CSIndex;
@@ -162,20 +163,20 @@ public class YPParserUtils
                     }
                 });
     }
-    
-    public String slurpFileStream(FileInputStream stream) throws IOException
-    {
-        try
-        {
-            FileChannel fc = stream.getChannel();
-            MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
-            return Charset.defaultCharset().decode(bb).toString();            
-        }
-        finally
-        {
-            stream.close();
-        }
-    }
+//    
+//    public String slurpFileStream(FileInputStream stream) throws IOException
+//    {
+//        try
+//        {
+//            FileChannel fc = stream.getChannel();
+//            MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+//            return Charset.defaultCharset().decode(bb).toString();            
+//        }
+//        finally
+//        {
+//            stream.close();
+//        }
+//    }
     
     public boolean canUseListing(Listing l)
     {

@@ -74,7 +74,7 @@ public class YPRawDataParser implements FeedParser {
             
             
           //this excepts 
-            writerThread = new WriterThread(bufferedWriter);
+            //writerThread = new WriterThread(bufferedWriter);
             
             searcher = new IndexSearcher(new NIOFSDirectory(new File(parser.getOldIndexPath())));
             

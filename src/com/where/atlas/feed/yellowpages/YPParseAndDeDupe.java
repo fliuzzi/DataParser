@@ -82,8 +82,9 @@ public class YPParseAndDeDupe
             System.err.println("ARG3: Output flatfile target path");
             return;
         }
+        
         try{
-            
+        	
             File zipDirectory = new File(args[0]);
             final File[] zipFiles = zipDirectory.listFiles();
             
@@ -131,8 +132,8 @@ public class YPParseAndDeDupe
                     thePool.awaitTermination(Long.MAX_VALUE, TimeUnit.MINUTES);
                     
                     
-                    //TODO:  write to file
-                    System.out.println(collector.retrieveJSON());                    
+                    //write to file
+                    YPRawDataParser.bufferedWriter().write(collector.getJSON().toString());
                     
                     parser.resetCounter();
                     parser.closeWriter();
