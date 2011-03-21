@@ -33,7 +33,8 @@ public class FixCatsInLis
 
         for(int i = 0; i < md; i++)
         {
-        	if(i % 1000000 == 0){System.out.println("+");}
+        	if(i == 0) {System.out.println("Start: Total = "+md);} 
+        	else if(i % 1000000 == 0){System.out.println("+");}
         	else if(i % 10000 == 0){System.out.print("+");}
     		
             Document doc = reader.document(i);
