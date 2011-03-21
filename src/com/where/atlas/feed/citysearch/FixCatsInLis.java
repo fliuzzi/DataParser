@@ -33,6 +33,9 @@ public class FixCatsInLis
 
         for(int i = 0; i < md; i++)
         {
+        	if(i % 1000000 == 0){System.out.println("+");}
+        	else if(i % 10000 == 0){System.out.print("+");}
+    		
             Document doc = reader.document(i);
             CSListing listing = CSListingDocumentFactory.createCSListing(doc, i);
             
@@ -42,7 +45,7 @@ public class FixCatsInLis
             {
                 if(cnt > 0) {catNames.append("|");}
                 catNames.append(cat.getName());
-                if(cnt > 0) {catIds.append(" ");}
+                if(cnt > 0) {catIds.append("|");}
                 catIds.append(cat.getId());
 		cnt++;
             }
@@ -50,11 +53,12 @@ public class FixCatsInLis
             doc.add(new Field("catnames", catNames.toString(), Field.Store.YES, Index.ANALYZED_NO_NORMS));
             doc.add(new Field("catids", catIds.toString(), Field.Store.YES, Index.ANALYZED_NO_NORMS));
             catNames.delete(0, catNames.length());
-            catIds.delete(0, catNames.length());
+            catIds.delete(0, catIds.length());
             writer.addDocument(doc);
         }
         reader.close();
         writer.optimize();
         writer.close();
+        System.out.println("DONE");
     }
 }
