@@ -54,7 +54,6 @@ public class ValidCategoryGenerator
             "Real Estate Sales & Services",
             "Shopping",
             "Sales Events",
-            "Auto Dealers",
             "Sporting Goods",
             "Exercise"
     };
