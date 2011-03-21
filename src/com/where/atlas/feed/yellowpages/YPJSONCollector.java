@@ -7,9 +7,7 @@ import com.where.place.Place;
 import com.where.place.YPPlace;
 
 public class YPJSONCollector implements PlaceCollector{
-	
-
-	@Override// TODO Auto-generated catch block
+	@Override
 	public void collect(Place place) {
 		YPPlace ypplace = (YPPlace)place;
 		try {
@@ -23,7 +21,7 @@ public class YPJSONCollector implements PlaceCollector{
 
 	@Override
 	public void collectBadInput(Object input, Exception reason) {
-				
+				//if all else fails do nothing :(  --The data's bad enough!
 	}
 
 }

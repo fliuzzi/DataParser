@@ -19,12 +19,13 @@ public class YPParseAndDeDupe
     
     public static void main(String[] args)
     {
-        if(args.length != 3)
+        if(args.length != 4)
         {
             System.err.println("USAGE: program will go through a directory of yellow pages raw data zips");
             System.err.println("ARG1: directory of raw data .zips");
-            System.err.println("ARG2: CS 'lis' index to de-dupe against");
-            System.err.println("ARG3: Output flatfile target path");
+            System.err.println("ARG2: Output flatfile target path");
+            System.err.println("ARG3: Parseing type (int): 1)<listing>  2)<details>");
+            System.err.println("ARG4: Thread count (int)");
             return;
         }
         
@@ -38,8 +39,8 @@ public class YPParseAndDeDupe
                 return;
             }
             else{
-                final YPRawDataParser parser = new YPRawDataParser(new YPParserUtils(args[1],args[2]));
-                ExecutorService thePool = Executors.newFixedThreadPool(15);
+                final YPRawDataParser parser = new YPRawDataParser(new YPParserUtils(args[1],Integer.parseInt(args[2])));
+                ExecutorService thePool = Executors.newFixedThreadPool(Integer.parseInt(args[3]));
                 
                 final YPJSONCollector collector = new YPJSONCollector();
                 

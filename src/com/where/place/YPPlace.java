@@ -79,13 +79,6 @@ public class YPPlace extends Place {
 		return toJSON(true);
 	}
 	
-//	String YPName;
-//	String hours;
-//	String YPurl;
-//	String biz_url;
-//	ArrayList<String> categories;
-//	ArrayList<JSONObject> reviews;
-	//TODO: finish this
     public JSONObject toJSON(boolean includeReviews) {
     	JSONObject json = new JSONObject();
     	try{
