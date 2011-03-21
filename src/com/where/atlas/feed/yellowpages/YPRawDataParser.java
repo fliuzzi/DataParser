@@ -211,72 +211,72 @@ public class YPRawDataParser implements FeedParser {
     
     public void parse(PlaceCollector collector, InputStream ins) throws IOException {
         try{
-//                DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-//                DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-//                Document doc = docBuilder.parse(ins);
-//                
-//                doc.getDocumentElement().normalize();
-//                
-//                NodeList listOfListings = doc.getElementsByTagName("listing");
-//                NodeList listOfDetails = doc.getElementsByTagName("business_details");
-//                NodeList listOfReviews = doc.getElementsByTagName("business_reviews");
-//                
-//                Node listingNode = null;
-//                YPPlace poi = null;
-//                Address location = null;
-//                
+                DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
+                Document doc = docBuilder.parse(ins);
+                
+                doc.getDocumentElement().normalize();
+                
+                NodeList listOfListings = doc.getElementsByTagName("listing");
+                NodeList listOfDetails = doc.getElementsByTagName("business_details");
+                NodeList listOfReviews = doc.getElementsByTagName("business_reviews");
+                
+                Node listingNode = null;
+                YPPlace poi = null;
+                Address location = null;
+                
                 
                 //// <LISTING>
-//                for(int i = 0; i < listOfListings.getLength();i++)
-//                {   
-//                    listingNode = listOfListings.item(i);
-//                    if(listingNode.getNodeType() == Node.ELEMENT_NODE){
-//                        Element listingElement = (Element)listingNode;
-//                        
-//                        
-//                        poi = new YPPlace();
-//                        location = new Address();
-//                        
-//                        poi.setName(listingElement.getAttribute("name"));//NAME
-//                        location.setZip(listingElement.getAttribute("postal_code"));//addy.ZIP
-//                        poi.setPhone(stripPhone(listingElement.getAttribute("phone")));//PHONE
-//                        poi.setHours(listingElement.getAttribute("hours"));
-//                        poi.setBizURL(listingElement.getAttribute("biz_url"));
-//                        location.setCity(listingElement.getAttribute("locality"));//addy.CITY
-//                        location.setState(listingElement.getAttribute("region"));
-//                        location.setAddress1(listingElement.getAttribute("address"));
-//                        
-//                        
-//                        if(listingElement.getAttribute("lat").length() > 1 && listingElement.getAttribute("lon").length() > 1){
-//                            location.setLat(Double.parseDouble(listingElement.getAttribute("lat")));	//LATITUDE
-//                            location.setLng(Double.parseDouble(listingElement.getAttribute("lon")));	//LONGITUDE
-//                        }
-//                        
-//                        poi.setAddress(location);
-//                        
-//                        //sub-nodes
-//                        NodeList categories = listingElement.getElementsByTagName("category");
-//                        fillCategories(categories,poi);
-//                        NodeList reviews = listingElement.getElementsByTagName("review");
-//                        fillReviews(reviews,poi);
-//                        
-//                        NodeList URLlist = listingElement.getElementsByTagName("URL");
-//                        Element URL = (Element) URLlist.item(0);
-//                        
-//                        try{
-//                        	poi.setYPurl(URL.getTextContent());
-//                        }
-//                        catch(NullPointerException np)
-//                        {
-//                        	
-//                        }
-//                        	
-//                        if(poi.getName().length() <= 0)
-//                    		collector.collectBadInput(poi, new Exception("Nullname"));
-//                        else
-//                        	collector.collect(poi);
-//                    }
-//                }
+                for(int i = 0; i < listOfListings.getLength();i++)
+                {   
+                    listingNode = listOfListings.item(i);
+                    if(listingNode.getNodeType() == Node.ELEMENT_NODE){
+                        Element listingElement = (Element)listingNode;
+                        
+                        
+                        poi = new YPPlace();
+                        location = new Address();
+                        
+                        poi.setName(listingElement.getAttribute("name"));//NAME
+                        location.setZip(listingElement.getAttribute("postal_code"));//addy.ZIP
+                        poi.setPhone(stripPhone(listingElement.getAttribute("phone")));//PHONE
+                        poi.setHours(listingElement.getAttribute("hours"));
+                        poi.setBizURL(listingElement.getAttribute("biz_url"));
+                        location.setCity(listingElement.getAttribute("locality"));//addy.CITY
+                        location.setState(listingElement.getAttribute("region"));
+                        location.setAddress1(listingElement.getAttribute("address"));
+                        
+                        
+                        if(listingElement.getAttribute("lat").length() > 1 && listingElement.getAttribute("lon").length() > 1){
+                            location.setLat(Double.parseDouble(listingElement.getAttribute("lat")));	//LATITUDE
+                            location.setLng(Double.parseDouble(listingElement.getAttribute("lon")));	//LONGITUDE
+                        }
+                        
+                        poi.setAddress(location);
+                        
+                        //sub-nodes
+                        NodeList categories = listingElement.getElementsByTagName("category");
+                        fillCategories(categories,poi);
+                        NodeList reviews = listingElement.getElementsByTagName("review");
+                        fillReviews(reviews,poi);
+                        
+                        NodeList URLlist = listingElement.getElementsByTagName("URL");
+                        Element URL = (Element) URLlist.item(0);
+                        
+                        try{
+                        	poi.setYPurl(URL.getTextContent());
+                        }
+                        catch(NullPointerException np)
+                        {
+                        	
+                        }
+                        	
+                        if(poi.getName().length() <= 0)
+                    		collector.collectBadInput(poi, new Exception("Nullname"));
+                        else
+                        	collector.collect(poi);
+                    }
+                }
                 
                 
 //                //// <BUSINESS_DETAILS>

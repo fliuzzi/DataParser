@@ -136,7 +136,6 @@ public class YPParseAndDeDupe
                     System.out.print("Beginning JSON dump.....");
                     YPRawDataParser.bufferedWriter().write(collector.getJSON().toString());
                     System.out.println("Done!");
-                    parser.resetCounter();
                     parser.closeWriter();
                 }
                 
