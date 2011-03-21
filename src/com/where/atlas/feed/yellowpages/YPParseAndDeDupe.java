@@ -39,7 +39,7 @@ public class YPParseAndDeDupe
             }
             else{
                 final YPRawDataParser parser = new YPRawDataParser(new YPParserUtils(args[1],args[2]));
-                ExecutorService thePool = Executors.newFixedThreadPool(5);
+                ExecutorService thePool = Executors.newFixedThreadPool(15);
                 
                 final YPJSONCollector collector = new YPJSONCollector();
                 
