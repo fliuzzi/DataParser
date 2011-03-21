@@ -121,34 +121,19 @@ public class YPParserUtils
         }
         
     }
+   
     
-    public YPParserUtils(String oldIndexPath, String ratingsPath, String targetPath) throws IOException,CorruptIndexException
+    
+    public YPParserUtils(String CSIndex,String targetFile) throws IOException
     {
+        oldIndexPath_=CSIndex;
+        targetPath_ = targetFile;
         
-        oldIndexPath_ = oldIndexPath;
-        targetPath_ = targetPath;
-        
-        maxUserId_ = 45000000;
-        
-        ratings = getFiles(ratingsPath);
-        
-        
-        jw_ = new JaroWinklerDistance();
-        oldSearchIndexSearcher_ = new IndexSearcher(new NIOFSDirectory(new File(oldIndexPath)));
-        geoCache_ = new GeoHashCache(CSListingDocumentFactory.LATITUDE_RANGE, CSListingDocumentFactory.LONGITUDE_RANGE,
-                CSListingDocumentFactory.LISTING_ID, oldSearchIndexSearcher_.getIndexReader());
-        outputFileName_ = targetPath;
+        outputFileName_ = targetFile;
         outputFile_ = new File(outputFileName_);
         outputFile_.createNewFile();
         outputStream_ = new FileOutputStream(outputFile_);
         outputChannel_ = outputStream_.getChannel();
-    }
-    
-    
-    public YPParserUtils(String CSIndex,String targetFile)
-    {
-        oldIndexPath_=CSIndex;
-        targetPath_ = targetFile;
     }
     
     // returns a File array of all files in path 'dirName' that end with .rating
