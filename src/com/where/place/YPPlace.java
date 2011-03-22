@@ -11,6 +11,7 @@ import com.where.atlas.feed.yellowpages.YPRawDataParser;
 
 public class YPPlace extends Place {
 
+	String pid;
 	String hours;
 	String YPurl;
 	String biz_url;
@@ -22,6 +23,24 @@ public class YPPlace extends Place {
 		categories = new ArrayList<String>();
 		reviews = new ArrayList<JSONObject>();
 	}
+	
+	public void setPID(String pid)
+	{
+		this.pid=pid;
+	}
+	
+	public String getPID()
+	{
+		return pid;
+	}
+	
+	private String parseYPURLtoPID(String url)
+    {
+    	if(url.length() > 0)
+    		return url.substring(url.indexOf("lid=")+4);
+    	else
+    		return null;
+    }
 	
 	public void addReview(JSONObject rev) throws JSONException
 	{
@@ -56,6 +75,7 @@ public class YPPlace extends Place {
 	public void setYPurl(String url)
 	{
 		YPurl = url;
+		setPID(parseYPURLtoPID(url));
 	}
 	
 	public String getYPurl()
@@ -102,6 +122,8 @@ public class YPPlace extends Place {
 	    		json.put("ypurl",YPurl);
 	    	if(biz_url != null && biz_url.length() > 0)
 	    		json.put("biz_url",biz_url);
+	    	if(pid != null && pid.length() > 0)
+	    		json.put("pid", pid);
 	    	if(categories.size() > 0)
 	    	{
 	    		JSONArray jarray = new JSONArray();

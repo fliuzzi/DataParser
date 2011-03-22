@@ -139,10 +139,51 @@ public class YPRawDataParser implements FeedParser {
     	
     }
     
+    
+    
     private void parseDetails(PlaceCollector collector,NodeList details,NodeList reviews)
     {
-    	
-    	
+    	Node listingNode = null;
+        YPPlace poi = null;
+        Address location = null;
+        //// <BUSINESS_DETAILS>
+        for(int i = 0; i < details.getLength();i++)
+        {
+        	listingNode = details.item(i);
+            if(listingNode.getNodeType() == Node.ELEMENT_NODE){
+                Element listingElement = (Element)listingNode.getFirstChild();
+                
+                NodeList URL = listingElement.getElementsByTagName("URL");
+                Element ypurl = (Element) URL.item(0);
+                NodeList url = ypurl.getChildNodes();
+                String strurl = ((Node) url.item(0)).getNodeValue();
+                
+                poi.setYPurl(strurl);
+                
+                poi = new YPPlace();
+                location = new Address();
+                
+                
+                
+        	
+            }
+        }
+        
+        //// <BUSINESS_REVIEWS>
+        for(int i = 0; i < details.getLength();i++)
+        {   
+        	listingNode = details.item(i);
+            if(listingNode.getNodeType() == Node.ELEMENT_NODE){
+                Element listingElement = (Element)listingNode;
+                
+                
+                poi = new YPPlace();
+                location = new Address();
+                
+                poi.setName(listingElement.getAttribute("name"));//NAME
+        	
+            }
+        }
     	
     }
     
