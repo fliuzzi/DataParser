@@ -24,7 +24,6 @@ public class YPParserUtils
     {
         targetPath_ = targetFile;
         parserType = parserChoice;
-        
     }
     
     public int getParserType()

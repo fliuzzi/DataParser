@@ -88,6 +88,7 @@ public class YPRawDataParser implements FeedParser {
         //// <LISTING>
         for(int i = 0; i < listings.getLength();i++)
         {   
+        	
             listingNode = listings.item(i);
             if(listingNode.getNodeType() == Node.ELEMENT_NODE){
                 Element listingElement = (Element)listingNode;
@@ -139,55 +140,179 @@ public class YPRawDataParser implements FeedParser {
     	
     }
     
-    
-    
-    private void parseDetails(PlaceCollector collector,NodeList details,NodeList reviews)
+    private void parseDetails(PlaceCollector collector,NodeList details)
     {
     	Node listingNode = null;
         YPPlace poi = null;
-        Address location = null;
+        
         //// <BUSINESS_DETAILS>
         for(int i = 0; i < details.getLength();i++)
-        {
+        {	
         	listingNode = details.item(i);
-            if(listingNode.getNodeType() == Node.ELEMENT_NODE){
-                Element listingElement = (Element)listingNode.getFirstChild();
-                
-                NodeList URL = listingElement.getElementsByTagName("URL");
-                Element ypurl = (Element) URL.item(0);
-                NodeList url = ypurl.getChildNodes();
-                String strurl = ((Node) url.item(0)).getNodeValue();
-                
-                poi.setYPurl(strurl);
-                
-                poi = new YPPlace();
-                location = new Address();
-                
-                
-                
         	
+            if(listingNode.getNodeType() == Node.ELEMENT_NODE){
+            	
+            	Element element = ((Element)listingNode);
+            	poi = new YPPlace();
+            	
+            	//<URL>
+	            String url = element.getElementsByTagName("URL").item(0).getTextContent();
+	            poi.setYPurl(url);
+	            
+	            //<address>
+                String address = element.getElementsByTagName("address").item(0).getTextContent().trim();
+                if(address != null && address.length() > 0)
+                	poi.setAddress(parseAddress(address));
+	            
+	            //<accreditations>
+                String accreditations = element.getElementsByTagName("accreditations").item(0).getTextContent().trim();
+                if(accreditations != null && accreditations.length() > 0)
+                	poi.setAccreditations(accreditations);
+            	//<brands>
+                String brands = element.getElementsByTagName("brands").item(0).getTextContent().trim();
+                if(brands != null && brands.length() > 0)
+                	poi.setBrands(brands);
+	            //<payment_types_accepted>
+                String payment_types_accepted = element.getElementsByTagName("payment_types_accepted").item(0).getTextContent().trim();
+                if(payment_types_accepted != null && payment_types_accepted.length() > 0)
+                	poi.setPayment_types_accepted(payment_types_accepted);
+                //<in_business_since>
+                String in_business_since = element.getElementsByTagName("in_business_since").item(0).getTextContent().trim();
+                if(in_business_since != null && in_business_since.length() > 0)
+                	poi.setBiz_since(in_business_since);
+                //<categories>
+                //<aka>
+                String aka = element.getElementsByTagName("aka").item(0).getTextContent().trim();
+                if(aka != null && aka.length() > 0)
+                	poi.setAka(aka);
+                //<average_rating>
+                String average_rating = element.getElementsByTagName("average_rating").item(0).getTextContent().trim();
+                if(average_rating != null && average_rating.length() > 0)
+                	poi.setAvg_rating(average_rating);
+                //<languages_spoken>
+                String languages_spoken = element.getElementsByTagName("languages_spoken").item(0).getTextContent().trim();
+                if(languages_spoken != null && languages_spoken.length() > 0)
+                	poi.setLanguages(languages_spoken);
             }
         }
-        
-        //// <BUSINESS_REVIEWS>
-        for(int i = 0; i < details.getLength();i++)
-        {   
-        	listingNode = details.item(i);
-            if(listingNode.getNodeType() == Node.ELEMENT_NODE){
-                Element listingElement = (Element)listingNode;
-                
-                
-                poi = new YPPlace();
-                location = new Address();
-                
-                poi.setName(listingElement.getAttribute("name"));//NAME
-        	
-            }
-        }
-    	
     }
     
     
+    private void parseReviews(PlaceCollector collector,NodeList reviews)
+    {
+    	Node listingNode = null;
+        YPPlace poi = null;
+        
+        //// <BUSINESS_REVIEWS>
+        for(int i = 0; i < reviews.getLength();i++)
+        {	
+        	listingNode = reviews.item(i);
+        	
+            if(listingNode.getNodeType() == Node.ELEMENT_NODE){
+            	
+            	Element element = ((Element)listingNode);
+            	
+                poi = new YPPlace();
+                
+                //<name>
+                String name = element.getElementsByTagName("name").item(0).getTextContent();
+	            poi.setName(name);
+	            
+                //<address>
+                String address = element.getElementsByTagName("address").item(0).getTextContent().trim();
+                if(address != null && address.length() > 0)
+                	poi.setAddress(parseAddress(address));
+                
+                //<URL>
+	            String url = element.getElementsByTagName("URL").item(0).getTextContent();
+	            poi.setYPurl(url);
+                
+                //<reviews>
+	            NodeList reviewnodes = element.getElementsByTagName("review");
+	            if(reviewnodes.getLength() > 0)
+	            	fillDetailReviews(reviewnodes, poi);
+	            
+	            if(poi.getName().length() <= 0)
+            		collector.collectBadInput(poi, new Exception("Nullname"));
+                else
+                	collector.collect(poi);
+            }
+        }
+    }
+    
+    private Address parseAddress(String addy)
+    {
+    	Address address = new Address();
+    	String state = null , city = null;
+    	
+    	String zip = addy.substring(addy.lastIndexOf(" ")+1);
+    	try{
+	    	addy = addy.substring(0,addy.lastIndexOf(" "));
+	    	
+	    	
+	    	state = addy.substring(addy.lastIndexOf(" ")+1);
+	    	
+	    	addy = addy.substring(0,addy.lastIndexOf(" "));
+	    	
+    	
+	    	city = addy.substring(addy.lastIndexOf(" ")+1);
+	    	
+	    	addy = addy.substring(0,addy.lastIndexOf(" "));
+	    	address.setAddress1(addy.trim());
+	    	address.setState(state);
+	    	address.setCity(city);
+	    	address.setZip(zip);
+    	}
+    	catch(Exception e)
+    	{
+        	address.setState(state);
+        	address.setCity(addy);
+        	address.setZip(zip);
+    	}
+    	
+    	return address;
+    }
+    
+    private void fillDetailReviews(NodeList reviews, YPPlace poi)
+    {
+    	Node listingNode = null;
+    	JSONObject json;
+    	
+    	for(int i = 0; i < reviews.getLength();i++)
+        {	
+    		json = new JSONObject();
+        	listingNode = reviews.item(i);
+        	
+            if(listingNode.getNodeType() == Node.ELEMENT_NODE){
+            	
+            	Element element = ((Element)listingNode);
+            	
+            	try {
+			    	//<content>
+	            	String content = element.getElementsByTagName("content").item(0).getTextContent();
+					json.put("text", content);
+			    	//<author>
+	                String author = element.getElementsByTagName("author").item(0).getTextContent();
+		            json.put("user", author);
+			    	//<subject>
+		            String subject = element.getElementsByTagName("subject").item(0).getTextContent();
+		            json.put("subject", subject);
+			    	//<rating>
+		            String rating = element.getElementsByTagName("rating").item(0).getTextContent();
+		            json.put("rating", rating);
+			    	//<date>
+		            String date = element.getElementsByTagName("date").item(0).getTextContent();
+		            json.put("date", date);
+		            
+		            poi.addReview(json);
+            	}
+            	catch(Exception e)
+            	{
+            		System.err.println("error putting together review json "+e.getMessage());
+            	}
+            }
+        }
+    }
     
     public void parse(PlaceCollector collector, InputStream ins) throws IOException {
         try{
@@ -204,13 +329,25 @@ public class YPRawDataParser implements FeedParser {
                 }
                 else if(parser.getParserType() == 2)
                 {
-                	NodeList listOfDetails = doc.getElementsByTagName("business_details");
-                    NodeList listOfReviews = doc.getElementsByTagName("business_reviews");
-                	parseDetails(collector,listOfDetails,listOfReviews);
+					String nodename = doc.getChildNodes().item(0).getChildNodes().item(0).getNodeName();
+					Element reviews = (Element)doc.getChildNodes().item(0);
+					NodeList reviewLst = reviews.getElementsByTagName("business_reviews");
+					
+                    if(!nodename.equals("listing"))
+                    	parseReviews(collector, reviewLst);
+                }
+                else if(parser.getParserType() == 3)
+                {
+                	String nodename = doc.getChildNodes().item(0).getChildNodes().item(0).getNodeName();
+					Element details = (Element)doc.getChildNodes().item(0);
+					NodeList detailLst = details.getElementsByTagName("business_details");
+					
+                    if(!nodename.equals("listing"))
+                    	parseDetails(collector, detailLst);
                 }
                 else
                 {
-                	System.err.println("INVALID PARSEING TYPE\n restart and choose: 1) <listing>   2) <details>");
+                	System.err.println("INVALID PARSEING TYPE\n restart and choose: 1) <listing>   2) <reviews>");
                 	return;
                 }
                 

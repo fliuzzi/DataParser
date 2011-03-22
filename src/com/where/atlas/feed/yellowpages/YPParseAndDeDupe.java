@@ -60,8 +60,7 @@ public class YPParseAndDeDupe
                         
                                 	System.out.println("Zip File #"+(lcv+1)+" : " + zipFiles[lcv].getName());
                                 	
-                                    parser.parse(collector, 
-                                    		XMLfixer.repairXML(zipFile.getInputStream(entry)));
+                                    parser.parse(collector, XMLfixer.repairXML(zipFile.getInputStream(entry)));
                                     
 									zipFile.close();
                                     System.out.println("\nFinished zip" + zipFile.getName());
