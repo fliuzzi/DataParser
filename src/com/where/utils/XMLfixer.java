@@ -24,7 +24,7 @@ public class XMLfixer {
 	
 	private static InputStream convertToInputStream(String str) throws UnsupportedEncodingException
 	{
-			return new ByteArrayInputStream(str.getBytes("UTF-8"));
+			return new ByteArrayInputStream(str.getBytes("US-ASCII"));
 	}
 	
 	private static String replaceProductServices(String buf)

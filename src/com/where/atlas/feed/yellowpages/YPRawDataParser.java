@@ -1,6 +1,7 @@
 package com.where.atlas.feed.yellowpages;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,19 +26,23 @@ public class YPRawDataParser implements FeedParser {
     
     protected YPParserUtils parser;
     private static BufferedWriter bufferedWriter;
+    int parseingType;
 
     
     public YPRawDataParser(YPParserUtils Yparser)
     {
         parser=Yparser;
         try{
+        	
+        	File file = new File(parser.getTargetPath());
+        	file.createNewFile();
             bufferedWriter = new BufferedWriter(new FileWriter(parser.getTargetPath()));
             
             //Start the JSON Array
             bufferedWriter.write("[");
         }
-        catch(Throwable t){
-            System.err.print("Error Loading!");
+        catch(Exception e){
+            System.err.print("Error Loading!"+e.getMessage());
         }
     }
     
@@ -75,6 +80,114 @@ public class YPRawDataParser implements FeedParser {
         return tel;
     }
     
+    private void parseListings(PlaceCollector collector,NodeList listings)
+    {
+    	Node listingNode = null;
+        YPPlace poi = null;
+        Address location = null;
+        //// <LISTING>
+        for(int i = 0; i < listings.getLength();i++)
+        {   
+            listingNode = listings.item(i);
+            if(listingNode.getNodeType() == Node.ELEMENT_NODE){
+                Element listingElement = (Element)listingNode;
+                
+                
+                poi = new YPPlace();
+                location = new Address();
+                
+                poi.setName(listingElement.getAttribute("name"));//NAME
+                location.setZip(listingElement.getAttribute("postal_code"));//addy.ZIP
+                poi.setPhone(stripPhone(listingElement.getAttribute("phone")));//PHONE
+                poi.setHours(listingElement.getAttribute("hours"));
+                poi.setBizURL(listingElement.getAttribute("biz_url"));
+                location.setCity(listingElement.getAttribute("locality"));//addy.CITY
+                location.setState(listingElement.getAttribute("region"));
+                location.setAddress1(listingElement.getAttribute("address"));
+                
+                
+                if(listingElement.getAttribute("lat").length() > 1 && listingElement.getAttribute("lon").length() > 1){
+                    location.setLat(Double.parseDouble(listingElement.getAttribute("lat")));	//LATITUDE
+                    location.setLng(Double.parseDouble(listingElement.getAttribute("lon")));	//LONGITUDE
+                }
+                
+                poi.setAddress(location);
+                
+                //sub-nodes
+                NodeList categories = listingElement.getElementsByTagName("category");
+                fillCategories(categories,poi);
+                NodeList reviews = listingElement.getElementsByTagName("review");
+                fillReviews(reviews,poi);
+                
+                NodeList URLlist = listingElement.getElementsByTagName("URL");
+                Element URL = (Element) URLlist.item(0);
+                
+                try{
+                	poi.setYPurl(URL.getTextContent());
+                }
+                catch(NullPointerException np)
+                {
+                	
+                }
+                	
+                if(poi.getName().length() <= 0)
+            		collector.collectBadInput(poi, new Exception("Nullname"));
+                else
+                	collector.collect(poi);
+            }
+        }
+    	
+    }
+    
+    
+    
+    private void parseDetails(PlaceCollector collector,NodeList details,NodeList reviews)
+    {
+    	Node listingNode = null;
+        YPPlace poi = null;
+        Address location = null;
+        //// <BUSINESS_DETAILS>
+        for(int i = 0; i < details.getLength();i++)
+        {
+        	listingNode = details.item(i);
+            if(listingNode.getNodeType() == Node.ELEMENT_NODE){
+                Element listingElement = (Element)listingNode.getFirstChild();
+                
+                NodeList URL = listingElement.getElementsByTagName("URL");
+                Element ypurl = (Element) URL.item(0);
+                NodeList url = ypurl.getChildNodes();
+                String strurl = ((Node) url.item(0)).getNodeValue();
+                
+                poi.setYPurl(strurl);
+                
+                poi = new YPPlace();
+                location = new Address();
+                
+                
+                
+        	
+            }
+        }
+        
+        //// <BUSINESS_REVIEWS>
+        for(int i = 0; i < details.getLength();i++)
+        {   
+        	listingNode = details.item(i);
+            if(listingNode.getNodeType() == Node.ELEMENT_NODE){
+                Element listingElement = (Element)listingNode;
+                
+                
+                poi = new YPPlace();
+                location = new Address();
+                
+                poi.setName(listingElement.getAttribute("name"));//NAME
+        	
+            }
+        }
+    	
+    }
+    
+    
     
     public void parse(PlaceCollector collector, InputStream ins) throws IOException {
         try{
@@ -84,81 +197,22 @@ public class YPRawDataParser implements FeedParser {
                 
                 doc.getDocumentElement().normalize();
                 
-                NodeList listOfListings = doc.getElementsByTagName("listing");
-                //NodeList listOfDetails = doc.getElementsByTagName("business_details");
-                //NodeList listOfReviews = doc.getElementsByTagName("business_reviews");
                 
-                Node listingNode = null;
-                YPPlace poi = null;
-                Address location = null;
-                
-                
-                //// <LISTING>
-                for(int i = 0; i < listOfListings.getLength();i++)
-                {   
-                    listingNode = listOfListings.item(i);
-                    if(listingNode.getNodeType() == Node.ELEMENT_NODE){
-                        Element listingElement = (Element)listingNode;
-                        
-                        
-                        poi = new YPPlace();
-                        location = new Address();
-                        
-                        poi.setName(listingElement.getAttribute("name"));//NAME
-                        location.setZip(listingElement.getAttribute("postal_code"));//addy.ZIP
-                        poi.setPhone(stripPhone(listingElement.getAttribute("phone")));//PHONE
-                        poi.setHours(listingElement.getAttribute("hours"));
-                        poi.setBizURL(listingElement.getAttribute("biz_url"));
-                        location.setCity(listingElement.getAttribute("locality"));//addy.CITY
-                        location.setState(listingElement.getAttribute("region"));
-                        location.setAddress1(listingElement.getAttribute("address"));
-                        
-                        
-                        if(listingElement.getAttribute("lat").length() > 1 && listingElement.getAttribute("lon").length() > 1){
-                            location.setLat(Double.parseDouble(listingElement.getAttribute("lat")));	//LATITUDE
-                            location.setLng(Double.parseDouble(listingElement.getAttribute("lon")));	//LONGITUDE
-                        }
-                        
-                        poi.setAddress(location);
-                        
-                        //sub-nodes
-                        NodeList categories = listingElement.getElementsByTagName("category");
-                        fillCategories(categories,poi);
-                        NodeList reviews = listingElement.getElementsByTagName("review");
-                        fillReviews(reviews,poi);
-                        
-                        NodeList URLlist = listingElement.getElementsByTagName("URL");
-                        Element URL = (Element) URLlist.item(0);
-                        
-                        try{
-                        	poi.setYPurl(URL.getTextContent());
-                        }
-                        catch(NullPointerException np)
-                        {
-                        	
-                        }
-                        	
-                        if(poi.getName().length() <= 0)
-                    		collector.collectBadInput(poi, new Exception("Nullname"));
-                        else
-                        	collector.collect(poi);
-                    }
+                if(parser.getParserType() == 1){
+                	NodeList listOfListings = doc.getElementsByTagName("listing");
+                	parseListings(collector, listOfListings);
                 }
-                
-                
-//                //// <BUSINESS_DETAILS>
-//                for(int i = 0; i < listOfDetails.getLength();i++)
-//                {
-//                    listingNode = listOfDetails.item(i);
-//                    if(listingNode.getNodeType() == Node.ELEMENT_NODE){
-//                        Element detailElement = (Element)listingNode;
-//                        
-//                        poi = new YPPlace();
-//                        location = new Address();
-//                        
-//                        NodeList detailElement
-//                        }}
-                	
+                else if(parser.getParserType() == 2)
+                {
+                	NodeList listOfDetails = doc.getElementsByTagName("business_details");
+                    NodeList listOfReviews = doc.getElementsByTagName("business_reviews");
+                	parseDetails(collector,listOfDetails,listOfReviews);
+                }
+                else
+                {
+                	System.err.println("INVALID PARSEING TYPE\n restart and choose: 1) <listing>   2) <details>");
+                	return;
+                }
                 
     	}
         catch(Exception e){
