@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.StringTokenizer;
 
 import org.json.JSONObject;
 import org.w3c.dom.Document;
@@ -140,6 +141,12 @@ public class YPRawDataParser implements FeedParser {
     	
     }
     
+    public String readNode(Element element,String nodename)
+    {
+    	return element.getElementsByTagName(nodename).item(0) != null ? 
+				element.getElementsByTagName(nodename).item(0).getTextContent().trim() : null;
+    }
+    
     private void parseDetails(PlaceCollector collector,NodeList details)
     {
     	Node listingNode = null;
@@ -159,42 +166,83 @@ public class YPRawDataParser implements FeedParser {
 	            String url = element.getElementsByTagName("URL").item(0).getTextContent();
 	            poi.setYPurl(url);
 	            
+	            String name = readNode(element,"name");
+	            if(name != null && name.length() > 0)
+	            	poi.setName(name);
+	            
 	            //<address>
-                String address = element.getElementsByTagName("address").item(0).getTextContent().trim();
+                String address = readNode(element, "address");
                 if(address != null && address.length() > 0)
                 	poi.setAddress(parseAddress(address));
 	            
 	            //<accreditations>
-                String accreditations = element.getElementsByTagName("accreditations").item(0).getTextContent().trim();
+                String accreditations = readNode(element, "accreditations");
                 if(accreditations != null && accreditations.length() > 0)
                 	poi.setAccreditations(accreditations);
             	//<brands>
-                String brands = element.getElementsByTagName("brands").item(0).getTextContent().trim();
+                String brands = readNode(element, "brands");
                 if(brands != null && brands.length() > 0)
                 	poi.setBrands(brands);
 	            //<payment_types_accepted>
-                String payment_types_accepted = element.getElementsByTagName("payment_types_accepted").item(0).getTextContent().trim();
+                String payment_types_accepted = readNode(element, "payment_types_accepted");
                 if(payment_types_accepted != null && payment_types_accepted.length() > 0)
                 	poi.setPayment_types_accepted(payment_types_accepted);
                 //<in_business_since>
-                String in_business_since = element.getElementsByTagName("in_business_since").item(0).getTextContent().trim();
+                String in_business_since = readNode(element, "in_business_since");
                 if(in_business_since != null && in_business_since.length() > 0)
                 	poi.setBiz_since(in_business_since);
-                //<categories>
+                
                 //<aka>
-                String aka = element.getElementsByTagName("aka").item(0).getTextContent().trim();
+                String aka = readNode(element, "aka");
                 if(aka != null && aka.length() > 0)
                 	poi.setAka(aka);
                 //<average_rating>
-                String average_rating = element.getElementsByTagName("average_rating").item(0).getTextContent().trim();
+                String average_rating = readNode(element, "average_rating");
                 if(average_rating != null && average_rating.length() > 0)
                 	poi.setAvg_rating(average_rating);
                 //<languages_spoken>
-                String languages_spoken = element.getElementsByTagName("languages_spoken").item(0).getTextContent().trim();
+                String languages_spoken = readNode(element, "languages_spoken");
                 if(languages_spoken != null && languages_spoken.length() > 0)
                 	poi.setLanguages(languages_spoken);
+                
+                //<categories>
+                String categories = readNode(element,"categories");
+                if(categories != null && categories.length() > 0)
+                	parseDetailCategories(categories, poi);
+                
+                //aaannnddddd   collect.
+                if(poi.getName() != null && poi.getName().length() <= 0)
+            		collector.collectBadInput(poi, new Exception("Nullname"));
+                else
+                	collector.collect(poi);
             }
         }
+    }
+    
+    private void parseDetailCategories(String categories, YPPlace poi)
+    {
+    	
+    	if(categories.indexOf(",") > -1){
+	    	StringTokenizer st = new StringTokenizer(categories,",");
+	    	while(st.hasMoreTokens())
+	    		poi.addCategory(st.nextToken().trim());
+    	}
+    	else{
+    		StringTokenizer st = new StringTokenizer(categories);
+    		
+    		if(st.countTokens() == 2){
+    			if(categories.charAt(categories.indexOf(" ")+1) == ' ')
+    				while(st.hasMoreTokens())
+    		    		poi.addCategory(st.nextToken());
+    			else
+    				poi.addCategory(categories);
+    		}
+    		else{
+		    	while(st.hasMoreTokens())
+		    		poi.addCategory(st.nextToken());
+    		}
+    	}
+    		
     }
     
     
