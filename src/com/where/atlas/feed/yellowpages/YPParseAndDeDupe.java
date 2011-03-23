@@ -11,6 +11,19 @@ import java.util.zip.ZipFile;
 
 import com.where.utils.XMLfixer;
 
+/**
+ * 
+ * @author fliuzzi
+ *
+ *	Yellow Pages Raw Data Parser (from 80legs crawling data)
+ *	
+ *	-  The data comes in two different types of files (listings, and reviews/details)
+ *	-  Separate them into different directories and use the proper parsing type (arg3)
+ *	-  The program tries its best to parse through the horrible dataset, but some additional
+ *			tweaking will probably be needed for a new dataset.
+ *	-  This program will write out a neat JSON that re-organizes the data so it can later be de-duped/used
+ *
+ */
 
 
 
@@ -21,10 +34,11 @@ public class YPParseAndDeDupe
     {
         if(args.length != 4)
         {
-            System.err.println("USAGE: program will go through a directory of yellow pages raw data zips");
+            System.err.println("USAGE: program will go through a directory of yellow pages raw data zips"+
+            						" and parse them to a neat JSON");
             System.err.println("ARG1: directory of raw data .zips");
             System.err.println("ARG2: Output flatfile target path");
-            System.err.println("ARG3: Parseing type (int): 1)<listing>  2)<details>");
+            System.err.println("ARG3: Parseing type (int): 1)<listing>  2)<reviews> 3)<details>");
             System.err.println("ARG4: Thread count (int)");
             return;
         }

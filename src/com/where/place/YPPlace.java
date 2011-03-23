@@ -237,6 +237,30 @@ public class YPPlace extends Place {
     	}
     	return json;
     }
+    
+//    public static YPPlace fromJSON(JSONObject json) {
+//        try {
+//        	
+//        	YPPlace poi =  new YPPlace();
+//        	
+//        	
+//        	poi.setName(json.optString("name"));
+//        	poi.setPID(json.optString("pid"));
+//        	poi.setAka(json.optString("aka"));
+//        	poi.setBiz_since(json.optString("in_biz_since"));
+//        	poi.setBrands(json.optString("brands"));
+//        	poi.setAvg_rating(json.optString("avg_rating"));
+//        	poi.setYPurl(json.optString("ypurl"));
+//        	poi.setAccreditations(json.optString("accreditations"));
+//        	
+//        	
+//        	
+//        }
+//        catch(Exception e)
+//        {
+//        	throw new IllegalStateException(e);
+//        }
+//    }
 	
 	
 	public String toString()
