@@ -1,7 +1,10 @@
 package com.where.atlas.feed.yellowpages.YPdedupe;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,13 +66,12 @@ public class YPJSONParseAndDeDupe {
 	
 	public static void parseListings(String path) throws IOException, JSONException
 	{
-		InputStream is = new FileInputStream(path);
-		String jsonTxt = IOUtils.toString( is );
-		JSONArray jarray = new JSONArray(jsonTxt);
+		BufferedReader br = new BufferedReader(new FileReader(path));
 		
-		for(int i = 0;  i < jarray.length(); i++)
-		{
-			listings.add(jarray.getJSONObject(i));
+		 String line = null;
+	        while((line = br.readLine()) != null) {
+		
+			listings.add(new JSONObject(line));
 		}
 		
 		//now we have no duplicates
@@ -190,8 +192,7 @@ public class YPJSONParseAndDeDupe {
 	{
 		map = new HashMap<String,JSONObject>();
 		InputStream is = new FileInputStream(path);
-		String jsonTxt = IOUtils.toString( is );
-		JSONArray jarray = new JSONArray(jsonTxt);
+		JSONArray jarray = new JSONArray(IOUtils.toString( is ));
 		JSONObject jobj = new JSONObject();
 		String pid = null;
 		
