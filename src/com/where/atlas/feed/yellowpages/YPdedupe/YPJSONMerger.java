@@ -28,9 +28,9 @@ public class YPJSONMerger {
 	public static JSONArray dump;
 	public static BufferedWriter writer;
 	
-	private static void setupWriter(String writepath) throws IOException
+	private static BufferedWriter setupWriter(String writepath) throws IOException
 	{
-		writer = new BufferedWriter(new FileWriter(writepath));
+		return new BufferedWriter(new FileWriter(writepath));
         
 	}
 	
@@ -49,14 +49,19 @@ public class YPJSONMerger {
 		
 		
 		try {
-			setupWriter(args[1]);
+			
+			reviews = new HashMap<String,JSONObject>();
+			details = new HashMap<String,JSONObject>();
+			listings = new HashSet<JSONObject>();
+			
+			writer = setupWriter(args[1]);
 			
 			
-			loadPIDSfromJSONArray(args[0]+"/YPreviews.json",reviews);
-			loadPIDSfromJSONArray(args[0]+"/YPdetails.json",details);
-			parseListings(args[0]+"/YPlistings.json");
+			reviews = loadPIDSfromJSONArray(args[0]+"/YPreviews.json",reviews);
+			details = loadPIDSfromJSONArray(args[0]+"/YPdetails.json",details);
+			parseListings(args[0]+"/YPlistings.json",reviews,details);
 			
-			closeWriter();
+			writer.close();
 		} catch (IOException e) {
 			System.err.println("IO ERROR:"+e.getMessage());
 		} catch (JSONException e) {
@@ -64,7 +69,7 @@ public class YPJSONMerger {
 		}
 	} 
 	
-	public static void parseListings(String path) throws IOException, JSONException
+	public static void parseListings(String path,HashMap<String,JSONObject> reviews,HashMap<String,JSONObject> details) throws IOException, JSONException
 	{
 		BufferedReader br = new BufferedReader(new FileReader(path));
 		listings = new HashSet<JSONObject>();
@@ -74,6 +79,7 @@ public class YPJSONMerger {
         	count++;
 			listings.add(new JSONObject(line.replace("amp;", "&")));
 		}
+        
 		
         System.out.println("Added "+count+" unique listings to memory...writing");
 		//now we have no duplicates
@@ -190,7 +196,7 @@ public class YPJSONMerger {
 		}
 	}
 	
-	public static void loadPIDSfromJSONArray(String path,HashMap<String,JSONObject> map) throws IOException, JSONException
+	public static HashMap<String,JSONObject> loadPIDSfromJSONArray(String path,HashMap<String,JSONObject> map) throws IOException, JSONException
 	{
 		map = new HashMap<String,JSONObject>();
 		InputStream is = new FileInputStream(path);
@@ -206,6 +212,7 @@ public class YPJSONMerger {
 				map.put(pid,jobj);
 		}
 		System.out.println("Loaded " + path + " to memory.");
+		return map;
 	}
 	
 }
