@@ -57,8 +57,8 @@ public class YPJSONMerger {
 			writer = setupWriter(args[1]);
 			
 			
-			reviews = loadPIDSfromJSONArray(args[0]+"/YPreviews.json",reviews);
-			details = loadPIDSfromJSONArray(args[0]+"/YPdetails.json",details);
+			reviews = loadPIDSfromJSONArray(args[0]+"/YPreviews.json");
+			details = loadPIDSfromJSONArray(args[0]+"/YPdetails.json");
 			parseListings(args[0]+"/YPlistings.json",reviews,details);
 			
 			writer.close();
@@ -89,7 +89,7 @@ public class YPJSONMerger {
 			JSONObject listing = it.next();
 			if(!(listing.optString("pid").equals("")) && reviews.containsKey(listing.optString("pid")))
 			{
-				listing = updateReview(listing);
+				listing = updateReview(listing,reviews);
 				//remove from map
 				reviews.remove(listing.optString("pid"));
 			}
@@ -139,8 +139,13 @@ public class YPJSONMerger {
 	}
 	
 	//updates the json since its already in the reviews map
-	private static JSONObject updateReview(JSONObject listing) throws JSONException
+	private static JSONObject updateReview(JSONObject listing,HashMap<String,JSONObject> reviews) throws JSONException
 	{
+		if((listing.optString("pid") == null) ||  (listing.optJSONArray("reviews") == null)){
+			return listing;
+		}
+		
+		
 		JSONObject reviewpoi = reviews.get(listing.optString("pid"));
 		
 		
@@ -151,7 +156,11 @@ public class YPJSONMerger {
 			
 			for(int i=0;i<reviewReviews.length();i++)
 			{
-				if(isUniqueReview(listingreviews,(JSONObject)reviewReviews.get(i)))
+				if(listingreviews == null)
+				{
+					listing.accumulate("reviews", reviewReviews.get(i));
+				}
+				else if(isUniqueReview(listingreviews,(JSONObject)reviewReviews.get(i)))
 				{
 					listing.accumulate("reviews", reviewReviews.get(i));
 				}
@@ -196,9 +205,9 @@ public class YPJSONMerger {
 		}
 	}
 	
-	public static HashMap<String,JSONObject> loadPIDSfromJSONArray(String path,HashMap<String,JSONObject> map) throws IOException, JSONException
+	public static HashMap<String,JSONObject> loadPIDSfromJSONArray(String path) throws IOException, JSONException
 	{
-		map = new HashMap<String,JSONObject>();
+		HashMap<String,JSONObject> map = new HashMap<String,JSONObject>();
 		InputStream is = new FileInputStream(path);
 		JSONArray jarray = new JSONArray(IOUtils.toString( is ));
 		JSONObject jobj = new JSONObject();
@@ -211,7 +220,7 @@ public class YPJSONMerger {
 			if(pid != null)
 				map.put(pid,jobj);
 		}
-		System.out.println("Loaded " + path + " to memory.");
+		System.out.println("Loaded " + path + "'s "+jarray.length()+" elements to memory.");
 		return map;
 	}
 	
