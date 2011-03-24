@@ -81,13 +81,13 @@ public class YPJSONMerger {
 		while(it.hasNext())
 		{
 			JSONObject listing = it.next();
-			if(listing.optString("pid") != null && reviews.containsKey(listing.optString("pid")))
+			if(!(listing.optString("pid").equals("")) && reviews.containsKey(listing.optString("pid")))
 			{
 				listing = updateReview(listing);
 				//remove from map
 				reviews.remove(listing.optString("pid"));
 			}
-			if(listing.optString("pid") != null && details.containsKey(listing.optString("pid")))
+			if(!(listing.optString("pid").equals("")) && details.containsKey(listing.optString("pid")))
 			{
 				listing = updateDetail(listing);
 				//remove from map
