@@ -1,6 +1,6 @@
 package com.where.atlas.feed.yellowpages.YPdedupe;
 
-import java.io.BufferedInputStream;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
@@ -62,7 +62,7 @@ public class YPJSONParseAndDeDupe {
 		} catch (JSONException e) {
 			System.err.println("JSON ERROR:"+e.getMessage());
 		}
-	}
+	} 
 	
 	public static void parseListings(String path) throws IOException, JSONException
 	{

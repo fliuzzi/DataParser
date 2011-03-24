@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.StringTokenizer;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -39,8 +40,6 @@ public class YPRawDataParser implements FeedParser {
         	file.createNewFile();
             bufferedWriter = new BufferedWriter(new FileWriter(parser.getTargetPath()));
             
-            //Start the JSON Array
-            bufferedWriter.write("[");
         }
         catch(Exception e){
             System.err.print("Error Loading!"+e.getMessage());
@@ -61,8 +60,6 @@ public class YPRawDataParser implements FeedParser {
     
     public void closeWriter() throws IOException
     {
-    	//close the array and close the writer
-    	bufferedWriter.write("]");
         bufferedWriter.close();
     }
     

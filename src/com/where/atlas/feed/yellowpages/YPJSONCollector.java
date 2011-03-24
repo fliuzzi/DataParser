@@ -12,7 +12,7 @@ public class YPJSONCollector implements PlaceCollector{
 		YPPlace ypplace = (YPPlace)place;
 		try {
 			
-			YPRawDataParser.bufferedWriter().write(ypplace.toJSON().toString());
+			YPRawDataParser.bufferedWriter().write(ypplace.toJSON().toString()+"\n");
 			
 		} catch (IOException e) {
 			System.err.println("error writing:"+ypplace+"\t"+e.getMessage());
