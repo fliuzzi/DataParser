@@ -19,7 +19,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-public class YPJSONParseAndDeDupe {
+public class YPJSONMerger {
 
 	
 	public static HashMap<String,JSONObject> reviews;
@@ -67,13 +67,15 @@ public class YPJSONParseAndDeDupe {
 	public static void parseListings(String path) throws IOException, JSONException
 	{
 		BufferedReader br = new BufferedReader(new FileReader(path));
-		
+		listings = new HashSet<JSONObject>();
+		int count =0 ;
 		 String line = null;
-	        while((line = br.readLine()) != null) {
-		
-			listings.add(new JSONObject(line));
+        while((line = br.readLine()) != null) {
+        	count++;
+			listings.add(new JSONObject(line.replace("amp;", "&")));
 		}
 		
+        System.out.println("Added "+count+" listings from YPlistings.json");
 		//now we have no duplicates
 		Iterator<JSONObject> it = listings.iterator();
 		while(it.hasNext())
@@ -91,22 +93,22 @@ public class YPJSONParseAndDeDupe {
 				//remove from map
 				details.remove(listing.optString("pid"));
 			}
-			
-			//add remaining in maps
-			if(reviews.size() > 0)
-			{
-				collectFromMap(reviews);
-			}
-			if(details.size() > 0)
-			{
-				collectFromMap(details);
-			}
-			
-			
 			//aaannddddd write
 			collect(listing);
 		}
 		
+		System.out.print("Finished checking against maps, dumping leftovers...");
+		
+		//add remaining in maps
+		if(reviews.size() > 0)
+		{
+			collectFromMap(reviews);
+		}
+		if(details.size() > 0)
+		{
+			collectFromMap(details);
+		}
+		System.out.println("Done.");
 	}
 	
 	private static void collectFromMap(HashMap<String,JSONObject> map)
