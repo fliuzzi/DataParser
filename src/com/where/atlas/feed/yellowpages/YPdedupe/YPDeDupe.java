@@ -7,6 +7,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 import org.apache.lucene.search.spell.JaroWinklerDistance;
@@ -21,18 +25,21 @@ import com.where.commons.feed.citysearch.search.query.Search.SearchCriteria;
 
 public class YPDeDupe {
 	private static final float THRESHOLD 		= 0.88f;
-	BufferedReader reader;
-	BufferedWriter writer;
-	Search searchob;
+	protected BufferedReader reader;
+	protected BufferedWriter writer;
+	protected Search searchob;
+	protected AtomicLong count;
 	
 	public YPDeDupe(BufferedReader reader, BufferedWriter writer)
 	{
 		this.reader = reader;
 		this.writer = writer;
+		count = new AtomicLong(0);
 		
 		searchob = new Search();
 		searchob.setIndexPath("/idx/lis");
 	}
+	
 	
 	public BufferedReader getReader()
 	{
@@ -73,35 +80,50 @@ public class YPDeDupe {
 		return (result != null ? result.pois() : null);
 	}
 	
+	private synchronized void collect(String str) throws IOException
+	{
+		writer.write(str);
+		writer.newLine();
+	}
+	
+	public void analyzeAndCollect(JSONObject listing) throws JSONException, IOException
+	{
+    	String[] ids = findWhereId(listing);
+    	if(ids != null)
+    	{
+    		listing.put("whereid",ids[0]);
+    		listing.put("csid", ids[1]);
+    		collect(listing.toString());
+    		count.incrementAndGet();
+    	}
+	}
+	
 	public void dedupe() throws IOException, JSONException
 	{
 		String line = null;
-		long count = 0;
+		
+        ExecutorService thePool = Executors.newFixedThreadPool(5);
+
 		
         while((line = reader.readLine()) != null) {
-        	
-        	JSONObject listing;
-			try {
-				listing = new JSONObject(line);
-			} catch (JSONException e) 
-			{     
-				//if thats a bad json listing, continue to the next
-				continue;
-			}
+        	final String line_ = line;
+				
+			Future<?> fut = thePool.submit(
+                    new Runnable(){ public void run(){
+                    	try{
+	                    	analyzeAndCollect(new JSONObject(line_));
+                    	}
+                    	catch(JSONException e)
+                    	{
+                    		System.out.println(e.getMessage());
+                    	} catch (IOException e) {
+                    		System.out.println(e.getMessage());
+						}
+	                    }});
 			
-        	String[] ids = findWhereId(listing);
-        	if(ids != null)
-        	{
-        		count++;
-        		listing.put("whereid",ids[0]);
-        		listing.put("csid", ids[1]);
-        		writer.write(listing.toString());
-        		writer.newLine();
-        	}
-        	
-        	
         }
-        System.out.println("Done.  Wrote "+count+" de-duped listings.");
+        
+        System.out.println("Done.  De-duped to "+count.get()+" listings.");
 	}
 	
 	
@@ -121,14 +143,12 @@ public class YPDeDupe {
 			}
 			
 			if(possiblePois != null && !possiblePois.isEmpty()) {
-				//System.out.println("*** Results ("+possiblePois.size()+") for: "+json.optLong(ID)+" "+json.optJSONObject(PLACE).optString(NAME));
 				CSListingHolder holder = null;
 				JaroWinklerDistance jd = new JaroWinklerDistance();
 				String placename = json.optString("name").toLowerCase().replace("the ","");
 				String smushedname = placename.replace(" ","");
 				for(CSListing l: possiblePois) {
 					float distance = jd.getDistance(smushedname, l.getName().toLowerCase().replaceAll(" ", ""));
-					//System.out.println("  * "+l.getWhereId()+" "+ l.getName()+" "+distance);
 					if(holder == null || holder.distance < distance) holder = new CSListingHolder(l, distance);
 					if(holder.distance == 1) break;
 				}
@@ -174,7 +194,7 @@ public class YPDeDupe {
 			e.printStackTrace();
 		}
 		
-		
+		main.getWriter().close();
 		
 	}
 }
