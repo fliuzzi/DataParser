@@ -29,14 +29,15 @@ public class YPDeDupe {
 	protected BufferedReader reader;
 	protected BufferedWriter writer;
 	protected Search searchob;
-	protected AtomicLong count;
+	protected AtomicLong goodCount;
+	protected long totalCount;
 	
 	public YPDeDupe(BufferedReader reader, BufferedWriter writer)
 	{
 		this.reader = reader;
 		this.writer = writer;
-		count = new AtomicLong(0);
-		
+		goodCount = new AtomicLong(0);
+		totalCount = 0;
 		searchob = new Search();
 		searchob.setIndexPath("/idx/lis");
 	}
@@ -52,12 +53,19 @@ public class YPDeDupe {
 		return writer;
 	}
 	
+	private String fixQuery(String query)
+	{
+		if(query != null)
+			return query.replace(",","").replace(".","").replace("AND","").replace("OR", "").trim();
+		else 
+			return query;
+	}
+	
 	public List<CSListing> searchByLocation(double lat, double lon, String keywords, String addressdata) {
-		//System.out.println("** Search Criteria: "+lat+"/"+lon+" : "+keywords+" : "+addressdata);
 		
-		//TODO: this is where a funky query will throw out data
-		//keywords = QueryParser.escape(keywords);
-		//addressdata = QueryParser.escape(addressdata);
+		//TODO: temporary fix for oregon listings being disjuncted
+		keywords = fixQuery(keywords);
+		addressdata = fixQuery(addressdata);
 		
 		SearchCriteria criteria = new SearchCriteria();
 		criteria.setLat(lat);
@@ -76,7 +84,6 @@ public class YPDeDupe {
 		} catch (Throwable t) {
 			System.err.println("**** "+ (new Date()).toString());
 			System.err.println("KEYWORDS: "+keywords+"\nADDRESSDATA: "+addressdata);
-			t.printStackTrace();
 		}
 		return (result != null ? result.pois() : null);
 	}
@@ -95,7 +102,7 @@ public class YPDeDupe {
     		listing.put("whereid",ids[0]);
     		listing.put("csid", ids[1]);
     		collect(listing.toString());
-    		count.incrementAndGet();
+    		goodCount.incrementAndGet();
     	}
 	}
 	
@@ -107,6 +114,7 @@ public class YPDeDupe {
 
 		
         while((line = reader.readLine()) != null) {
+        	totalCount++;
         	final String line_ = line;
 				
 			@SuppressWarnings("unused")
@@ -125,10 +133,11 @@ public class YPDeDupe {
 			
         }
         
+        System.out.println(totalCount+" total listings...awaiting analyzation and collection...");
         thePool.shutdown();
         thePool.awaitTermination(Long.MAX_VALUE, TimeUnit.MINUTES);
         
-        System.out.println("Done.  De-duped to "+count.get()+" listings.");
+        System.out.println("Done.  De-duped to "+goodCount.get()+" listings. ~" + ((goodCount.get()/totalCount)*100)+"%");
 	}
 	
 	

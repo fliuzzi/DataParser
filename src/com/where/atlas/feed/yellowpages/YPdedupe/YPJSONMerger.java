@@ -34,11 +34,6 @@ public class YPJSONMerger {
         
 	}
 	
-	private static void closeWriter() throws IOException
-	{
-        writer.close();
-	}
-	
 	
 	public static void main(String[] args) {
 		if(args.length != 2){
