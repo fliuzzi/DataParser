@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 
@@ -98,16 +99,17 @@ public class YPDeDupe {
     	}
 	}
 	
-	public void dedupe() throws IOException, JSONException
+	public void dedupe() throws IOException, JSONException, InterruptedException
 	{
 		String line = null;
 		
-        ExecutorService thePool = Executors.newFixedThreadPool(5);
+        ExecutorService thePool = Executors.newFixedThreadPool(20);
 
 		
         while((line = reader.readLine()) != null) {
         	final String line_ = line;
 				
+			@SuppressWarnings("unused")
 			Future<?> fut = thePool.submit(
                     new Runnable(){ public void run(){
                     	try{
@@ -122,6 +124,9 @@ public class YPDeDupe {
 	                    }});
 			
         }
+        
+        thePool.shutdown();
+        thePool.awaitTermination(Long.MAX_VALUE, TimeUnit.MINUTES);
         
         System.out.println("Done.  De-duped to "+count.get()+" listings.");
 	}
@@ -176,7 +181,7 @@ public class YPDeDupe {
 	}
 	
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, InterruptedException {
 		if (args.length != 2)
 		{
 			System.err.println("usage: takes in a newline delimeted list of YP jsons," +
