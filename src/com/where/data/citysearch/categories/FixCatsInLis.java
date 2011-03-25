@@ -38,7 +38,7 @@ public class FixCatsInLis
         	else if(i % 10000 == 0){System.out.print("+");}
     		
             Document doc = reader.document(i);
-            CSListing listing = CSListingDocumentFactory.createCSListing(doc, i);
+            CSListing listing = CSListingDocumentFactory.createCSListing(doc, ""+i);
             
             List<Category> cats = listing.getCategories();
             int cnt = 0;
