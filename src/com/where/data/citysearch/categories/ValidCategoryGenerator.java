@@ -17,6 +17,30 @@ import org.json.simple.parser.JSONParser;
 
 public class ValidCategoryGenerator
 {
+    public static String [] playCats= new String [] 
+                                               {"Restaurants",
+                                                "Bars & Pubs",
+                                                "Food & Dining",
+                                                "Dessert Shops",
+                                                "Food Stores",
+                                                "Attractions",
+                                                "Musical Entertainers",
+                                                "Entertainers",
+                                                "Arts & Entertainment",
+                                                "Live Theatre",
+                                                "Performing Arts Events",
+                                                "Music Events",
+                                                "Dance Events",
+                                                "Festivals",
+                                                "Bookstores",
+                                                "Movie Rentals",
+                                                "Recreational Activities",
+                                                "Movie Rentals",
+                                                "Movie Theaters",
+                                                "Bars & Clubs"
+                                               };
+
+    
     public static String [] cats = new String [] 
     {
             "Restaurants",
@@ -70,7 +94,7 @@ public class ValidCategoryGenerator
         Object json = new JSONParser().parse(reader);
         reader.close();
         JSONObject arr = (JSONObject) json;
-        for(String cat: cats)
+        for(String cat: playCats)
         {
             recurseNodes(cat, arr);
         }
