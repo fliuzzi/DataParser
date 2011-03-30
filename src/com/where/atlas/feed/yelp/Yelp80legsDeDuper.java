@@ -144,8 +144,9 @@ public class Yelp80legsDeDuper {
 	                    }});
 			
         }
-        
-        System.out.println(totalCount+" total listings...awaiting analyzation and collection...");
+       
+        System.out.println(totalCount+" total listings...awaiting analyzation and collection...\n" +
+        											"(this may take a bit)");
         thePool.shutdown();
         thePool.awaitTermination(Long.MAX_VALUE, TimeUnit.MINUTES);
         
