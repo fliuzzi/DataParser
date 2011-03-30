@@ -1,6 +1,7 @@
 package com.where.data.citysearch.categories;
 
 import gnu.trove.TLongHashSet;
+import gnu.trove.TLongIntHashMap;
 import gnu.trove.TLongIterator;
 
 import java.io.BufferedWriter;
@@ -19,16 +20,29 @@ import org.apache.lucene.store.NIOFSDirectory;
 
 public class ValidCatPlaceFinder
 {    
-    private static int numPois = 0;
-    // /home/michael/viz/category/valid_placeids.txt 
-    // /h/csdata/experimental/input/merged_12_23.txt  /h/csdata/experimental/input/merged_12_23_filtered_by_category.txt
-    public static void main(String[] args) throws IOException
+    public static void main(String [] args) throws IOException
     {
-        String validPOIsFile = args[0];
-        String ratingsInput  = args[1];
-        String ratingsOutput= args[2];
-        TLongHashSet validPOIs = loadPOIs(validPOIsFile);
+        String method = args[0];
         
+        if(method.equals("ratings"))
+        {
+            generateRatingsFile(args);
+        }
+        else if(method.equals("places"))
+        {
+            generatePoisFile(args);
+        }
+    }
+    
+    private static int numPois = 0;
+    //ratings /home/michael/viz/category/valid_placeids.txt 
+    // /h/csdata/experimental/input/merged_12_23.txt  /h/csdata/experimental/input/merged_12_23_filtered_by_category.txt
+    public static void generateRatingsFile(String[] args) throws IOException
+    {
+        String validPOIsFile = args[1];
+        String ratingsInput  = args[2];
+        String ratingsOutput= args[3];
+        TLongHashSet validPOIs = loadPOIs(validPOIsFile);
         writeNewRatingsFile(ratingsInput, ratingsOutput, validPOIs);
     }
     
@@ -50,18 +64,21 @@ public class ValidCatPlaceFinder
      * @param args
      * @throws IOException 
      */
-    
-    // /home/michael/viz/category/catcount_sorted.txt 
-    ///idx/fixed_cat_lis /home/michael/viz/category/valid_placeids.txt 20 
-    // /h/csdata/experimental/input/merged_12_23.txt  /h/csdata/experimental/input/merged_12_23_filtered_by_category.txt
-    public static void main1(String[] args) throws IOException
+    // places /home/michael/viz/category/playcatcount.txt 
+    // /h/csdata/experimental/input/merged_12_23_filtered_by_play_category_sorted.txt 
+    ///idx/fixed_cat_lis  /home/michael/viz/category/playcat_places.txt 20 2    
+    public static void generatePoisFile(String[] args) throws IOException
     {
-        String catFile = args[0];
-        String lisFile = args[1];
-        String outputFile = args[2];
-        int minHits = Integer.parseInt(args[3]);
+        String catFile    = args[1];
+        String oldRatings = args[2];
+        String lisFile    = args[3];        
+        String outputFile = args[4];
+        int minHits = Integer.parseInt(args[5]);
+        int minRatingsPerson = Integer.parseInt(args[6]);
+        
         HashSet<String> cats = loadValidCats(catFile, minHits);
         TLongHashSet validPOIs = loadPOIs(lisFile, cats);
+        validPOIs = verifyRecCount(oldRatings, validPOIs, minRatingsPerson);
         System.out.print("Got " + validPOIs.size() + " valid POIs out of a possible " + numPois);
         TLongIterator iter = validPOIs.iterator();
         BufferedWriter writer = new BufferedWriter(new FileWriter(new File(outputFile)));
@@ -71,6 +88,36 @@ public class ValidCatPlaceFinder
             writer.write(Long.toString(nextVal));
             writer.newLine();
         }
+    }
+    
+    private static TLongHashSet verifyRecCount(String catFile, TLongHashSet candidates, int minCount) 
+        throws NumberFormatException, IOException
+    {
+        TLongHashSet output = new TLongHashSet();
+        TLongIntHashMap cntMap = new TLongIntHashMap();
+        BufferedReader reader = new BufferedReader(new FileReader(new File(catFile)));        
+        String line;
+        while((line = reader.readLine()) != null)
+        {
+            String [] vals = line.split(",");
+            long placeId = Long.parseLong(vals[1]);
+            if(candidates.contains(placeId))
+            {
+                cntMap.adjustOrPutValue(placeId, 1, 1);
+            }
+        }        
+        TLongIterator iter = candidates.iterator();
+        while(iter.hasNext())
+        {
+            long val = iter.next();
+            int cnt = cntMap.get(val);
+            if(cnt > minCount)
+            {
+                output.add(val);
+            }
+        }
+
+        return output;
     }
     
     private static void writeNewRatingsFile(String ratingsInput, String ratingsOutput, TLongHashSet validPOIs) throws IOException
@@ -140,4 +187,5 @@ public class ValidCatPlaceFinder
         reader.close();
         return output;
     }
+    
 }
