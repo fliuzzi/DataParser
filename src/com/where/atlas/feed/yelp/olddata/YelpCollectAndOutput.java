@@ -1,4 +1,4 @@
-package com.where.atlas.feed.yelp;
+package com.where.atlas.feed.yelp.olddata;
 
 import com.where.atlas.feed.PlaceCollector;
 import com.where.place.Place;

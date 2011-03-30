@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.Scanner;
 import java.util.Set;
 
-import com.where.atlas.feed.yelp.YelpRawDataParser;
+import com.where.atlas.feed.yelp.olddata.YelpRawDataParser;
 
 public class CitySubset
 {

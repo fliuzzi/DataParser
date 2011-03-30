@@ -45,17 +45,29 @@ public class XMLfixer {
 		return builder.toString();
 	}
 	
+    private static String removeNonUtf8CompliantCharacters( final String inString ) {
+    	if (null == inString ) return null;
+    		byte[] byteArr = inString.getBytes();
+    	for ( int i=0; i < byteArr.length; i++ ) {
+    		byte ch= byteArr[i];
+    		// remove any characters outside the valid UTF-8 range as well as all control characters
+    		// except tabs and new lines
+    		if ( !( (ch > 31 && ch < 253 ) || ch == '\t' || ch == '\n' || ch == '\r') ) {
+    			byteArr[i]=' ';
+    		}
+    	}
+    	return new String( byteArr );
+    }
+	
 	
 	public static InputStream repairXML(InputStream ins)
 	{
 		String buf;
 		try {
 			buf = convertToString(ins).toString();
-			buf = buf.replace("<general_info>","<general_info><![CDATA[").replace("</general_info>", "]]></general_info>");
-			buf = buf.replace("<hours>","<hours><![CDATA[").replace("</hours>", "]]></hours>");
-			buf = buf.replace("<products_services>","<products_services><![CDATA[").replace("</products_services>", "]]></products_services>");
-
-			return convertToInputStream(buf.replace("&", ""));
+			
+			
+			return convertToInputStream(removeNonUtf8CompliantCharacters(buf));
 		}
 		catch (UnsupportedEncodingException e) {
 			e.printStackTrace();

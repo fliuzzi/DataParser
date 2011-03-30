@@ -16,7 +16,7 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.NIOFSDirectory;
 import org.json.JSONObject;
 
-import com.where.atlas.feed.yelp.YelpRawDataParser;
+import com.where.atlas.feed.yelp.olddata.YelpRawDataParser;
 
 public class CSCategoryMapper extends IndexProcessor{
 
