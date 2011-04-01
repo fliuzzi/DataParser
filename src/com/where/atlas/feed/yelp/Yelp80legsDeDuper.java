@@ -63,7 +63,7 @@ public class Yelp80legsDeDuper {
 	private String fixQuery(String query)
 	{
 		if(query != null)
-			return query.replace(",","").replace(".","").replace("AND","").replace("OR", "").trim();
+			return query.replace(",","").replace("-","").replace(".","").replace("AND","").replace("OR", "").trim();
 		else 
 			return query;
 	}
