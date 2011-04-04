@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.GZIPInputStream;
 
@@ -34,15 +35,23 @@ public class Yelp80legsDeDuper {
 	
 	private static final float THRESHOLD 		= 0.88f;
 	protected BufferedReader reader;
-	protected BufferedWriter writer;
 	protected Search searchob;
 	protected AtomicLong goodCount;
 	protected long totalCount;
+	protected WriteCollector writerCollector;
+	protected static AtomicInteger writeThreadID;
+	protected static ExecutorService writerPool;
+	private static final int writeThreadNum = 10;
 	
-	public Yelp80legsDeDuper(BufferedReader reader, BufferedWriter writer)
+	public Yelp80legsDeDuper(BufferedReader reader, String writePath) throws IOException
 	{
+		//writer thread preferences
+		writeThreadID = new AtomicInteger(0);
+		writerPool = Executors.newFixedThreadPool(writeThreadNum);
+		
+		
 		this.reader = reader;
-		this.writer = writer;
+		writerCollector = new WriteCollector(writePath);
 		goodCount = new AtomicLong(0);
 		totalCount = 0;
 		searchob = new Search();
@@ -50,14 +59,79 @@ public class Yelp80legsDeDuper {
 	}
 	
 	
+	public static class WriterWorker implements Runnable{
+        
+        String toWrite;
+        BufferedWriter writer;
+        
+        public WriterWorker(String s, BufferedWriter w)
+        {
+            toWrite = s;
+            writer = w;
+        }
+        
+        
+        public void run(){
+            
+            try{
+                writer.write(toWrite);
+                writer.newLine();
+            }
+            
+            catch(Throwable t){
+                System.err.println("Err writing");
+            }
+        }
+    }
+    
+    
+    public static class WriteCollector{
+        
+        private BufferedWriter[] writer;
+        private AtomicInteger writerSwitch;
+        
+        public WriteCollector(String path) throws IOException{
+        	
+        	writer = new BufferedWriter[writeThreadNum];
+        	
+        	for(int i=0;i < writeThreadNum;i++)
+        	{
+        		int id = writeThreadID.incrementAndGet();
+        		writer[i] = new BufferedWriter(new FileWriter(path+"/yelpdedupe"+id+".json"));
+        	}
+        	
+        	writerSwitch = new AtomicInteger(-1);
+        }
+        
+        public void addTask(String t)
+        {
+        	int seq = writerSwitch.incrementAndGet() % writeThreadNum;
+        	
+        	
+            writerPool.execute(new WriterWorker(t,writer[seq]));
+        }
+        
+        public void finish() throws IOException,InterruptedException
+        {
+        	for(int i=0;i < writer.length; i++)
+        	{
+        		try{
+        			writer[i].close();
+        		}
+        		catch(Throwable e)
+        		{
+        			System.err.println(e.getMessage());
+        		}
+        	}
+        }
+    
+    }
+	
+	
+	
 	public BufferedReader getReader()
 	{
 		return reader;
-	}
-	
-	public BufferedWriter getWriter()
-	{
-		return writer;
 	}
 	
 	private String fixQuery(String query)
@@ -102,8 +176,7 @@ public class Yelp80legsDeDuper {
 	
 	private synchronized void collect(String str) throws IOException
 	{
-		writer.write(str);
-		writer.newLine();
+		writerCollector.addTask(str);
 	}
 	
 	public void analyzeAndCollect(JSONObject listing) throws JSONException, IOException
@@ -115,6 +188,8 @@ public class Yelp80legsDeDuper {
     		listing.put("csid", ids[1]);
     		collect(listing.toString());
     		goodCount.incrementAndGet();
+    		if(goodCount.get() % 500000 == 0)
+    			System.out.print("+");
     	}
 	}
 	
@@ -122,7 +197,7 @@ public class Yelp80legsDeDuper {
 	{
 		String line = null;
 		
-        ExecutorService thePool = Executors.newFixedThreadPool(2);
+        ExecutorService thePool = Executors.newFixedThreadPool(10);
         
 		
         while((line = reader.readLine()) != null) {
@@ -146,9 +221,15 @@ public class Yelp80legsDeDuper {
         }
        
         System.out.println(totalCount+" total listings...awaiting analyzation and collection...\n" +
-        											"(this may take a bit)");
+        											"(this may take a bit)   '+' ==  ~500,000 listings written");
+        
+        //await read pool
         thePool.shutdown();
         thePool.awaitTermination(Long.MAX_VALUE, TimeUnit.MINUTES);
+        
+        //await write pool
+        writerPool.shutdown();
+        writerPool.awaitTermination(Long.MAX_VALUE, TimeUnit.MINUTES);
         
         System.out.println("Done.  De-duped to "+goodCount.get()+" listings. ~" + ((goodCount.get()/(double)totalCount)*100)+"%");
 	}
@@ -208,7 +289,7 @@ public class Yelp80legsDeDuper {
 		{
 			System.err.println("usage: takes in a newline delimeted Yelp json," +
 					"de-dupes them against our places, and outputs the jsons with whereid and csid keys");
-			System.err.println("arg0: Yelp file\targ1: output file");
+			System.err.println("arg0: Yelp file\targ1: output dir (will output to different files)");
 		}
 		
 		InputStream fileStream = new FileInputStream(args[0]);
@@ -216,10 +297,8 @@ public class Yelp80legsDeDuper {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(gzipStream));
 		
 		
-        	
 		
-		Yelp80legsDeDuper main = new Yelp80legsDeDuper(reader, 
-				new BufferedWriter(new FileWriter(args[1])));	
+		Yelp80legsDeDuper main = new Yelp80legsDeDuper(reader, args[1]);	
 		
 		System.out.println("Beginning de-dupe");
 		try {
@@ -227,9 +306,6 @@ public class Yelp80legsDeDuper {
 		} catch (JSONException je) {
 			je.printStackTrace();
 		}
-		
-		main.getWriter().close();
-		
 	}
 
 
