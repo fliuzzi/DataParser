@@ -1,4 +1,4 @@
-package com.where.atlas.feed.yelp;
+package com.where.atlas.feed.yelp.olddata;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -8,7 +8,7 @@ import java.io.StringReader;
 import com.where.atlas.feed.FeedParser;
 import com.where.atlas.feed.PlaceCollector;
 import com.where.atlas.feed.citysearch.CSListingDocumentFactory;
-import com.where.atlas.feed.yelp.YelpParserUtils.Listing;
+import com.where.atlas.feed.yelp.olddata.YelpParserUtils.Listing;
 
 public class YelpParser implements FeedParser{
     

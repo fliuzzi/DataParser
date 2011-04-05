@@ -13,6 +13,15 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+
+/**
+ * 
+ * @author fliuzzi
+ *
+ *		CSXmlScanner.java
+ *			finds which xml file in the CS enhanced data contains an id 
+ *									(mainly for debugging and pre-parsing)
+ */
 public class CSXmlScanner
 {
 

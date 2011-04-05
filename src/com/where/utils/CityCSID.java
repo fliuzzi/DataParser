@@ -10,7 +10,7 @@ import java.util.Set;
 
 import org.apache.lucene.document.Document;
 
-import com.where.atlas.feed.yelp.YelpRawDataParser;
+import com.where.atlas.feed.yelp.olddata.YelpRawDataParser;
 
 public class CityCSID extends IndexProcessor
 {

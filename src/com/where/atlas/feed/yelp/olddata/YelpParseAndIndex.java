@@ -1,4 +1,4 @@
-package com.where.atlas.feed.yelp;
+package com.where.atlas.feed.yelp.olddata;
 
 import java.io.File;
 import java.io.FileInputStream;
