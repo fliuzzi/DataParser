@@ -5,7 +5,7 @@
 	<classpathentry kind="lib" path="lib/JSON.jar"/>
 	<classpathentry kind="lib" path="lib/json_simple.jar" sourcepath="/3rdpartysrc/src/json_simple.zip"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-core-3.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-core-3.0.2.jar" sourcepath="/3rdpartysrc/src/lucene-3.0.2/src"/>
 	<classpathentry kind="lib" path="lib/lucene-spatial-3.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/where_utils.jar" sourcepath="/Utilities/src"/>
 	<classpathentry kind="lib" path="lib/lucene-spellchecker-3.0.2.jar"/>
