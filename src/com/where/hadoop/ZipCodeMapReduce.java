@@ -1,6 +1,7 @@
 package com.where.hadoop;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
@@ -17,7 +18,6 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import edu.umd.cloud9.io.JSONObjectWritable;
 
@@ -50,17 +50,27 @@ public class ZipCodeMapReduce extends Configured implements Tool  {
 		}
 	}
 	
-	public static class ZipReducer extends Reducer<Text,JSONObjectWritable,Text,JSONObjectWritable> {
+	public static class ZipReducer extends Reducer<Text,JSONObjectWritable,Text,Text> {
 		public void reduce(Text key, Iterable<JSONObjectWritable> values, Context context) throws IOException, InterruptedException{
 			
-			JSONArray jarray = new JSONArray();
-
 			JSONObjectWritable json = new JSONObjectWritable();
+			System.out.println("Made new json...accumulating values from mapper...");
 			
-			for(JSONObjectWritable val : values)
+			StringBuilder strb = new StringBuilder();
+			
+			Iterator<JSONObjectWritable> it = values.iterator();
+			while(it.hasNext())
 			{
-				context.write(key, val);
+				strb.append(it.next().toString());
+				
+				if(it.hasNext())
+					strb.append(",");
 			}
+			
+			
+			System.out.println("Done accumulating: resulting strb: "+strb);
+				
+			context.write(key, new Text("["+strb.toString()+"]"));
 		}
 	}
 	
@@ -84,7 +94,7 @@ public class ZipCodeMapReduce extends Configured implements Tool  {
 		job.setOutputValueClass(JSONObjectWritable.class);
 		
 		job.setMapperClass(ZipMapper.class);
-		job.setCombinerClass(ZipReducer.class);
+		//job.setCombinerClass(ZipReducer.class);
 		job.setReducerClass(ZipReducer.class);
 		
 		
