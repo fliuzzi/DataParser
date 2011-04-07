@@ -18,8 +18,7 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.json.JSONArray;
 import org.json.JSONException;
-
-import edu.umd.cloud9.io.JSONObjectWritable;
+import org.json.JSONObject;
 
 /**
  * 
@@ -28,11 +27,11 @@ import edu.umd.cloud9.io.JSONObjectWritable;
  */
 public class ZipCodeMapReduce extends Configured implements Tool  {
 	
-	public static class ZipMapper extends Mapper<LongWritable, Text, Text, JSONObjectWritable>{
+	public static class ZipMapper extends Mapper<LongWritable, Text, Text, Text>{
 		
 		public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 	        try {
-	        	JSONObjectWritable json = new JSONObjectWritable(value.toString());
+	        	JSONObject json = new JSONObject(value.toString());
 				
 				String zipcode = json.optString("zip");
 				
@@ -42,7 +41,7 @@ public class ZipCodeMapReduce extends Configured implements Tool  {
 					if(zipcode.length() > 5)
 						zipcode = zipcode.substring(0,5);
 					
-					context.write(new Text(zipcode), json);
+					context.write(new Text(zipcode), value);
 				}
 			} catch (JSONException e) {
 				System.err.println(e.getMessage());
@@ -50,15 +49,15 @@ public class ZipCodeMapReduce extends Configured implements Tool  {
 		}
 	}
 	
-	public static class ZipReducer extends Reducer<Text,JSONObjectWritable,Text,Text> {
-		public void reduce(Text key, Iterable<JSONObjectWritable> values, Context context) throws IOException, InterruptedException{
+	public static class ZipReducer extends Reducer<Text,Text,Text,Text> {
+		public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException{
 			
-			JSONObjectWritable json = new JSONObjectWritable();
+			JSONObject json = new JSONObject();
 			System.out.println("Made new json...accumulating values from mapper...");
 			
 			StringBuilder strb = new StringBuilder();
 			
-			Iterator<JSONObjectWritable> it = values.iterator();
+			Iterator<Text> it = values.iterator();
 			while(it.hasNext())
 			{
 				strb.append(it.next().toString());
@@ -91,7 +90,7 @@ public class ZipCodeMapReduce extends Configured implements Tool  {
 		job.setJobName("ZipCodeMapReduce");
 		
 		job.setOutputKeyClass(Text.class);
-		job.setOutputValueClass(JSONObjectWritable.class);
+		job.setOutputValueClass(Text.class);
 		
 		job.setMapperClass(ZipMapper.class);
 		//job.setCombinerClass(ZipReducer.class);
