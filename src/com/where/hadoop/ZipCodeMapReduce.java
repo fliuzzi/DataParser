@@ -54,22 +54,12 @@ public class ZipCodeMapReduce extends Configured implements Tool  {
 		public void reduce(Text key, Iterable<JSONObjectWritable> values, Context context) throws IOException, InterruptedException{
 			
 			JSONArray jarray = new JSONArray();
+
+			JSONObjectWritable json = new JSONObjectWritable();
 			
-			System.out.println("Key: "+key);
 			for(JSONObjectWritable val : values)
 			{
-				jarray.put(val);
-			}
-			try{
-				//write
-				JSONObjectWritable json = new JSONObjectWritable();
-				json.put("pois", jarray);
-				
-				context.write(key, json);
-			}
-			catch(JSONException e )
-			{
-				System.err.println(e.getMessage());
+				context.write(key, val);
 			}
 		}
 	}
