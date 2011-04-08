@@ -41,12 +41,12 @@ public class ZipCodeFileIndexer {
 		return lineCount.get();
 	}
 	
-	public void start() throws IOException, InterruptedException
+	public void start(int numThreads) throws IOException, InterruptedException
 	{
 		System.out.println("Starting...");
 		String line = null;
 		
-		ExecutorService thePool = Executors.newFixedThreadPool(36);
+		ExecutorService thePool = Executors.newFixedThreadPool(numThreads);
 		
 		while((line = reader.readLine()) != null) {
 			
@@ -111,19 +111,20 @@ public class ZipCodeFileIndexer {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		if( args.length != 2)
+		if( args.length != 3)
 		{
 			System.err.println("USAGE: takes mapreduce output (cat all parts together) " +
 					"and creates a directory of files:\n " +
 					"the name of each file is a zipcode and the file contains line-delimeted jsons of all" +
 					"\nCS pois in that zip code area.");
-			System.err.println("Arg0: mapreduce total output file\t Arg1: output directory to write thousands of zip files");
+			System.err.println("Arg0: mapreduce total output file\t Arg1: output directory to write thousands of zip files" +
+								"\nARG2: num threads");
 			return;
 		}
 		
 		long startMillies = new Date().getTime();
 		ZipCodeFileIndexer zcfi = new ZipCodeFileIndexer(new BufferedReader(new FileReader(args[0])),args[1]);
-		zcfi.start();
+		zcfi.start(Integer.parseInt(args[2]));
 		long endMillies = new Date().getTime();
 		
 		System.out.println("--------------------------------------------------------------------");
