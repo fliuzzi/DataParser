@@ -2,7 +2,6 @@ package com.where.hadoop;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -94,10 +93,9 @@ public class ZipCodeFileIndexer {
 		
 			for(int i = 0; i < jarray.length(); i++)
 			{
-				String toWrite = jarray.get(i).toString();
-					writer.write(jarray.get(i).toString());
-					writer.newLine();
-					entryCount.incrementAndGet();
+				writer.write(jarray.get(i).toString());
+				writer.newLine();
+				entryCount.incrementAndGet();
 			}
 			
 			writer.close();

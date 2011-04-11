@@ -7,6 +7,7 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.lib.MultipleTextOutputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -16,7 +17,6 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -51,8 +51,6 @@ public class ZipCodeMapReduce extends Configured implements Tool  {
 	
 	public static class ZipReducer extends Reducer<Text,Text,Text,Text> {
 		public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException{
-			
-			JSONObject json = new JSONObject();
 			System.out.println("Made new json...accumulating values from mapper...");
 			
 			StringBuilder strb = new StringBuilder();
@@ -65,7 +63,6 @@ public class ZipCodeMapReduce extends Configured implements Tool  {
 				if(it.hasNext())
 					strb.append(",");
 			}
-			
 			
 			System.out.println("Done accumulating: resulting strb: "+strb);
 				
