@@ -38,7 +38,7 @@ public class MultiOut extends MultipleTextOutputFormat<NullWritable, Text>{
 		{
 			value = value2;
 			String temp = value2.toString();
-			spliced = temp.split("\t");
+			spliced = temp.split("\n");
 		}
 		
 		

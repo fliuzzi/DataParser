@@ -25,6 +25,8 @@ import org.apache.lucene.document.NumericField;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.lucene.util.Version;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.where.atlas.feed.localeze.LocalezeUtil;
 import com.where.commons.feed.citysearch.search.BaseAnalyzer;
@@ -32,7 +34,9 @@ import com.where.commons.feed.citysearch.search.NoStemAnalyzer;
 import com.where.commons.feed.citysearch.search.budget.ExcludedCategories;
 import com.where.commons.util.LocationUtil;
 import com.where.commons.util.StringUtil;
+import com.where.commons.feed.citysearch.CSListing;
 import com.where.commons.feed.citysearch.Category;
+import com.where.commons.feed.citysearch.Location;
 import com.where.commons.feed.citysearch.Offer;
 import com.where.place.Address;
 import com.where.place.CSPlace;
@@ -75,7 +79,7 @@ public class CSListingDocumentFactory {
 	public static final String CITY_STATE = "city_state";
 	public static final String CITY_STATE_ZIP = "city_state_zip";
 	public static final String NBH_CITY_STATE = "nbh_city_state";
-	public static final String LOCATION = "location";
+	public static final String MINI_DETAILS = "mini_details";
 	public static final String LOCATION1 = "location1";
 	public static final String LOCATION2 = "location2";
     public static final String STREET_ADDRESS = "street_address";
@@ -169,7 +173,7 @@ public class CSListingDocumentFactory {
 		Analyzer latlongAnalyzer = new StandardAnalyzer(Version.LUCENE_30);
 		theWrapper.addAnalyzer(LATITUDE, latlongAnalyzer);
 		theWrapper.addAnalyzer(LONGITUDE, latlongAnalyzer);
-		theWrapper.addAnalyzer(LOCATION, new BaseAnalyzer());		
+		theWrapper.addAnalyzer(MINI_DETAILS, new BaseAnalyzer());		
 		return theWrapper;
 	}
 	
@@ -222,7 +226,40 @@ public class CSListingDocumentFactory {
 		}
 		
 		addLocationFields(poi, document);
+		
+		
+		//------------  MINI DETAILS
 				
+		CSListing locationlisting = new CSListing();
+		Location locationobj = new Location();
+		Address addressobj = poi.getAddress();
+		locationobj.setAddress1(addressobj.getAddress1());
+		locationobj.setCity(addressobj.getCity());
+		locationobj.setLat(addressobj.getLat());
+		locationobj.setLng(addressobj.getLng());
+		locationobj.setState(addressobj.getState());
+		locationobj.setZip(addressobj.getZip());
+		
+		
+		locationlisting.setAddress(locationobj);
+		locationlisting.setWhereId(poi.getWhereId());
+		locationlisting.setListingId(poi.getListingId());
+		locationlisting.setName(poi.getName());
+		try {
+			JSONObject json = new JSONObject(locationlisting.toJSON().toString());
+			json.remove("rating");
+			json.remove("ratingStats");
+			json.remove("source");
+			
+			document.add(new Field(MINI_DETAILS, json.toString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
+
+		} catch (JSONException e) {
+			System.err.println("Malformed json in minidetail conversion"+e.getMessage());
+		}
+		
+		
+		//-------------------------------------------------
+		
 		document.add(new NumericField(LATITUDE_RANGE,  Store.YES,true).setDoubleValue(poi.getAddress().getLat()));	
 		document.add(new NumericField(LONGITUDE_RANGE, Store.YES,true).setDoubleValue(poi.getAddress().getLng()));
 
@@ -579,6 +616,8 @@ public class CSListingDocumentFactory {
 				
 		String geohash = GeoHashUtils.encode(poi.getAddress().getLat(), poi.getAddress().getLng());
 		document.add(new Field(GEOHASH, geohash, Field.Store.NO, Field.Index.NOT_ANALYZED));
+		
+		
 				
 		if(!StringUtil.isEmpty(poi.getCategory()))
 		{

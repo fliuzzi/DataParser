@@ -124,7 +124,7 @@ public class YelpUserPlaceRating {
 		writer.close();
 	}
 	
-	//parses through the merger file and finds the greatest userid....then adds one hundred million
+	//parses through the merger file and finds the greatest userid....then adds two hundred million
 	protected long findMaxUserID(BufferedReader reader) throws IOException
 	{
 		String line = null;

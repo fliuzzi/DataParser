@@ -15,6 +15,10 @@ import org.json.JSONObject;
  * 
  * @author fliuzzi
  *
+ *	ZipCodeMRMultiOut.java
+ *		This hadoop program will take in a newline delimeted json file and write out all pois in a zip code to 
+ *			respectively named, multiple files.
+ *
  */
 @SuppressWarnings("deprecation")
 public class ZipCodeMRMultiOut extends Configured implements Tool  {
@@ -59,7 +63,7 @@ public class ZipCodeMRMultiOut extends Configured implements Tool  {
 				strb.append(values.next().toString());
 				
 				if(values.hasNext())
-					strb.append("\t");
+					strb.append("\n");
 			}
 			
 			System.out.println("Done accumulating: resulting strb: "+strb);

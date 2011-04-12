@@ -7,7 +7,6 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.lib.MultipleTextOutputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -23,6 +22,11 @@ import org.json.JSONObject;
 /**
  * 
  * @author fliuzzi
+ * 
+ * ZipCodeMapReduce.java   -- DEPRECATED:  use ZipCodeMRMultiOut
+ * 		This hadoop program will output pois sorted by zipcode to one file in the format:
+ * 					KEY \t POI \t POI \n
+ * 			which can later be parsed and bucketed to diff files by ZipCodeFileIndexer
  *
  */
 public class ZipCodeMapReduce extends Configured implements Tool  {

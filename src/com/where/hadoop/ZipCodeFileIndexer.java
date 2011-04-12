@@ -15,6 +15,16 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+
+/**
+ * 
+ * @author fliuzzi
+ *
+ *	ZipCodeFileIndexer.java    -- DEPRECATED:  use ZipCodeMRMultiOut
+ *		this program will go through a lump of mapreduce output from ZipCodeMapReduce and 
+ *			bucket all pois to their respective zip code files.  (ZipMultiOut does this automatically in hadoop)
+ *		
+ */
 public class ZipCodeFileIndexer {
 	
 	protected BufferedReader reader;
