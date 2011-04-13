@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,8 +35,6 @@ import com.where.commons.feed.citysearch.search.NoStemAnalyzer;
 import com.where.commons.feed.citysearch.search.budget.ExcludedCategories;
 import com.where.commons.util.LocationUtil;
 import com.where.commons.util.StringUtil;
-import com.where.commons.feed.citysearch.CSListing;
-import com.where.commons.feed.citysearch.Category;
 import com.where.commons.feed.citysearch.Location;
 import com.where.commons.feed.citysearch.Offer;
 import com.where.place.Address;
@@ -239,6 +238,15 @@ public class CSListingDocumentFactory {
 		locationobj.setLng(addressobj.getLng());
 		locationobj.setState(addressobj.getState());
 		locationobj.setZip(addressobj.getZip());
+		
+		
+		//add categories too!
+		List<Category> categories = poi.getCategories();
+		for(Category cat: categories)
+		{
+			locationlisting.addCategory(cat);
+		}
+		
 		
 		
 		locationlisting.setAddress(locationobj);

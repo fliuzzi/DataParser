@@ -8,9 +8,10 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.where.commons.feed.citysearch.CSListing;
-import com.where.commons.feed.citysearch.CSListing.sourceEnum;
-import com.where.commons.feed.citysearch.Category;
+
+import com.where.atlas.feed.citysearch.CSListing;
+import com.where.atlas.feed.citysearch.CSListing.sourceEnum;
+import com.where.atlas.feed.citysearch.Category;
 import com.where.commons.feed.citysearch.Location;
 import com.where.commons.feed.citysearch.Offer;
 import com.where.commons.feed.citysearch.Placelist;

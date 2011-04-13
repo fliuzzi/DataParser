@@ -93,6 +93,10 @@ public class ZipCodeMRMultiOut extends Configured implements Tool  {
 		conf.setOutputKeyClass(NullWritable.class);
 		conf.setOutputFormat(MultiOut.class);
 
+		System.out.println("INPUT ARG: "+args[0]);
+		System.out.println("OUTPUT ARG: "+args[1]);
+		
+		
 	    FileInputFormat.setInputPaths(conf, new Path(args[0]));  
 	    FileOutputFormat.setOutputPath(conf, new Path(args[1]));
 

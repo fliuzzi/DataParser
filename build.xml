@@ -5,6 +5,7 @@
 	<property name="dist.dir" value="${basedir}/bin" />
 	<property name="class.dir" value="${dist.dir}/classes" />
 	<property name="lib.dir" value="${basedir}/lib" />
+	<property name="tmpsrc.dir" value="${dist.dir}/tmpsrc" />
 
 	<path id="classpath">
 		<fileset dir="${lib.dir}">
@@ -15,6 +16,24 @@
 
 	<target name="clean">
 		<delete dir="${dist.dir}" />
+	</target>
+	
+	
+	<target name="hadoop" depends="compile">
+		<mkdir dir="${dist.dir}/lib" />
+		<mkdir dir="${dist.dir}/data" />
+			<jar destfile="${dist.dir}/dataparser.jar">
+				<fileset dir="${class.dir}"/>
+				<fileset dir="${dist.dir}/data" />
+				<restrict>
+				     <name name="**/*.class"/>
+				     <archives>
+				       <zips>
+				         <fileset dir="${lib.dir}" includes="**/*.jar"/>
+				       </zips>
+					</archives>
+				</restrict>
+			</jar>
 	</target>
 
 	<target name="compile" depends="clean">

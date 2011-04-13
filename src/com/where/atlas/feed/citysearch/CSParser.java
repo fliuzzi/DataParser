@@ -27,7 +27,6 @@ import org.xml.sax.InputSource;
 
 import com.where.atlas.feed.FeedParser;
 import com.where.atlas.feed.PlaceCollector;
-import com.where.commons.feed.citysearch.Category;
 import com.where.commons.feed.citysearch.Offer;
 import com.where.commons.feed.citysearch.ParseUtils;
 import com.where.commons.feed.citysearch.Placelist;
