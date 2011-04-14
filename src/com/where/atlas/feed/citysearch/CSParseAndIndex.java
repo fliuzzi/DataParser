@@ -10,7 +10,6 @@ public class CSParseAndIndex {
         private static String zipPath, indexPath, idMappingPath;
     
         public static void main(String[] args) throws IOException{
-      
             if(args.length != 3){System.err.println("need 3 args"); return;}
             if(!args[0].endsWith(".zip")){System.err.println("req args: .zip path, idx to_write path"); return;}
 

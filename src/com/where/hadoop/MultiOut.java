@@ -49,8 +49,11 @@ public class MultiOut extends MultipleTextOutputFormat<NullWritable, Text>{
 			{
 				try {
 					JSONObject json = new JSONObject(spliced[0]);
+					JSONObject location = json.optJSONObject("location");
 					
 					String zipcode = json.optString("zip");
+					
+					
 					if(zipcode.length() > 0)
 					{
 						if(zipcode.length() > 5)
@@ -58,9 +61,15 @@ public class MultiOut extends MultipleTextOutputFormat<NullWritable, Text>{
 						
 						return zipcode;
 					}
-					
-					return "null";
-					
+					else if(location != null) //YP and Yelp support
+					{
+						zipcode = location.optString("zip");
+						
+						if(zipcode.length() > 5)
+							zipcode = zipcode.substring(0,5);
+						
+						return zipcode;
+					}
 				} catch (JSONException e) {
 					System.err.println("Error generating key"+e.getMessage());
 				}

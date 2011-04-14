@@ -31,11 +31,15 @@ public class ZipCodeMRMultiOut extends Configured implements Tool  {
 				OutputCollector<Text, Text> output, Reporter reporter)
 				throws IOException {
 			try {
-	        	JSONObject json = new JSONObject(value.toString());
-				
+				JSONObject json = new JSONObject(value.toString());
 				String zipcode = json.optString("zip");
 				
-				// creates:  K: TEXT zip code  V: TEXT rest of json
+	        	JSONObject location = json.optJSONObject("location");
+				
+	        	if(location != null)
+	        		zipcode = location.optString("zip");
+	        		
+        		// creates:  K: TEXT zip code  V: TEXT rest of json
 				if(zipcode.length() > 0)
 				{
 					if(zipcode.length() > 5)
@@ -43,6 +47,7 @@ public class ZipCodeMRMultiOut extends Configured implements Tool  {
 					
 					output.collect(new Text(zipcode), value);
 				}
+	        	
 			} catch (JSONException e) {
 				System.err.println(e.getMessage());
 			}
@@ -66,8 +71,6 @@ public class ZipCodeMRMultiOut extends Configured implements Tool  {
 					strb.append("\n");
 			}
 			
-			System.out.println("Done accumulating: resulting strb: "+strb);
-				
 			output.collect(NullWritable.get(), new Text(strb.toString()));
 		}
 	}
@@ -96,9 +99,15 @@ public class ZipCodeMRMultiOut extends Configured implements Tool  {
 		System.out.println("INPUT ARG: "+args[0]);
 		System.out.println("OUTPUT ARG: "+args[1]);
 		
+		int inputSize = args.length - 1;
+		Path[] paths = new Path[inputSize];
+		for(int i = 0 ; i < args.length-1; i++)
+		{
+			paths[i] = new Path(args[i]);
+		}
 		
-	    FileInputFormat.setInputPaths(conf, new Path(args[0]));  
-	    FileOutputFormat.setOutputPath(conf, new Path(args[1]));
+	    FileInputFormat.setInputPaths(conf, paths);  
+	    FileOutputFormat.setOutputPath(conf, new Path(args[args.length-1]));
 
 		JobClient.runJob(conf);
 		return 0;
