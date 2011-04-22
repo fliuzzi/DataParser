@@ -914,7 +914,88 @@ public class CSPlace extends Place implements Serializable {
         
         
         return cslisting;
+    }
+    
+    public com.where.commons.feed.citysearch.CSListing toOldCSListing()
+    {
+    	com.where.commons.feed.citysearch.CSListing cslisting = new com.where.commons.feed.citysearch.CSListing();
+        cslisting.setSource(com.where.commons.feed.citysearch.CSListing.sourceEnum.Citysearch);
+        cslisting.setListingId(getListingId());
+        cslisting.setWhereId(getWhereId());
+        cslisting.setReferenceId(getReferenceId());
+        cslisting.setName(getName());
+        cslisting.setSubtitle(getSubtitle());
+        cslisting.setPhone(getPhone());
+        cslisting.setCategory(getCategory());
+        
+        List<Category> newCatList = getCategories();
+        List<com.where.commons.feed.citysearch.Category> oldCatList = 
+        	new ArrayList<com.where.commons.feed.citysearch.Category>();
+        
+        for(Category cat: newCatList)
+        {
+        	com.where.commons.feed.citysearch.Category oldcat = 
+        		new com.where.commons.feed.citysearch.Category(cat.getId(),cat.getName());
+        	oldCatList.add(oldcat);
+        }
+        
+
+        cslisting.setCategories(oldCatList);
+        cslisting.setTermFreqs(getTermFreqs());
+        cslisting.setNeighborhood(getNeighborhood());
+        cslisting.setNeighborhoods(neighborhoods());
+        cslisting.setMarkets(markets());
+        //address data/////////////////////////////////
+        Location loc = new Location();
+        loc.setAddress1(getAddress().getAddress1());
+        loc.setCity(getAddress().getCity());
+        loc.setLat(getAddress().getLat());
+        loc.setLng(getAddress().getLng());
+        loc.setState(getAddress().getState());
+        loc.setZip(getAddress().getZip());
+        cslisting.setAddress(loc);
+        ////////////////////////////////////////////////
+        cslisting.setLists(lists());
+        //cslisting.setBecause(getBecause());
+        //cslisting.setSimilar(getSimilar());
+        Double d = getRating();
+        cslisting.setRating(d.toString());
+        cslisting.setReviewCount(getReviewCount());
+        cslisting.setMyRating(getMyRating());
+        cslisting.setWebUrl(getWebUrl());
+        cslisting.setMenuUrl(getMenuUrl());
+        cslisting.setSendToUrl(getSendToUrl());
+        cslisting.setEmailUrl(getEmailUrl());
+        cslisting.setStaticMapUrl(getStaticMapUrl());
+        cslisting.setThumbUrl(getThumbUrl());
+        cslisting.setCustomerMessage(getCustomerMessage());
+        cslisting.setTagline(getTagline());
+        cslisting.setBusinessHours(getBusinessHours());
+        cslisting.setParking(getParking());
+        cslisting.setPriceLevel(getPriceLevel());
+        cslisting.setPpe(getPpe());
+        cslisting.setReservationId(getReservationId());
+        cslisting.setReservationUrl(getReservationUrl());
+        cslisting.setMaxCap(getMaxCap());
+        cslisting.setOffer(getOffer());
+        cslisting.setDistance(getDistance());
+        cslisting.setClicksRemained(getClicksRemained());
+        cslisting.setUpdated(isUpdated());
+        cslisting.setBullets(bullets());
+        cslisting.setAttributes(attributes());
+        cslisting.setTips(tips());
+        cslisting.setImages(images());
+        cslisting.setEditorials(editorials());
+        cslisting.setUserReviews(userReviews());
+        cslisting.setMicroReviews(reviews());
+        cslisting.setRecentTweets(recentTweets());
+        
+        if(isNotAdvertiser()) cslisting.setNotAdvertiser();
+        
+        
+        return cslisting;
         
     }
+    
 
 }

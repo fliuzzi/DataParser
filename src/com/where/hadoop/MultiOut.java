@@ -6,6 +6,13 @@ import org.apache.hadoop.mapred.lib.MultipleTextOutputFormat;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+
+/**
+ * 
+ * @author fliuzzi
+ *					
+ *		MultiOut.java - aids in outputting multiple files in a MR job
+ */
 public class MultiOut extends MultipleTextOutputFormat<NullWritable, Text>{
 	private LineParser parser = new LineParser();
 	

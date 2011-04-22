@@ -557,7 +557,7 @@ public class CSListingDocumentFactory {
 		try {
 			ByteArrayOutputStream bout = new ByteArrayOutputStream();
 			ObjectOutputStream oout = new ObjectOutputStream(bout);
-			oout.writeObject(poi.toCSListing());
+			oout.writeObject(poi.toOldCSListing());
 			oout.close();
 			
 			byte[] bytes = bout.toByteArray();

@@ -140,3 +140,5 @@ public class ZipCodeFileIndexer {
 		System.out.println("Wrote "+zcfi.getEntryCount()+ " entries in " + zcfi.getLineCount() + " zipcodes.");
 	}
 }
+
+

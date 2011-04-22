@@ -36,9 +36,12 @@ public class ZipCodeMapReduce extends Configured implements Tool  {
 		public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 	        try {
 	        	JSONObject json = new JSONObject(value.toString());
-				
 				String zipcode = json.optString("zip");
 				
+	        	JSONObject location = json.optJSONObject("location");
+	        	if(location != null)
+	        		zipcode = location.optString("zip");
+	        	
 				// creates:  K: TEXT zip code  V: TEXT rest of json
 				if(zipcode.length() > 0)
 				{
@@ -55,7 +58,6 @@ public class ZipCodeMapReduce extends Configured implements Tool  {
 	
 	public static class ZipReducer extends Reducer<Text,Text,Text,Text> {
 		public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException{
-			System.out.println("Made new json...accumulating values from mapper...");
 			
 			StringBuilder strb = new StringBuilder();
 			
@@ -67,8 +69,6 @@ public class ZipCodeMapReduce extends Configured implements Tool  {
 				if(it.hasNext())
 					strb.append(",");
 			}
-			
-			System.out.println("Done accumulating: resulting strb: "+strb);
 				
 			context.write(key, new Text("["+strb.toString()+"]"));
 		}
