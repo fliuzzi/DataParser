@@ -88,6 +88,21 @@ public class LSHinfostrip {
 		writer.close();
 	}
 	
+	public String cleanPhone(String phone) {
+	    if(phone == null || phone.trim().length() == 0){return phone;}
+		StringBuffer buffer = new StringBuffer();
+		char[] chrs = phone.toCharArray();
+		for(int i = 0, n = chrs.length; i < n; i++) {
+			if(Character.isDigit(chrs[i])) {
+				buffer.append(chrs[i]);
+			}
+		}
+		
+		String tel = buffer.toString();
+		if(tel.length() > 10) tel = tel.substring(0, 9);
+		
+		return tel;
+	}
 	
 	public void stripAndWrite(JSONObject line, BufferedWriter writer) throws JSONException, IOException
 	{
@@ -98,7 +113,15 @@ public class LSHinfostrip {
 			{
 				//yellowpages
 				json.put("source", "yp");
-				json.put("phone",line.optString("phone"));
+				
+				String phone = line.optString("hours");
+				if (phone.length() > 0){
+					phone = phone.substring(phone.indexOf("at ")+3,phone.length()-1);
+					
+					json.put("phone",cleanPhone(phone));
+				}
+				
+				
 				json.put("name",line.optString("name"));
 				json.put("id", line.optString("pid"));
 			}
