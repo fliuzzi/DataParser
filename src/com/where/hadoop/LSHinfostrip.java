@@ -115,7 +115,7 @@ public class LSHinfostrip {
 				json.put("source", "yp");
 				
 				String phone = line.optString("hours");
-				if (phone.length() > 0){
+				if (phone.length() > 0 && phone.contains("Please contact")){
 					phone = phone.substring(phone.indexOf("at ")+3,phone.length()-1);
 					
 					json.put("phone",cleanPhone(phone));
