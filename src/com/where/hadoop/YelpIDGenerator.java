@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.json.JSONException;
@@ -101,7 +102,7 @@ public class YelpIDGenerator {
 	}
 	
 	
-	public static void main(String[] args) throws FileNotFoundException, IOException {
+	public static void main(String[] args) throws FileNotFoundException, IOException, InterruptedException {
 		if(args.length != 3) return;
 		
 		File inDir = new File(args[0]);
@@ -112,8 +113,16 @@ public class YelpIDGenerator {
 		
 		YelpIDGenerator lshis = new YelpIDGenerator(files,args[1],Integer.parseInt(args[2]));
 		lshis.start();
+		lshis.await();
 		System.out.println("DONE.");
 
+	}
+	
+	public void await() throws InterruptedException
+	{
+
+		thePool.shutdown();
+        thePool.awaitTermination(Long.MAX_VALUE, TimeUnit.MINUTES);
 	}
 
 }

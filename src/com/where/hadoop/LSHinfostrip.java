@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -165,7 +166,7 @@ public class LSHinfostrip {
 	}
 	
 	
-	public static void main(String[] args) throws FileNotFoundException, IOException {
+	public static void main(String[] args) throws FileNotFoundException, IOException, InterruptedException {
 		if(args.length != 4) return;
 		
 		File inDir = new File(args[0]);
@@ -176,8 +177,16 @@ public class LSHinfostrip {
 		
 		LSHinfostrip lshis = new LSHinfostrip(files,args[1],Integer.parseInt(args[2]),args[3]);
 		lshis.start();
+		lshis.await();
+		
 		System.out.println("DONE.");
 
+	}
+	
+	public void await() throws InterruptedException
+	{
+		thePool.shutdown();
+        thePool.awaitTermination(Long.MAX_VALUE, TimeUnit.MINUTES);
 	}
 
 }
