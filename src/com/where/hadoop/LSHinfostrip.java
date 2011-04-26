@@ -130,7 +130,8 @@ public class LSHinfostrip {
 			{
 				//yelp
 				json.put("source","yelp");
-				json.put("phone",line.optString("phone"));
+				if(line.optString("phone").length() > 0)
+					json.put("phone",line.optString("phone"));
 				json.put("name",line.optString("name"));
 				json.put("id", line.optString("pid"));
 			}
@@ -145,6 +146,8 @@ public class LSHinfostrip {
 			json = json.optJSONObject("location");
 			
 			json.put("source", "cs");
+			
+			
 			json.put("phone",line.optString("phone"));
 			json.put("name",line.optString("name"));
 			
