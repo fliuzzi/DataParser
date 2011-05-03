@@ -28,5 +28,9 @@
 	<classpathentry kind="lib" path="lib/lucene-misc-3.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-queryparser-3.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-collation-3.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/cloud9-1.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/hadoop-0.20.2-ant.jar"/>
+	<classpathentry kind="lib" path="lib/hadoop-0.20.2-core.jar"/>
+	<classpathentry kind="lib" path="lib/hadoop-0.20.2-tools.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
