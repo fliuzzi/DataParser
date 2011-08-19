@@ -5,13 +5,17 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicLong;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.where.atlas.feed.PlaceCollector;
 import com.where.place.Place;
 import com.where.place.YelpPlace;
 
 public class Yelp80legsCollector implements PlaceCollector{
-
+	static AtomicLong atomicN = new AtomicLong();
 	HashSet<String> cache;
 	MessageDigest m;
 	public Yelp80legsCollector() throws NoSuchAlgorithmException
@@ -25,7 +29,7 @@ public class Yelp80legsCollector implements PlaceCollector{
 	public void collect(Place place) {
 		YelpPlace ypplace = (YelpPlace)place;
 		try {
-			writeEntry(ypplace.toJSON().toString()+"\n");
+			writeEntry(ypplace.toJSON()); //.toString()+"\n");
 			
 			
 		} catch (IOException e) {
@@ -39,16 +43,27 @@ public class Yelp80legsCollector implements PlaceCollector{
 		//not implemented right now
 	}
 	
-	private synchronized void writeEntry(String entry) throws IOException
+	private synchronized void writeEntry(JSONObject entry_json) throws IOException
 	{
+		String entry = entry_json.toString()+"\n";
 		m.update(entry.getBytes(),0,entry.length());
 		
-		if(cache.add(new BigInteger(1,m.digest()).toString(16)))
-			Yelp80legsParser.getWriter().write(entry);
-		else
+		if(cache.add(new BigInteger(1,m.digest()).toString(16))){
+			try {
+				addId(entry_json);
+			} catch (JSONException e) {
+				System.out.println("error occurs when addId to Json"); 
+				e.printStackTrace();
+			}
+			Yelp80legsParser.getWriter().write(entry_json.toString()+"\n");
+		}
+		else{
 			System.out.println("DUPLICATE DETECTED (and left out)");
+		}
 	}
 
-	
+	private static void addId(JSONObject json) throws JSONException{
+		json.put("_id", atomicN.getAndIncrement());		
+	}
 	
 }
