@@ -32,5 +32,6 @@
 	<classpathentry kind="lib" path="lib/hadoop-0.20.2-ant.jar"/>
 	<classpathentry kind="lib" path="lib/hadoop-0.20.2-core.jar"/>
 	<classpathentry kind="lib" path="lib/hadoop-0.20.2-tools.jar"/>
+	<classpathentry kind="lib" path="/practice/lib/mongo-2.6.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

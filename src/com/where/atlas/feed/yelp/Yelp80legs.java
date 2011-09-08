@@ -21,13 +21,14 @@ import com.where.utils.XMLfixer;
 public class Yelp80legs {
 
 	public static void main(String[] args) {
-        if(args.length != 3)
+        if(args.length != 4)
         {
             System.err.println("USAGE: program will go through a directory of yelp 80legs raw data zips"+
             						" and parse them to a neat JSON");
             System.err.println("ARG0: directory of raw data .zips");
             System.err.println("ARG1: Output flatfile target path");
             System.err.println("ARG2: Thread count (int)");
+            System.err.println("ARG3: if you want text reviews in the output type in: true or false");
             return;
         }
         
@@ -42,6 +43,7 @@ public class Yelp80legs {
             }
             else{
                 final Yelp80legsParser parser = new Yelp80legsParser(args[1]);
+                parser.setFlag(args[3]);
                 ExecutorService thePool = Executors.newFixedThreadPool(Integer.parseInt(args[2]));
                 
                 final Yelp80legsCollector collector = new Yelp80legsCollector();

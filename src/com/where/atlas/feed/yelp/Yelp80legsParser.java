@@ -22,12 +22,23 @@ import com.where.place.YelpPlace;
 
 public class Yelp80legsParser implements FeedParser{
 
-	
+	private static Boolean WANT_REVIEW_TEXT;
 	private static BufferedWriter bufferedWriter;
 	
 	public Yelp80legsParser(String writePath) throws IOException
 	{
 		bufferedWriter = new BufferedWriter(new FileWriter(writePath));
+	}
+	
+	public void setFlag(String flg){
+		if(flg.equals("true"))
+			WANT_REVIEW_TEXT = true;
+		else if(flg.equals("false")){
+			WANT_REVIEW_TEXT = false;
+		}
+		else{
+			
+		}
 	}
 	
 	public static BufferedWriter getWriter()
@@ -148,7 +159,9 @@ public class Yelp80legsParser implements FeedParser{
 	                json.put("user_id",review.getAttribute("user_id"));
 	                json.put("rating", review.getAttribute("rating"));
 	                json.put("date", review.getAttribute("date"));
-	                json.put("text", removeNonUtf8CompliantCharacters(review.getAttribute("text")));
+	                if(WANT_REVIEW_TEXT){
+	                	json.put("text", removeNonUtf8CompliantCharacters(review.getAttribute("text")));
+	                }
 	                if(review.getAttribute("useful").length() > 0)
 	                	json.put("useful", review.getAttribute("useful"));
 	                if(review.getAttribute("funny").length() > 0)

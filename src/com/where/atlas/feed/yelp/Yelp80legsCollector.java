@@ -56,6 +56,7 @@ public class Yelp80legsCollector implements PlaceCollector{
 				e.printStackTrace();
 			}
 			Yelp80legsParser.getWriter().write(entry_json.toString()+"\n");
+			Yelp80legsParser.getWriter().flush();
 		}
 		else{
 			System.out.println("DUPLICATE DETECTED (and left out)");
