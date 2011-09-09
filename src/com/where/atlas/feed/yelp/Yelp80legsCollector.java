@@ -29,7 +29,7 @@ public class Yelp80legsCollector implements PlaceCollector{
 	public void collect(Place place) {
 		YelpPlace ypplace = (YelpPlace)place;
 		try {
-			writeEntry(ypplace.toJSON()); //.toString()+"\n");
+			writeEntry(ypplace.toJSON(true)); //.toString()+"\n");
 			
 			
 		} catch (IOException e) {

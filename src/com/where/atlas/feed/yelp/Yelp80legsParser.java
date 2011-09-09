@@ -95,7 +95,7 @@ public class Yelp80legsParser implements FeedParser{
                 location.setCity(listingElement.getAttribute("locality"));//addy.CITY
                 location.setState(listingElement.getAttribute("region"));
                 location.setAddress1(listingElement.getAttribute("address"));
-       
+                location.setSource();
                 
                 
                 if(listingElement.getAttribute("lat").length() > 1 && listingElement.getAttribute("lon").length() > 1){

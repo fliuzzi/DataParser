@@ -12,10 +12,10 @@ public class Address {
 	private String state;
 	private String zip;
 	private String country;
-	
-	private double lat = Double.NaN;
-    private double lng = Double.NaN;
 
+	private double lat = Double.NaN;
+	private double lng = Double.NaN;
+	
 	public String getAddress1() {
 		return address1;
 	}
@@ -71,57 +71,66 @@ public class Address {
 	public void setCountry(String country) {
 		this.country = country;
 	}
-	
+
 	public double getLat() {
-        return lat;
-    }
-    public void setLat(double lat) {
-        this.lat = lat;
-    }
-    public double getLng() {
-        return lng;
-    }
-    public void setLng(double lng) {
-        this.lng = lng;
-    }
-	
-	public JSONObject toJSON() {
-        try {
-            JSONObject address = new JSONObject();
-            
-            if(getAddress1() != null) {
-                address.put("address1", getAddress1());
-            }
-            if(getAddress2() != null) {
-                address.put("address2", getAddress2());
-            }
-            if(getNeighborhood() != null) {
-                address.put("neighborhood", getNeighborhood());
-            }
-            if(getCity() != null) {
-                address.put("city", getCity());
-            }
-            if(getState() != null) {
-                address.put("state", getState());
-            }
-            if(getZip() != null) {
-                address.put("zip", getZip());
-            }
-            if(getCountry() != null) {
-                address.put("country", getCountry());
-            }
-            
-            //round off
-            Double lat = (double)Math.round(getLat() * 100000) / 100000;
-            Double lng = (double)Math.round(getLng() * 100000) / 100000;
-            
-            address.put("lat", lat);
-            address.put("lng", lng);
-            
-            return address;
-        }
-        catch(Exception ex) {
-            throw new IllegalStateException(ex);
-        }
-    }
+		return lat;
+	}
+	public void setLat(double lat) {
+		this.lat = lat;
+	}
+	public double getLng() {
+		return lng;
+	}
+	public void setLng(double lng) {
+		this.lng = lng;
+	}
+
+	public JSONObject toJSON(){
+		return toJSON(false);
+	}
+
+	public JSONObject toJSON(boolean useStreet) {
+		try {
+
+			JSONObject address = new JSONObject();
+
+			if(getAddress1() != null) {
+				if(useStreet){
+					address.put("street1", getAddress1());
+				}else{
+					address.put("address1", getAddress1());
+				}
+			}
+			if(getAddress2() != null) {
+				address.put("address2", getAddress2());
+			}
+			if(getNeighborhood() != null) {
+				address.put("neighborhood", getNeighborhood());
+			}
+			if(getCity() != null) {
+				address.put("city", getCity());
+			}
+			if(getState() != null) {
+				address.put("state", getState());
+			}
+			if(getZip() != null) {
+				address.put("zip", getZip());
+			}
+			if(getCountry() != null) {
+				address.put("country", getCountry());
+			}
+
+			//round off
+			Double lat = (double)Math.round(getLat() * 100000) / 100000;
+			Double lng = (double)Math.round(getLng() * 100000) / 100000;
+
+			address.put("lat", lat);
+			address.put("lng", lng);
+
+			return address;
+		}
+		catch(Exception ex) {
+			throw new IllegalStateException(ex);
+		}
+	}
 }
