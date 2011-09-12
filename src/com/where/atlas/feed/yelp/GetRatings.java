@@ -63,7 +63,7 @@ public class GetRatings {
 			//			y:10125 y:1374	4 1 0 0 (0.9) <y:10125 Public Storage> <y:1374 Public Storage>
 
 			while((input_line = ids_buff.readLine()) != null){
-				String[] inputs = input_line.split("\\t".intern());
+				String[] inputs = input_line.split("\\s".intern());
 
 				if(inputs[0].startsWith("y".intern())){
 					if(!inputs[1].startsWith("y".intern())){
@@ -124,7 +124,7 @@ public class GetRatings {
 										userId = id_map.get(userHash);
 									}
 
-									//									System.out.println(user.optString("user_id")+","+place_id+","+user.optString("rating"));
+//																		System.out.println(user.optString("user_id")+","+place_id+","+user.optString("rating"));
 									result_buff.write(userId +","+place_id+","+user.optString("rating"));
 									result_buff.newLine();
 									result_buff.flush();
