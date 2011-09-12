@@ -4,6 +4,6 @@ jars="${rootdir}/lib/cloud9-1.0.0.jar:${rootdir}/lib/lucene-queryparser-3.0.2.ja
 
 
 
-java -Xmx5g -Xms4g -cp ${jars} com.where.atlas.feed.yelp.Yelp80legs /home/qimeng/Yelp/raw_data/ /home/qimeng/test 30 true > log.txt &
+java -Xmx5g -Xms4g -cp ${jars} com.where.atlas.feed.yelp.Yelp80legs /home/qimeng/Yelp/raw_data/ /home/qimeng/test 30 false > log.txt &
 
 
