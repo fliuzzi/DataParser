@@ -78,8 +78,8 @@ public class GetRatings {
 
 					else {
 						if (inputs[1].startsWith("y".intern())){
-							long yelp_id = Long.parseLong(inputs[0]);
-							long where_id = Long.parseLong(inputs[1].substring(2)); 
+							long where_id = Long.parseLong(inputs[0]);
+							long yelp_id = Long.parseLong(inputs[1].substring(2)); 
 							hashMap.put(yelp_id, where_id);
 						}
 						//else, both are where id, ignore

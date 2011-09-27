@@ -21,7 +21,7 @@ import com.where.utils.XMLfixer;
 public class Yelp80legs {
 
 	public static void main(String[] args) {
-        if(args.length != 4)
+        if(args ==  null || args.length != 4)
         {
             System.err.println("USAGE: program will go through a directory of yelp 80legs raw data zips"+
             						" and parse them to a neat JSON");
