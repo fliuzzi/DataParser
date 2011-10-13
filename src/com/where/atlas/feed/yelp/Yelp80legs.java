@@ -28,7 +28,7 @@ public class Yelp80legs {
             System.err.println("ARG0: directory of raw data .zips");
             System.err.println("ARG1: Output flatfile target path");
             System.err.println("ARG2: Thread count (int)");
-            System.err.println("ARG3: if you want text reviews in the output, type in: true or false");
+            System.err.println("ARG3: if you want text reviews in the output, type in true; otherwise false");
             return;
         }
         

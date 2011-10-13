@@ -190,7 +190,9 @@ public class YelpPlace extends Place
 			if(getName() != null)
 				json.put("name", getName());
 
-
+			if(getPhone() != null && getPhone().length() > 0)
+				json.put("phone", getPhone());
+			
 			if(getBiz_url() != null && getBiz_url().length() > 0)
 				json.put("biz_url", getBiz_url());
 			if(getPrice() != null && getPrice().length() > 0)
